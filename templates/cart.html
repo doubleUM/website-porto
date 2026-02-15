@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section style="padding-top: var(--space-xl);">
+    <div class="container">
+        <h1 class="hero-title" style="font-size: var(--text-4xl); margin-bottom: var(--space-xl);">Shopping Cart</h1>
+
+        <div style="display: grid; grid-template-columns: 1fr 400px; gap: var(--space-xl);">
+            <!-- Cart Items -->
+            <div>
+                {% if cart_items %}
+                {% for item in cart_items %}
+                <div class="cart-item" id="cart-item-{{ item.id }}">
+                    <div
+                        style="background: var(--bg-secondary); width: 100px; height: 100px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: var(--text-4xl);">
+                        🔧
+                    </div>
+
+                    <div class="cart-item-details">
+                        <h4>{{ item.product.name }}</h4>
+                        <p style="color: var(--text-muted); margin-bottom: var(--space-xs);">{{ item.product.brand }}
+                        </p>
+                        <p style="color: var(--primary); font-weight: 600;">${{ "%.2f"|format(item.product.price) }}</p>
+                    </div>
+
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="updateQuantity({{ item.id }}, -1)">-</button>
+                        <span class="quantity-value" id="quantity-{{ item.id }}">{{ item.quantity }}</span>
+                        <button class="quantity-btn" onclick="updateQuantity({{ item.id }}, 1)">+</button>
+                    </div>
+
+                    <div style="text-align: right;">
+                        <p class="card-price" style="margin-bottom: var(--space-md);">${{
+                            "%.2f"|format(item.product.price * item.quantity) }}</p>
+                        <button class="btn btn-outline btn-sm" onclick="removeItem({{ item.id }})"
+                            style="background: var(--danger); color: white; border: none;">
+                            🗑️ Remove
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="card text-center" style="padding: var(--space-2xl);">
+                    <div style="font-size: var(--text-5xl); margin-bottom: var(--space-md);">🛒</div>
+                    <h3>Your cart is empty</h3>
+                    <p>Start adding some premium car parts!</p>
+                    <a href="{{ url_for('products') }}" class="btn btn-primary">Shop Now</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Cart Summary -->
+            {% if cart_items %}
+            <div class="cart-summary">
+                <h3 style="margin-bottom: var(--space-lg);">Order Summary</h3>
+
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">${{ "%.2f"|format(total) }}</span>
+                </div>
+
+                <div class="summary-row">
+                    <span>Shipping:</span>
+                    <span style="color: var(--success);">FREE</span>
+                </div>
+
+                <div class="summary-row">
+                    <span>Tax (10%):</span>
+                    <span id="tax">${{ "%.2f"|format(total * 0.1) }}</span>
+                </div>
+
+                <div class="summary-row"
+                    style="border-top: 2px solid var(--primary); padding-top: var(--space-md); margin-top: var(--space-md);">
+                    <span style="font-size: var(--text-xl); font-weight: 700;">Total:</span>
+                    <span class="summary-total" id="total">${{ "%.2f"|format(total * 1.1) }}</span>
+                </div>
+
+                <a href="{{ url_for('checkout') }}" class="btn btn-primary btn-lg"
+                    style="width: 100%; margin-top: var(--space-lg);">
+                    Proceed to Checkout
+                </a>
+
+                <a href="{{ url_for('products') }}" class="btn btn-outline"
+                    style="width: 100%; margin-top: var(--space-sm);">
+                    Continue Shopping
+                </a>
+
+                <!-- Trust Badges -->
+                <div
+                    style="margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--glass-border);">
+                    <div style="text-align: center; margin-bottom: var(--space-sm);">
+                        <span style="font-size: var(--text-2xl);">🔒</span>
+                        <p style="font-size: var(--text-sm); margin: 0;">Secure Checkout</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <span style="font-size: var(--text-2xl);">✅</span>
+                        <p style="font-size: var(--text-sm); margin: 0;">30-Day Returns</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<script>
+    function updateQuantity(itemId, change) {
+        const quantityElem = document.getElementById(`quantity-${itemId}`);
+        let newQuantity = parseInt(quantityElem.textContent) + change;
+
+        if (newQuantity < 1) return;
+
+        fetch('/api/cart/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                item_id: itemId,
+                quantity: newQuantity
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+    }
+
+    function removeItem(itemId) {
+        if (confirm('Are you sure you want to remove this item?')) {
+            fetch(`/api/cart/remove/${itemId}`, {
+                method: 'DELETE'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    }
+                });
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section style="padding-top: var(--space-xl);">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div style="margin-bottom: var(--space-lg);">
+            <a href="{{ url_for('index') }}" style="color: var(--text-muted);">Home</a>
+            <span style="color: var(--text-muted);"> / </span>
+            <a href="{{ url_for('products', category=product.category_id) }}" style="color: var(--text-muted);">{{
+                product.category.name }}</a>
+            <span style="color: var(--text-muted);"> / </span>
+            <span>{{ product.name }}</span>
+        </div>
+
+        <!-- Product Detail -->
+        <div class="product-detail">
+            <!-- Product Image -->
+            <div>
+                <div
+                    style="background: var(--bg-tertiary); border-radius: var(--radius-lg); height: 500px; display: flex; align-items: center; justify-content: center; font-size: 10rem; box-shadow: var(--shadow-lg);">
+                    🔧
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="product-info">
+                <h1>{{ product.name }}</h1>
+
+                <div style="display: flex; gap: var(--space-sm); margin-bottom: var(--space-md);">
+                    {% if product.stock > 0 %}
+                    <span class="badge badge-success">✅ In Stock ({{ product.stock }} units)</span>
+                    {% else %}
+                    <span class="badge badge-danger">❌ Out of Stock</span>
+                    {% endif %}
+                    {% if product.featured %}
+                    <span class="badge badge-warning">⭐ Featured</span>
+                    {% endif %}
+                </div>
+
+                <div class="card-price" style="font-size: var(--text-4xl); margin-bottom: var(--space-lg);">
+                    ${{ "%.2f"|format(product.price) }}
+                </div>
+
+                <p style="font-size: var(--text-lg); margin-bottom: var(--space-lg);">{{ product.description }}</p>
+
+                <!-- Product Specifications -->
+                <div class="product-specs">
+                    <h3 style="margin-bottom: var(--space-md);">Specifications</h3>
+
+                    <div class="spec-item">
+                        <span class="spec-label">Brand:</span>
+                        <span class="spec-value">{{ product.brand }}</span>
+                    </div>
+
+                    <div class="spec-item">
+                        <span class="spec-label">Part Number:</span>
+                        <span class="spec-value">{{ product.part_number }}</span>
+                    </div>
+
+                    <div class="spec-item">
+                        <span class="spec-label">Category:</span>
+                        <span class="spec-value">{{ product.category.name }}</span>
+                    </div>
+
+                    {% if product.specifications %}
+                    <div class="spec-item">
+                        <span class="spec-label">Details:</span>
+                        <span class="spec-value">{{ product.specifications }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Compatible Cars -->
+                {% if product.compatible_cars %}
+                <div
+                    style="margin-top: var(--space-md); padding: var(--space-md); background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                    <h4 style="margin-bottom: var(--space-sm);">🚗 Compatible Vehicles</h4>
+                    <p style="margin: 0;">{{ product.compatible_cars }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Add to Cart -->
+                <div style="margin-top: var(--space-lg);">
+                    <div style="display: flex; gap: var(--space-md); align-items: center;">
+                        <div class="quantity-control">
+                            <button class="quantity-btn" onclick="decreaseQuantity()">-</button>
+                            <span class="quantity-value" id="quantity">1</span>
+                            <button class="quantity-btn" onclick="increaseQuantity()">+</button>
+                        </div>
+
+                        {% if product.stock > 0 %}
+                        <button class="btn btn-primary btn-lg" style="flex: 1;" onclick="addToCartDetail()">
+                            🛒 Add to Cart
+                        </button>
+                        {% else %}
+                        <button class="btn btn-primary btn-lg" style="flex: 1; opacity: 0.5;" disabled>
+                            Out of Stock
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Additional Info -->
+                <div
+                    style="margin-top: var(--space-lg); display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md);">
+                    <div
+                        style="text-align: center; padding: var(--space-md); background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                        <div style="font-size: var(--text-3xl); margin-bottom: var(--space-xs);">🚚</div>
+                        <p style="font-size: var(--text-sm); margin: 0;">Free Shipping</p>
+                    </div>
+                    <div
+                        style="text-align: center; padding: var(--space-md); background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                        <div style="font-size: var(--text-3xl); margin-bottom: var(--space-xs);">✅</div>
+                        <p style="font-size: var(--text-sm); margin: 0;">Genuine Parts</p>
+                    </div>
+                    <div
+                        style="text-align: center; padding: var(--space-md); background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                        <div style="font-size: var(--text-3xl); margin-bottom: var(--space-xs);">🔄</div>
+                        <p style="font-size: var(--text-sm); margin: 0;">Easy Returns</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products -->
+        {% if related_products %}
+        <section style="margin-top: var(--space-2xl);">
+            <h2 class="section-title">Related Products</h2>
+            <div class="grid grid-4">
+                {% for rel_product in related_products %}
+                <div class="card">
+                    <div
+                        style="background: var(--bg-tertiary); height: 150px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-md); font-size: var(--text-4xl);">
+                        🔧
+                    </div>
+                    <h4 class="card-title">{{ rel_product.name }}</h4>
+                    <div class="flex-between" style="margin-top: auto;">
+                        <span class="card-price" style="font-size: var(--text-xl);">${{ "%.2f"|format(rel_product.price)
+                            }}</span>
+                        <a href="{{ url_for('product_detail', product_id=rel_product.id) }}"
+                            class="btn btn-outline btn-sm">View</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+    let quantity = 1;
+    const maxQuantity = {{ product.stock }};
+
+    function increaseQuantity() {
+        if (quantity < maxQuantity) {
+            quantity++;
+            document.getElementById('quantity').textContent = quantity;
+        }
+    }
+
+    function decreaseQuantity() {
+        if (quantity > 1) {
+            quantity--;
+            document.getElementById('quantity').textContent = quantity;
+        }
+    }
+
+    function addToCartDetail() {
+        fetch('/api/cart/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                product_id: {{ product.id }},
+            quantity: quantity
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateCartCount(data.cart_count);
+                alert('✅ Added to cart successfully!');
+            }
+        });
+    }
+</script>
+{% endblock %}

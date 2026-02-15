@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section style="padding-top: var(--space-xl);">
+    <div class="container">
+        <h1 class="hero-title" style="font-size: var(--text-4xl); margin-bottom: var(--space-xl);">Car Spare Parts
+            Catalog</h1>
+
+        <div style="display: grid; grid-template-columns: 280px 1fr; gap: var(--space-xl);">
+            <!-- Filter Sidebar -->
+            <aside class="filter-sidebar">
+                <h3 class="filter-title">Filters</h3>
+
+                <!-- Search -->
+                <div class="filter-group">
+                    <form action="{{ url_for('products') }}" method="get">
+                        <div class="form-group">
+                            <input type="text" name="search" class="form-control" placeholder="Search products..."
+                                value="{{ search_query }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Search</button>
+                    </form>
+                </div>
+
+                <!-- Categories -->
+                <div class="filter-group">
+                    <h4 class="filter-title">Categories</h4>
+                    <a href="{{ url_for('products') }}" class="filter-option"
+                        style="display: block; padding: var(--space-xs) 0;">
+                        <div class="filter-option">
+                            All Categories
+                        </div>
+                    </a>
+                    {% for category in categories %}
+                    <a href="{{ url_for('products', category=category.id) }}" class="filter-option"
+                        style="display: block; padding: var(--space-xs) 0;">
+                        <div class="filter-option"
+                            style="{% if current_category == category.id %}color: var(--primary);{% endif %}">
+                            {{ category.icon }} {{ category.name }}
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+
+                <!-- Sort -->
+                <div class="filter-group">
+                    <h4 class="filter-title">Sort By</h4>
+                    <form action="{{ url_for('products') }}" method="get">
+                        <input type="hidden" name="category" value="{{ current_category }}">
+                        <input type="hidden" name="search" value="{{ search_query }}">
+                        <select name="sort" class="form-control" onchange="this.form.submit()">
+                            <option value="name">Name (A-Z)</option>
+                            <option value="price_asc">Price (Low to High)</option>
+                            <option value="price_desc">Price (High to Low)</option>
+                        </select>
+                    </form>
+                </div>
+            </aside>
+
+            <!-- Products Grid -->
+            <div>
+                <div
+                    style="margin-bottom: var(--space-lg); display: flex; justify-content: space-between; align-items: center;">
+                    <p style="color: var(--text-secondary);">Showing {{ products|length }} products</p>
+                </div>
+
+                {% if products %}
+                <div class="grid grid-3">
+                    {% for product in products %}
+                    <div class="card fade-in">
+                        <div
+                            style="background: var(--bg-tertiary); height: 200px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-md); font-size: var(--text-5xl);">
+                            🔧
+                        </div>
+
+                        {% if product.stock > 0 %}
+                        <span class="badge badge-success">In Stock ({{ product.stock }})</span>
+                        {% else %}
+                        <span class="badge badge-danger">Out of Stock</span>
+                        {% endif %}
+
+                        <h3 class="card-title">{{ product.name }}</h3>
+                        <p class="card-text" style="min-height: 60px;">{{ product.description[:100] }}...</p>
+
+                        <div style="margin-bottom: var(--space-sm);">
+                            <span style="font-size: var(--text-sm); color: var(--text-muted);">Brand:</span>
+                            <span style="font-weight: 600;">{{ product.brand }}</span>
+                        </div>
+
+                        <div class="flex-between" style="margin-top: auto;">
+                            <span class="card-price">${{ "%.2f"|format(product.price) }}</span>
+                            <a href="{{ url_for('product_detail', product_id=product.id) }}"
+                                class="btn btn-outline btn-sm">Details</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="card text-center" style="padding: var(--space-2xl);">
+                    <div style="font-size: var(--text-5xl); margin-bottom: var(--space-md);">🔍</div>
+                    <h3>No products found</h3>
+                    <p>Try adjusting your search or filters</p>
+                    <a href="{{ url_for('products') }}" class="btn btn-primary">Clear Filters</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

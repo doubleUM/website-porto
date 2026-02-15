@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section style="padding-top: var(--space-xl);">
+    <div class="container">
+        <h1 class="hero-title" style="font-size: var(--text-4xl); margin-bottom: var(--space-xl);">Checkout</h1>
+
+        <div style="display: grid; grid-template-columns: 1fr 400px; gap: var(--space-xl);">
+            <!-- Checkout Form -->
+            <div class="card">
+                <h3 style="margin-bottom: var(--space-lg);">Shipping Information</h3>
+
+                <form id="checkout-form">
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" class="form-control" name="name" required placeholder="John Doe">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" class="form-control" name="email" required placeholder="john@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Phone Number *</label>
+                        <input type="tel" class="form-control" name="phone" required placeholder="+1 (800) 123-4567">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Shipping Address *</label>
+                        <textarea class="form-control" name="address" required
+                            placeholder="123 Main St, Apt 4B&#10;New York, NY 10001"></textarea>
+                    </div>
+
+                    <h3 style="margin: var(--space-xl) 0 var(--space-lg);">Payment Information</h3>
+
+                    <div class="form-group">
+                        <label class="form-label">Card Number *</label>
+                        <input type="text" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+                        <div class="form-group">
+                            <label class="form-label">Expiry Date *</label>
+                            <input type="text" class="form-control" placeholder="MM/YY" maxlength="5">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">CVV *</label>
+                            <input type="text" class="form-control" placeholder="123" maxlength="3">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: var(--space-sm); cursor: pointer;">
+                            <input type="checkbox" required>
+                            <span>I agree to the terms and conditions</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+                        🔒 Place Order
+                    </button>
+                </form>
+            </div>
+
+            <!-- Order Summary -->
+            <div>
+                <div class="cart-summary">
+                    <h3 style="margin-bottom: var(--space-lg);">Order Summary</h3>
+
+                    <div style="max-height: 300px; overflow-y: auto; margin-bottom: var(--space-lg);">
+                        {% for item in cart_items %}
+                        <div
+                            style="display: flex; justify-content: space-between; padding: var(--space-sm) 0; border-bottom: 1px solid var(--glass-border);">
+                            <div style="flex: 1;">
+                                <p style="font-weight: 600; margin-bottom: 0;">{{ item.product.name }}</p>
+                                <p style="color: var(--text-muted); font-size: var(--text-sm); margin: 0;">Qty: {{
+                                    item.quantity }}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <p style="font-weight: 600; margin: 0;">${{ "%.2f"|format(item.product.price *
+                                    item.quantity) }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span>${{ "%.2f"|format(total) }}</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Shipping:</span>
+                        <span style="color: var(--success);">FREE</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Tax (10%):</span>
+                        <span>${{ "%.2f"|format(total * 0.1) }}</span>
+                    </div>
+
+                    <div class="summary-row"
+                        style="border-top: 2px solid var(--primary); padding-top: var(--space-md); margin-top: var(--space-md);">
+                        <span style="font-size: var(--text-xl); font-weight: 700;">Total:</span>
+                        <span class="summary-total">${{ "%.2f"|format(total * 1.1) }}</span>
+                    </div>
+
+                    <div style="margin-top: var(--space-lg); text-align: center;">
+                        <div style="font-size: var(--text-2xl); margin-bottom: var(--space-sm);">🔒</div>
+                        <p style="font-size: var(--text-sm); color: var(--text-muted);">Your payment information is
+                            secure and encrypted</p>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('cart') }}" class="btn btn-outline"
+                    style="width: 100%; margin-top: var(--space-md);">
+                    ← Back to Cart
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.getElementById('checkout-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = {
+            name: this.name.value,
+            email: this.email.value,
+            phone: this.phone.value,
+            address: this.address.value
+        };
+
+        fetch('/api/order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ Order placed successfully! Order ID: #' + data.order_id);
+                    window.location.href = '{{ url_for("index") }}';
+                }
+            })
+            .catch(error => {
+                alert('❌ Error placing order. Please try again.');
+            });
+    });
+</script>
+{% endblock %}
