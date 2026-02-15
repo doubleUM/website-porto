@@ -18,8 +18,10 @@
             <!-- Product Image -->
             <div>
                 <div
-                    style="background: var(--bg-tertiary); border-radius: var(--radius-lg); height: 500px; display: flex; align-items: center; justify-content: center; font-size: 10rem; box-shadow: var(--shadow-lg);">
-                    🔧
+                    style="background: var(--bg-tertiary); border-radius: var(--radius-lg); height: 500px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-lg); overflow: hidden;">
+                    <img src="{{ product.image_url or '/static/images/products/oil-filter.svg' }}"
+                        alt="{{ product.name }}"
+                        style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 30px;">
                 </div>
             </div>
 
@@ -131,8 +133,10 @@
                 {% for rel_product in related_products %}
                 <div class="card">
                     <div
-                        style="background: var(--bg-tertiary); height: 150px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-md); font-size: var(--text-4xl);">
-                        🔧
+                        style="background: var(--bg-tertiary); height: 150px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-md); overflow: hidden;">
+                        <img src="{{ rel_product.image_url or '/static/images/products/oil-filter.svg' }}"
+                            alt="{{ rel_product.name }}"
+                            style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 10px;">
                     </div>
                     <h4 class="card-title">{{ rel_product.name }}</h4>
                     <div class="flex-between" style="margin-top: auto;">

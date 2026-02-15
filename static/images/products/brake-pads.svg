@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="400" y2="400">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+    <linearGradient id="pad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8B7355"/>
+      <stop offset="100%" stop-color="#6B5335"/>
+    </linearGradient>
+    <linearGradient id="plate" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#777"/>
+      <stop offset="50%" stop-color="#bbb"/>
+      <stop offset="100%" stop-color="#777"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" rx="20" fill="url(#bg)"/>
+  <!-- Brake pad 1 (front) -->
+  <g transform="translate(60, 80)">
+    <!-- Metal backing plate -->
+    <path d="M30,20 Q140,-10 250,20 L260,30 Q260,140 250,160 Q140,190 30,160 L20,150 Q20,40 30,20Z" fill="url(#plate)" stroke="#999" stroke-width="1.5"/>
+    <!-- Friction material -->
+    <path d="M40,35 Q140,10 240,35 L245,42 Q245,130 240,145 Q140,170 40,145 L35,138 Q35,48 40,35Z" fill="url(#pad)"/>
+    <!-- Wear indicator slot -->
+    <line x1="80" y1="55" x2="80" y2="125" stroke="#5a4a30" stroke-width="3" stroke-linecap="round"/>
+    <!-- Mounting tab -->
+    <rect x="125" y="0" width="30" height="20" rx="3" fill="#999" stroke="#aaa" stroke-width="1"/>
+  </g>
+  <!-- Brake pad 2 (behind, offset) -->
+  <g transform="translate(80, 200)" opacity="0.85">
+    <path d="M30,20 Q140,-10 250,20 L260,30 Q260,120 250,140 Q140,170 30,140 L20,130 Q20,40 30,20Z" fill="url(#plate)" stroke="#999" stroke-width="1.5"/>
+    <path d="M40,35 Q140,10 240,35 L245,42 Q245,110 240,125 Q140,150 40,125 L35,118 Q35,48 40,35Z" fill="url(#pad)"/>
+    <line x1="80" y1="55" x2="80" y2="110" stroke="#5a4a30" stroke-width="3" stroke-linecap="round"/>
+    <rect x="125" y="0" width="30" height="20" rx="3" fill="#999" stroke="#aaa" stroke-width="1"/>
+  </g>
+  <text x="200" y="380" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#f39c12" letter-spacing="1">CERAMIC BRAKE PADS</text>
+</svg>

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="400" y2="400">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+    <radialGradient id="rotor" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#888"/>
+      <stop offset="70%" stop-color="#666"/>
+      <stop offset="100%" stop-color="#555"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="400" rx="20" fill="url(#bg)"/>
+  <!-- Outer ring -->
+  <circle cx="200" cy="190" r="150" fill="url(#rotor)" stroke="#777" stroke-width="2"/>
+  <!-- Drilled holes ring 1 -->
+  <g fill="#444">
+    <circle cx="200" cy="60" r="6"/><circle cx="265" cy="72" r="6"/>
+    <circle cx="318" cy="112" r="6"/><circle cx="340" cy="170" r="6"/>
+    <circle cx="330" cy="232" r="6"/><circle cx="293" cy="285" r="6"/>
+    <circle cx="240" cy="318" r="6"/><circle cx="170" cy="320" r="6"/>
+    <circle cx="112" cy="290" r="6"/><circle cx="72" cy="240" r="6"/>
+    <circle cx="60" cy="180" r="6"/><circle cx="78" cy="118" r="6"/>
+    <circle cx="130" cy="72" r="6"/>
+  </g>
+  <!-- Slots -->
+  <g stroke="#555" stroke-width="2" transform="translate(200,190)">
+    <line x1="-40" y1="-120" x2="-20" y2="-80" stroke-linecap="round"/>
+    <line x1="50" y1="-110" x2="30" y2="-70" stroke-linecap="round"/>
+    <line x1="110" y1="-50" x2="70" y2="-30" stroke-linecap="round"/>
+    <line x1="115" y1="30" x2="75" y2="20" stroke-linecap="round"/>
+    <line x1="60" y1="105" x2="40" y2="65" stroke-linecap="round"/>
+    <line x1="-30" y1="115" x2="-15" y2="75" stroke-linecap="round"/>
+    <line x1="-105" y1="55" x2="-65" y2="35" stroke-linecap="round"/>
+    <line x1="-110" y1="-30" x2="-70" y2="-18" stroke-linecap="round"/>
+  </g>
+  <!-- Inner hub -->
+  <circle cx="200" cy="190" r="55" fill="#3a3a4a" stroke="#555" stroke-width="2"/>
+  <!-- Bolt holes -->
+  <g fill="#222" stroke="#555" stroke-width="1">
+    <circle cx="200" cy="155" r="8"/><circle cx="233" cy="170" r="8"/>
+    <circle cx="225" cy="208" r="8"/><circle cx="175" cy="208" r="8"/>
+    <circle cx="168" cy="170" r="8"/>
+  </g>
+  <!-- Center hole -->
+  <circle cx="200" cy="190" r="18" fill="#222" stroke="#444" stroke-width="2"/>
+  <text x="200" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#e74c3c" letter-spacing="1">SLOTTED & DRILLED ROTORS</text>
+</svg>

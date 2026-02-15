@@ -69,8 +69,10 @@
                     {% for product in products %}
                     <div class="card fade-in">
                         <div
-                            style="background: var(--bg-tertiary); height: 200px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-md); font-size: var(--text-5xl);">
-                            🔧
+                            style="background: var(--bg-tertiary); height: 200px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-md); overflow: hidden;">
+                            <img src="{{ product.image_url or '/static/images/products/oil-filter.svg' }}"
+                                alt="{{ product.name }}"
+                                style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 10px;">
                         </div>
 
                         {% if product.stock > 0 %}

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="400" y2="400">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+    <radialGradient id="lens" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.1"/>
+      <stop offset="60%" stop-color="#aaa" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#666" stop-opacity="0.2"/>
+    </radialGradient>
+    <linearGradient id="housing" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#444"/>
+      <stop offset="100%" stop-color="#222"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" rx="20" fill="url(#bg)"/>
+  <!-- Fog light housing -->
+  <ellipse cx="200" cy="180" rx="130" ry="100" fill="url(#housing)" stroke="#555" stroke-width="2"/>
+  <!-- Chrome bezel -->
+  <ellipse cx="200" cy="180" rx="110" ry="85" fill="none" stroke="#aaa" stroke-width="3"/>
+  <!-- Glass lens -->
+  <ellipse cx="200" cy="180" rx="100" ry="78" fill="url(#lens)" stroke="#666" stroke-width="1"/>
+  <!-- Reflector pattern -->
+  <g stroke="#555" stroke-width="0.8" opacity="0.4">
+    <ellipse cx="200" cy="180" rx="90" ry="70" fill="none"/>
+    <ellipse cx="200" cy="180" rx="70" ry="55" fill="none"/>
+    <ellipse cx="200" cy="180" rx="50" ry="40" fill="none"/>
+    <ellipse cx="200" cy="180" rx="30" ry="25" fill="none"/>
+  </g>
+  <!-- Bulb (center) -->
+  <circle cx="200" cy="180" r="15" fill="#f1c40f" opacity="0.6"/>
+  <circle cx="200" cy="180" r="8" fill="#fff" opacity="0.8"/>
+  <!-- Light rays -->
+  <g stroke="#f1c40f" stroke-width="1.5" opacity="0.3">
+    <line x1="200" y1="90" x2="200" y2="70"/>
+    <line x1="270" y1="120" x2="285" y2="105"/>
+    <line x1="310" y1="180" x2="330" y2="180"/>
+    <line x1="270" y1="240" x2="285" y2="255"/>
+    <line x1="200" y1="270" x2="200" y2="290"/>
+    <line x1="130" y1="240" x2="115" y2="255"/>
+    <line x1="90" y1="180" x2="70" y2="180"/>
+    <line x1="130" y1="120" x2="115" y2="105"/>
+  </g>
+  <!-- Wiring harness -->
+  <path d="M200,280 Q200,310 220,320 Q260,340 280,350" stroke="#e74c3c" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M200,280 Q200,310 180,320 Q140,340 120,350" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- Connector -->
+  <rect x="270" y="342" width="30" height="18" rx="3" fill="#555" stroke="#777" stroke-width="1"/>
+  <rect x="110" y="342" width="30" height="18" rx="3" fill="#555" stroke="#777" stroke-width="1"/>
+  <text x="200" y="388" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#f1c40f" letter-spacing="1">FOG LIGHT ASSEMBLY</text>
+</svg>
