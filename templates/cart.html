@@ -10,7 +10,7 @@
             <div>
                 {% if cart_items %}
                 {% for item in cart_items %}
-                <div class="cart-item" id="cart-item-{{ item.id }}">
+                <div class="cart-item" id="cart-item-{{ item.id }}" data-price="{{ item.product.price }}">
                     <div
                         style="background: var(--bg-secondary); width: 100px; height: 100px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: var(--text-4xl);">
                         🔧
@@ -30,7 +30,7 @@
                     </div>
 
                     <div style="text-align: right;">
-                        <p class="card-price" style="margin-bottom: var(--space-md);">${{
+                        <p class="card-price" id="line-total-{{ item.id }}" style="margin-bottom: var(--space-md);">${{
                             "%.2f"|format(item.product.price * item.quantity) }}</p>
                         <button class="btn btn-outline btn-sm" onclick="removeItem({{ item.id }})"
                             style="background: var(--danger); color: white; border: none;">
@@ -104,39 +104,58 @@
 </section>
 
 <script>
-    function updateQuantity(itemId, change) {
-        const quantityElem = document.getElementById(`quantity-${itemId}`);
-        let newQuantity = parseInt(quantityElem.textContent) + change;
+    // Read price from a data attribute on each cart row — avoids Jinja2-in-JS issues
+    function getPrice(itemId) {
+        const row = document.getElementById('cart-item-' + itemId);
+        return row ? parseFloat(row.getAttribute('data-price')) : 0;
+    }
 
+    function recalcTotals() {
+        let subtotal = 0;
+        document.querySelectorAll('[id^="quantity-"]').forEach(el => {
+            const id = parseInt(el.id.replace('quantity-', ''));
+            const qty = parseInt(el.textContent);
+            const price = getPrice(id);
+            const lineTotal = price * qty;
+            subtotal += lineTotal;
+            const lineEl = document.getElementById('line-total-' + id);
+            if (lineEl) lineEl.textContent = '$' + lineTotal.toFixed(2);
+        });
+        document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
+        document.getElementById('tax').textContent = '$' + (subtotal * 0.1).toFixed(2);
+        document.getElementById('total').textContent = '$' + (subtotal * 1.1).toFixed(2);
+    }
+
+    function updateQuantity(itemId, change) {
+        const quantityElem = document.getElementById('quantity-' + itemId);
+        let newQuantity = parseInt(quantityElem.textContent) + change;
         if (newQuantity < 1) return;
 
         fetch('/api/cart/update', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                item_id: itemId,
-                quantity: newQuantity
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ item_id: itemId, quantity: newQuantity })
         })
-            .then(response => response.json())
+            .then(r => r.json())
             .then(data => {
                 if (data.success) {
-                    location.reload();
+                    quantityElem.textContent = newQuantity;
+                    recalcTotals();
                 }
             });
     }
 
     function removeItem(itemId) {
         if (confirm('Are you sure you want to remove this item?')) {
-            fetch(`/api/cart/remove/${itemId}`, {
-                method: 'DELETE'
-            })
-                .then(response => response.json())
+            fetch('/api/cart/remove/' + itemId, { method: 'DELETE' })
+                .then(r => r.json())
                 .then(data => {
                     if (data.success) {
-                        location.reload();
+                        const row = document.getElementById('cart-item-' + itemId);
+                        if (row) row.remove();
+                        recalcTotals();
+                        // If no items left, reload to show empty state
+                        if (!document.querySelector('[id^="quantity-"]')) location.reload();
                     }
                 });
         }

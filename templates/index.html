@@ -79,10 +79,12 @@
         <h2 class="section-title">Featured Products</h2>
         <div class="grid grid-3">
             {% for product in featured_products %}
-            <div class="card fade-in">
+            <div class="card">
                 <div
                     style="background: var(--bg-tertiary); height: 200px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-md); overflow: hidden;">
-                    <img src="{{ product.image_url or '/static/images/products/oil-filter.svg' }}" alt="{{ product.name }}" style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 10px;">
+                    <img src="{{ product.image_url or '/static/images/products/oil-filter.svg' }}"
+                        alt="{{ product.name }}"
+                        style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 10px;">
                 </div>
                 <span class="badge badge-success">In Stock</span>
                 <h3 class="card-title">{{ product.name }}</h3>

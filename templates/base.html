@@ -1,26 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Premium car spare parts - High-quality automotive components for all makes and models">
+    <meta name="description"
+        content="Premium car spare parts - High-quality automotive components for all makes and models">
     <meta name="keywords" content="car parts, spare parts, automotive, engine parts, brake systems">
     <title>{% block title %}AutoParts Pro - Premium Car Spare Parts{% endblock %}</title>
-    
+
     <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
-    
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+
     <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    
+
     {% block extra_css %}{% endblock %}
 </head>
+
 <body>
     <!-- Navigation -->
     <nav class="navbar">
         <div class="container">
             <a href="{{ url_for('index') }}" class="navbar-brand">🚗 AutoParts Pro</a>
-            
+
             <ul class="navbar-nav">
                 <li><a href="{{ url_for('index') }}" class="nav-link">Home</a></li>
                 <li><a href="{{ url_for('products') }}" class="nav-link">Products</a></li>
@@ -31,6 +35,16 @@
                         <span class="cart-badge" id="cart-count">0</span>
                     </a>
                 </li>
+                {% if current_user %}
+                <li style="display: flex; align-items: center; gap: var(--space-sm);">
+                    <span style="color: var(--text-muted); font-size: var(--text-sm);">👤 {{ current_user.name }}</span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline"
+                        style="padding: 0.3rem 0.8rem; font-size: var(--text-sm);">Logout</a>
+                </li>
+                {% else %}
+                <li><a href="{{ url_for('login_page') }}" class="btn btn-primary"
+                        style="padding: 0.4rem 1rem;">Login</a></li>
+                {% endif %}
             </ul>
         </div>
     </nav>
@@ -48,7 +62,7 @@
                     <h4>About Us</h4>
                     <p>Your trusted source for premium car spare parts. Quality guaranteed.</p>
                 </div>
-                
+
                 <div class="footer-section">
                     <h4>Quick Links</h4>
                     <ul class="footer-links">
@@ -57,7 +71,7 @@
                         <li><a href="{{ url_for('admin') }}">Admin Panel</a></li>
                     </ul>
                 </div>
-                
+
                 <div class="footer-section">
                     <h4>Customer Service</h4>
                     <ul class="footer-links">
@@ -67,7 +81,7 @@
                         <li><a href="#">Warranty</a></li>
                     </ul>
                 </div>
-                
+
                 <div class="footer-section">
                     <h4>Connect With Us</h4>
                     <p>📧 support@autopartspro.com</p>
@@ -75,7 +89,7 @@
                     <p>📍 123 Auto Street, Car City</p>
                 </div>
             </div>
-            
+
             <div class="footer-bottom">
                 <p>&copy; 2026 AutoParts Pro. All rights reserved. | Built with ❤️ for automotive enthusiasts</p>
             </div>
@@ -86,4 +100,5 @@
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block extra_js %}{% endblock %}
 </body>
+
 </html>

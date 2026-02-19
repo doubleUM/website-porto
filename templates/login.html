@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - AutoParts Pro{% endblock %}
+
+{% block content %}
+<section
+    style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: var(--space-xl) 0;">
+    <div style="width: 100%; max-width: 460px; padding: 0 var(--space-md);">
+
+        <!-- Logo / Heading -->
+        <div style="text-align: center; margin-bottom: var(--space-xl);">
+            <div style="font-size: 3rem; margin-bottom: var(--space-sm);">🚗</div>
+            <h1 style="font-size: var(--text-3xl); font-weight: 700; margin-bottom: var(--space-xs);">AutoParts Pro</h1>
+            <p style="color: var(--text-muted);">Sign in to your account or create a new one</p>
+        </div>
+
+        <!-- Card -->
+        <div class="card" style="padding: var(--space-xl);">
+
+            <!-- Tabs -->
+            <div
+                style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--bg-tertiary); border-radius: var(--radius-md); padding: 4px; margin-bottom: var(--space-xl);">
+                <button id="tab-login" onclick="switchTab('login')"
+                    style="padding: var(--space-sm); border: none; border-radius: calc(var(--radius-md) - 2px); font-weight: 600; cursor: pointer; transition: all 0.2s; background: var(--primary); color: white;">
+                    Login
+                </button>
+                <button id="tab-signup" onclick="switchTab('signup')"
+                    style="padding: var(--space-sm); border: none; border-radius: calc(var(--radius-md) - 2px); font-weight: 600; cursor: pointer; transition: all 0.2s; background: transparent; color: var(--text-muted);">
+                    Sign Up
+                </button>
+            </div>
+
+            <!-- Alert message -->
+            <div id="auth-alert"
+                style="display: none; padding: var(--space-sm) var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-lg); font-size: var(--text-sm); font-weight: 500;">
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" id="login-email" class="form-control" placeholder="john@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div style="position: relative;">
+                        <input type="password" id="login-password" class="form-control" placeholder="••••••••" required
+                            style="padding-right: 3rem;">
+                        <button type="button" onclick="togglePassword('login-password', this)"
+                            style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1.1rem;">👁</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: var(--space-md);"
+                    id="login-btn">
+                    Login
+                </button>
+            </form>
+
+            <!-- SIGNUP FORM -->
+            <form id="signup-form" style="display: none;" onsubmit="handleSignup(event)">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="signup-name" class="form-control" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" id="signup-email" class="form-control" placeholder="john@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div style="position: relative;">
+                        <input type="password" id="signup-password" class="form-control" placeholder="Min. 6 characters"
+                            required style="padding-right: 3rem;">
+                        <button type="button" onclick="togglePassword('signup-password', this)"
+                            style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1.1rem;">👁</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm Password</label>
+                    <div style="position: relative;">
+                        <input type="password" id="signup-confirm" class="form-control"
+                            placeholder="Repeat your password" required style="padding-right: 3rem;">
+                        <button type="button" onclick="togglePassword('signup-confirm', this)"
+                            style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1.1rem;">👁</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: var(--space-md);"
+                    id="signup-btn">
+                    Create Account
+                </button>
+            </form>
+
+        </div>
+
+        <!-- Footer note -->
+        <p
+            style="text-align: center; margin-top: var(--space-lg); color: var(--text-muted); font-size: var(--text-sm);">
+            🔒 Your information is secure and encrypted
+        </p>
+    </div>
+</section>
+
+<script>
+    function switchTab(tab) {
+        const isLogin = tab === 'login';
+        document.getElementById('login-form').style.display = isLogin ? 'block' : 'none';
+        document.getElementById('signup-form').style.display = isLogin ? 'none' : 'block';
+
+        const activeStyle = 'background: var(--primary); color: white;';
+        const inactiveStyle = 'background: transparent; color: var(--text-muted);';
+        document.getElementById('tab-login').style.cssText += isLogin ? activeStyle : inactiveStyle;
+        document.getElementById('tab-signup').style.cssText += isLogin ? inactiveStyle : activeStyle;
+
+        hideAlert();
+    }
+
+    function showAlert(message, isSuccess) {
+        const el = document.getElementById('auth-alert');
+        el.textContent = (isSuccess ? '✅ ' : '❌ ') + message;
+        el.style.display = 'block';
+        el.style.background = isSuccess ? 'rgba(46, 213, 115, 0.15)' : 'rgba(255, 71, 87, 0.15)';
+        el.style.color = isSuccess ? 'var(--success)' : 'var(--danger)';
+        el.style.border = `1px solid ${isSuccess ? 'rgba(46,213,115,0.3)' : 'rgba(255,71,87,0.3)'}`;
+    }
+
+    function hideAlert() {
+        document.getElementById('auth-alert').style.display = 'none';
+    }
+
+    function setLoading(btnId, loading) {
+        const btn = document.getElementById(btnId);
+        btn.disabled = loading;
+        btn.textContent = loading ? 'Please wait...' : (btnId === 'login-btn' ? 'Login' : 'Create Account');
+    }
+
+    function togglePassword(inputId, btn) {
+        const input = document.getElementById(inputId);
+        input.type = input.type === 'password' ? 'text' : 'password';
+        btn.textContent = input.type === 'password' ? '👁' : '🙈';
+    }
+
+    async function handleLogin(e) {
+        e.preventDefault();
+        hideAlert();
+        setLoading('login-btn', true);
+
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: document.getElementById('login-email').value,
+                password: document.getElementById('login-password').value
+            })
+        });
+        const data = await res.json();
+        setLoading('login-btn', false);
+
+        if (data.success) {
+            showAlert(`Welcome back, ${data.name}! Redirecting...`, true);
+            setTimeout(() => window.location.href = '/', 1200);
+        } else {
+            showAlert(data.message, false);
+        }
+    }
+
+    async function handleSignup(e) {
+        e.preventDefault();
+        hideAlert();
+
+        const password = document.getElementById('signup-password').value;
+        const confirm = document.getElementById('signup-confirm').value;
+        if (password !== confirm) {
+            showAlert('Passwords do not match.', false);
+            return;
+        }
+
+        setLoading('signup-btn', true);
+
+        const res = await fetch('/api/auth/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: document.getElementById('signup-name').value,
+                email: document.getElementById('signup-email').value,
+                password: password
+            })
+        });
+        const data = await res.json();
+        setLoading('signup-btn', false);
+
+        if (data.success) {
+            showAlert(`Account created! Welcome, ${data.name}! Redirecting...`, true);
+            setTimeout(() => window.location.href = '/', 1200);
+        } else {
+            showAlert(data.message, false);
+        }
+    }
+</script>
+{% endblock %}
