@@ -19,7 +19,7 @@
             <div>
                 <div
                     style="background: var(--bg-tertiary); border-radius: var(--radius-lg); height: 500px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-lg); overflow: hidden;">
-                    <img src="{{ product.image_url or '/static/images/products/oil-filter.svg' }}"
+                    <img src="{{ product.image_url or '/static/images/products/air-filter.png' }}"
                         alt="{{ product.name }}"
                         style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 30px;">
                 </div>
@@ -134,7 +134,7 @@
                 <div class="card">
                     <div
                         style="background: var(--bg-tertiary); height: 150px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-md); overflow: hidden;">
-                        <img src="{{ rel_product.image_url or '/static/images/products/oil-filter.svg' }}"
+                        <img src="{{ rel_product.image_url or '/static/images/products/air-filter.png' }}"
                             alt="{{ rel_product.name }}"
                             style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 10px;">
                     </div>
@@ -186,7 +186,7 @@
         .then(data => {
             if (data.success) {
                 updateCartCount(data.cart_count);
-                alert('✅ Added to cart successfully!');
+                showNotification('Added to cart successfully!', 'success');
             }
         });
     }

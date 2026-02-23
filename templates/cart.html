@@ -145,20 +145,26 @@
             });
     }
 
-    function removeItem(itemId) {
-        if (confirm('Are you sure you want to remove this item?')) {
-            fetch('/api/cart/remove/' + itemId, { method: 'DELETE' })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) {
-                        const row = document.getElementById('cart-item-' + itemId);
-                        if (row) row.remove();
-                        recalcTotals();
-                        // If no items left, reload to show empty state
-                        if (!document.querySelector('[id^="quantity-"]')) location.reload();
-                    }
-                });
-        }
+    async function removeItem(itemId) {
+        const confirmed = await showConfirm('Are you sure you want to remove this item from your cart?', {
+            title: 'Remove Item',
+            confirmText: 'Yes, remove',
+            cancelText: 'Keep it',
+            type: 'danger'
+        });
+        if (!confirmed) return;
+
+        fetch('/api/cart/remove/' + itemId, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    const row = document.getElementById('cart-item-' + itemId);
+                    if (row) row.remove();
+                    recalcTotals();
+                    // If no items left, reload to show empty state
+                    if (!document.querySelector('[id^="quantity-"]')) location.reload();
+                }
+            });
     }
 </script>
 {% endblock %}

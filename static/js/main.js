@@ -98,37 +98,134 @@ function initAnimations() {
 }
 
 // ============================================================================
-// NOTIFICATIONS
+// NOTIFICATIONS & CONFIRMATION MODALS
 // ============================================================================
 
-function showNotification(message, type = 'success') {
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed;
-        top: 100px;
-        right: 20px;
-        padding: 1rem 1.5rem;
-        background: ${type === 'success' ? 'var(--success)' : 'var(--danger)'};
-        color: white;
-        border-radius: var(--radius-md);
-        box-shadow: var(--shadow-lg);
-        z-index: 10000;
-        font-weight: 600;
-        animation: slideIn 0.3s ease;
+function showNotification(message, type = 'success', duration = 5000) {
+    // Remove existing notifications
+    document.querySelectorAll('.toast-notification').forEach(n => n.remove());
+
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    const colors = {
+        success: 'linear-gradient(135deg, #10b981, #059669)',
+        error: 'linear-gradient(135deg, #ef4444, #dc2626)',
+        warning: 'linear-gradient(135deg, #f59e0b, #d97706)',
+        info: 'linear-gradient(135deg, #3b82f6, #2563eb)'
+    };
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px;flex:1;">
+            <span style="font-size:1.5rem;">${icons[type] || icons.info}</span>
+            <span style="flex:1;font-weight:500;line-height:1.4;">${message}</span>
+        </div>
+        <button onclick="this.parentElement.remove()" style="background:none;border:none;color:white;font-size:1.2rem;cursor:pointer;padding:0;opacity:0.7;">✕</button>
+        <div class="toast-progress" style="animation-duration:${duration}ms;"></div>
+    `;
+    toast.style.cssText = `
+        position:fixed; top:24px; right:24px; max-width:420px; min-width:300px;
+        padding:16px 20px; background:${colors[type] || colors.info};
+        color:white; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.3);
+        z-index:10001; display:flex; align-items:center; gap:8px;
+        animation:toastSlideIn 0.4s cubic-bezier(0.16,1,0.3,1);
+        font-family:inherit; overflow:hidden;
     `;
 
-    document.body.appendChild(notification);
+    document.body.appendChild(toast);
 
-    // Remove after 3 seconds
     setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 300);
-    }, 3000);
+        toast.style.animation = 'toastSlideOut 0.3s ease forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
 }
+
+function showConfirm(message, { title = 'Confirm Action', confirmText = 'Yes, proceed', cancelText = 'Cancel', type = 'danger' } = {}) {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'confirm-overlay';
+        const accentColor = type === 'danger' ? 'var(--danger)' : 'var(--primary)';
+        overlay.innerHTML = `
+            <div class="confirm-modal">
+                <div style="text-align:center;margin-bottom:20px;">
+                    <div style="font-size:3rem;margin-bottom:12px;">${type === 'danger' ? '⚠️' : '❓'}</div>
+                    <h3 style="margin:0 0 8px;font-size:1.25rem;color:var(--text-primary);">${title}</h3>
+                    <p style="margin:0;color:var(--text-secondary);font-size:0.95rem;line-height:1.5;">${message}</p>
+                </div>
+                <div style="display:flex;gap:12px;">
+                    <button class="confirm-btn-cancel">${cancelText}</button>
+                    <button class="confirm-btn-ok" style="background:${accentColor};">${confirmText}</button>
+                </div>
+            </div>
+        `;
+
+        overlay.style.cssText = `
+            position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px);
+            z-index:10002; display:flex; align-items:center; justify-content:center;
+            animation:fadeIn 0.2s ease;
+        `;
+
+        const close = (result) => {
+            overlay.style.animation = 'fadeOut 0.2s ease forwards';
+            setTimeout(() => { overlay.remove(); resolve(result); }, 200);
+        };
+
+        overlay.querySelector('.confirm-btn-cancel').onclick = () => close(false);
+        overlay.querySelector('.confirm-btn-ok').onclick = () => close(true);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(false); });
+
+        document.body.appendChild(overlay);
+        overlay.querySelector('.confirm-btn-ok').focus();
+    });
+}
+
+// Inject notification & modal styles
+(function () {
+    const s = document.createElement('style');
+    s.textContent = `
+        @keyframes toastSlideIn {
+            from { transform:translateX(120%);opacity:0; }
+            to   { transform:translateX(0);opacity:1; }
+        }
+        @keyframes toastSlideOut {
+            from { transform:translateX(0);opacity:1; }
+            to   { transform:translateX(120%);opacity:0; }
+        }
+        @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+        @keyframes fadeOut { from{opacity:1;} to{opacity:0;} }
+        @keyframes progressShrink { from{width:100%;} to{width:0%;} }
+
+        .toast-progress {
+            position:absolute; bottom:0; left:0; height:3px;
+            background:rgba(255,255,255,0.4); border-radius:0 0 12px 12px;
+            animation:progressShrink linear forwards;
+        }
+        .confirm-modal {
+            background:var(--bg-card); border:1px solid var(--glass-border);
+            border-radius:16px; padding:32px; max-width:400px; width:90%;
+            box-shadow:0 24px 64px rgba(0,0,0,0.4);
+            animation:modalPop 0.3s cubic-bezier(0.16,1,0.3,1);
+        }
+        @keyframes modalPop {
+            from { transform:scale(0.9);opacity:0; }
+            to   { transform:scale(1);opacity:1; }
+        }
+        .confirm-btn-cancel, .confirm-btn-ok {
+            flex:1; padding:12px 20px; border:none; border-radius:10px;
+            font-weight:600; font-size:0.95rem; cursor:pointer; transition:all 0.2s;
+            font-family:inherit;
+        }
+        .confirm-btn-cancel {
+            background:var(--bg-tertiary); color:var(--text-primary);
+            border:1px solid var(--glass-border);
+        }
+        .confirm-btn-cancel:hover { background:var(--bg-secondary); }
+        .confirm-btn-ok { color:white; }
+        .confirm-btn-ok:hover { filter:brightness(1.1); transform:translateY(-1px); }
+    `;
+    document.head.appendChild(s);
+})();
+
 
 // ============================================================================
 // UTILITY FUNCTIONS

@@ -121,90 +121,96 @@ def init_db():
              'price': 15.99, 'stock': 150, 'brand': 'AutoPro', 'part_number': 'OF-2024',
              'category_id': 1, 'compatible_cars': 'Toyota Camry, Honda Accord, Ford Focus',
              'specifications': 'Thread size: 3/4-16, Height: 3.5 inches', 'featured': True,
-             'image_url': '/static/images/products/oil-filter.svg', 'created_at': datetime.utcnow()},
+             'image_url': '/static/images/products/oil-filter.png', 'created_at': datetime.utcnow()},
 
             {'_id': get_next_id('products'), 'name': 'Spark Plug Set (4pc)', 'description': 'Iridium spark plugs for improved performance',
-             'price': 45.99, 'stock': 80, 'brand': 'Champion', 'part_number': 'SP-IR-401',
+             'price': 45.99, 'stock': 80, 'brand': 'NGK', 'part_number': 'SP-IR-401',
              'category_id': 1, 'compatible_cars': 'Most 4-cylinder engines',
              'specifications': 'Gap: 0.044", Thread: 14mm', 'featured': True,
-             'image_url': '/static/images/products/spark-plugs.svg', 'created_at': datetime.utcnow()},
+             'image_url': '/static/images/products/spark-plugs.png', 'created_at': datetime.utcnow()},
 
             {'_id': get_next_id('products'), 'name': 'Air Filter', 'description': 'High-flow air filter for better engine breathing',
              'price': 24.99, 'stock': 120, 'brand': 'K&N', 'part_number': 'AF-3320',
              'category_id': 5, 'compatible_cars': 'Universal fit for most sedans',
              'specifications': 'Washable and reusable', 'featured': False,
-             'image_url': '/static/images/products/air-filter.svg', 'created_at': datetime.utcnow()},
+             'image_url': '/static/images/products/air-filter.png', 'created_at': datetime.utcnow()},
 
             # Brake Systems
             {'_id': get_next_id('products'), 'name': 'Ceramic Brake Pads', 'description': 'Low-dust ceramic brake pads for quiet stopping',
              'price': 89.99, 'stock': 60, 'brand': 'Brembo', 'part_number': 'BP-CER-500',
              'category_id': 2, 'compatible_cars': 'Honda Civic, Toyota Corolla',
              'specifications': 'Front axle, includes shims', 'featured': True,
-             'image_url': '/static/images/products/brake-pads.svg', 'created_at': datetime.utcnow()},
+             'image_url': '/static/images/products/brake-pads.png', 'created_at': datetime.utcnow()},
 
             {'_id': get_next_id('products'), 'name': 'Brake Rotors (Pair)', 'description': 'Slotted and drilled performance rotors',
              'price': 159.99, 'stock': 40, 'brand': 'PowerStop', 'part_number': 'BR-SP-250',
              'category_id': 2, 'compatible_cars': 'Ford Mustang, Chevrolet Camaro',
              'specifications': 'Front, 12.6" diameter', 'featured': False,
-             'image_url': '/static/images/products/brake-rotors.svg', 'created_at': datetime.utcnow()},
+             'image_url': '/static/images/products/brake-rotors.png', 'created_at': datetime.utcnow()},
 
             {'_id': get_next_id('products'), 'name': 'Brake Fluid DOT 4', 'description': 'Premium synthetic brake fluid',
              'price': 12.99, 'stock': 200, 'brand': 'Castrol', 'part_number': 'BF-DOT4-500',
              'category_id': 2, 'compatible_cars': 'Universal',
              'specifications': '500ml bottle, high boiling point', 'featured': False,
-             'image_url': '/static/images/products/brake-fluid.svg', 'created_at': datetime.utcnow()},
+             'image_url': '/static/images/products/brake-fluid.png', 'created_at': datetime.utcnow()},
 
             # Electrical
             {'_id': get_next_id('products'), 'name': 'Car Battery 12V', 'description': 'Maintenance-free AGM battery',
              'price': 189.99, 'stock': 35, 'brand': 'Optima', 'part_number': 'BAT-AGM-75',
              'category_id': 3, 'compatible_cars': 'Most sedans and trucks',
              'specifications': '750 CCA, 75 Ah, 3-year warranty', 'featured': True,
-             'image_url': '/static/images/products/car-battery.svg', 'created_at': datetime.utcnow()},
+             'image_url': '/static/images/products/car-battery.png', 'created_at': datetime.utcnow()},
 
             {'_id': get_next_id('products'), 'name': 'Alternator', 'description': 'High-output alternator for reliable charging',
              'price': 249.99, 'stock': 25, 'brand': 'Bosch', 'part_number': 'ALT-150A',
              'category_id': 3, 'compatible_cars': 'Toyota Tacoma, 4Runner',
              'specifications': '150 Amp output', 'featured': False,
-             'image_url': '/static/images/products/alternator.svg', 'created_at': datetime.utcnow()},
+             'image_url': '/static/images/products/alternator.png', 'created_at': datetime.utcnow()},
 
             # Suspension
             {'_id': get_next_id('products'), 'name': 'Shock Absorber Set', 'description': 'Gas-charged shock absorbers for smooth ride',
              'price': 199.99, 'stock': 30, 'brand': 'Monroe', 'part_number': 'SH-GAS-400',
              'category_id': 4, 'compatible_cars': 'Nissan Altima, Mazda 6',
              'specifications': 'Rear pair, gas-charged', 'featured': True,
-             'image_url': '/static/images/products/shock-absorbers.svg', 'created_at': datetime.utcnow()},
+             'image_url': '/static/images/products/shock-absorbers.png', 'created_at': datetime.utcnow()},
 
             {'_id': get_next_id('products'), 'name': 'Coil Spring Set', 'description': 'Heavy-duty coil springs',
              'price': 139.99, 'stock': 45, 'brand': 'Eibach', 'part_number': 'CS-HD-300',
              'category_id': 4, 'compatible_cars': 'Jeep Wrangler, Cherokee',
              'specifications': 'Front pair, +2" lift', 'featured': False,
-             'image_url': '/static/images/products/coil-springs.svg', 'created_at': datetime.utcnow()},
+             'image_url': '/static/images/products/coil-springs.png', 'created_at': datetime.utcnow()},
 
             # Filters
             {'_id': get_next_id('products'), 'name': 'Fuel Filter', 'description': 'High-pressure fuel filter',
              'price': 19.99, 'stock': 100, 'brand': 'Wix', 'part_number': 'FF-HP-200',
              'category_id': 5, 'compatible_cars': 'Most fuel-injected vehicles',
              'specifications': 'In-line mount, 10 micron', 'featured': False,
-             'image_url': '/static/images/products/fuel-filter.svg', 'created_at': datetime.utcnow()},
+             'image_url': '/static/images/products/fuel-filter.png', 'created_at': datetime.utcnow()},
 
             {'_id': get_next_id('products'), 'name': 'Cabin Air Filter', 'description': 'Activated carbon cabin filter',
              'price': 16.99, 'stock': 110, 'brand': 'Mann', 'part_number': 'CAF-AC-150',
              'category_id': 5, 'compatible_cars': 'BMW 3-Series, Mercedes C-Class',
              'specifications': 'HEPA filtration, odor elimination', 'featured': False,
-             'image_url': '/static/images/products/cabin-filter.svg', 'created_at': datetime.utcnow()},
+             'image_url': '/static/images/products/cabin-filter.png', 'created_at': datetime.utcnow()},
 
             # Lighting
             {'_id': get_next_id('products'), 'name': 'LED Headlight Bulbs', 'description': 'Super bright LED conversion kit',
-             'price': 79.99, 'stock': 70, 'brand': 'Philips', 'part_number': 'LED-H7-6K',
+             'price': 79.99, 'stock': 70, 'brand': 'Osram', 'part_number': 'LED-H7-6K',
              'category_id': 6, 'compatible_cars': 'H7 socket (most European cars)',
              'specifications': '6000K white, 12000 lumens', 'featured': True,
-             'image_url': '/static/images/products/led-headlights.svg', 'created_at': datetime.utcnow()},
+             'image_url': '/static/images/products/led-headlights.png', 'created_at': datetime.utcnow()},
 
             {'_id': get_next_id('products'), 'name': 'Fog Light Assembly', 'description': 'Complete fog light kit',
              'price': 129.99, 'stock': 50, 'brand': 'Hella', 'part_number': 'FL-KIT-500',
              'category_id': 6, 'compatible_cars': 'Universal with custom brackets',
              'specifications': 'Includes wiring harness and switch', 'featured': False,
-             'image_url': '/static/images/products/fog-light.svg', 'created_at': datetime.utcnow()},
+             'image_url': '/static/images/products/fog-light.png', 'created_at': datetime.utcnow()},
+
+            {'_id': get_next_id('products'), 'name': 'Halogen Light Bulb', 'description': 'Classic halogen headlight bulb with warm white light',
+             'price': 29.99, 'stock': 90, 'brand': 'Philips', 'part_number': 'HL-H4-3200K',
+             'category_id': 6, 'compatible_cars': 'H4 socket (most Japanese and Korean cars)',
+             'specifications': '3200K warm white, 1500 lumens, 55W', 'featured': False,
+             'image_url': '/static/images/products/halogen-headlight.png', 'created_at': datetime.utcnow()},
         ]
         products_col.insert_many(products_data)
         print("Database initialized with sample data!")

@@ -142,31 +142,37 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('✅ Product added successfully!');
-                    location.reload();
+                    showNotification('Product added successfully!', 'success');
+                    setTimeout(() => location.reload(), 1500);
                 }
             })
             .catch(error => {
-                alert('❌ Error adding product. Please try again.');
+                showNotification('Error adding product. Please try again.', 'error');
             });
     });
 
-    function deleteProduct(productId) {
-        if (confirm('Are you sure you want to delete this product?')) {
-            fetch(`/api/products/${productId}`, {
-                method: 'DELETE'
+    async function deleteProduct(productId) {
+        const confirmed = await showConfirm('Are you sure you want to delete this product? This action cannot be undone.', {
+            title: 'Delete Product',
+            confirmText: 'Yes, delete',
+            cancelText: 'Cancel',
+            type: 'danger'
+        });
+        if (!confirmed) return;
+
+        fetch('/api/products/' + productId, {
+            method: 'DELETE'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('product-row-' + productId).remove();
+                    showNotification('Product deleted successfully!', 'success');
+                }
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById(`product-row-${productId}`).remove();
-                        alert('✅ Product deleted successfully!');
-                    }
-                })
-                .catch(error => {
-                    alert('❌ Error deleting product. Please try again.');
-                });
-        }
+            .catch(error => {
+                showNotification('Error deleting product. Please try again.', 'error');
+            });
     }
 </script>
 {% endblock %}
