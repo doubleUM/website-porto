@@ -222,7 +222,7 @@ def init_db():
 @app.route('/login')
 def login_page():
     if session.get('user_id'):
-        return redirect(url_for('index'))
+        return redirect(url_for('store_home'))
     return render_template('login.html')
 
 @app.route('/api/auth/signup', methods=['POST'])
@@ -272,14 +272,19 @@ def login():
 @app.route('/api/auth/logout')
 def logout():
     session.clear()
-    return redirect(url_for('index'))
+    return redirect(url_for('portfolio_home'))
 
 # ============================================================================
 # ROUTES - PAGE VIEWS
 # ============================================================================
 
 @app.route('/')
-def index():
+def portfolio_home():
+    return render_template('portfolio_home.html')
+
+
+@app.route('/car-spareparts')
+def store_home():
     featured_products = docs_to_list(products_col.find({'featured': True}).limit(6))
     categories = docs_to_list(categories_col.find())
     return render_template('index.html', featured_products=featured_products, categories=categories)

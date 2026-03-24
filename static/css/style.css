@@ -1045,3 +1045,29 @@ footer {
     width: 100%;
   }
 }
+
+/* ============================================================================
+   PORTFOLIO HUB (Main Menu)
+   ============================================================================ */
+
+.hub-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.hub-card {
+  min-height: 320px;
+}
+
+.hub-card-disabled {
+  opacity: 0.75;
+  filter: saturate(0.85);
+  cursor: not-allowed;
+}
+
+.hub-card-disabled:hover {
+  transform: none;
+  box-shadow: var(--shadow-md);
+  border-color: var(--glass-border);
+}
