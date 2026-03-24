@@ -1,17 +1,20 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
+from flask_socketio import SocketIO, emit, join_room, leave_room
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from datetime import datetime
 import os
 import uuid
+import re
 
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 bcrypt = Bcrypt(app)
+socketio = SocketIO(app, cors_allowed_origins='*')
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
 
@@ -22,13 +25,22 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
 client = MongoClient(os.getenv('MONGODB_URI'))
 db = client.spareparts_db
 
-# Collections
+# Collections — Spareparts
 categories_col = db.categories
 products_col = db.products
 cart_items_col = db.cart_items
 orders_col = db.orders
 counters_col = db.counters
 users_col = db.users
+
+# Collections — Kanban
+kanban_col = db.kanban_tasks
+
+# Collections — Chat
+chat_messages_col = db.chat_messages
+
+# Active chat users tracker
+chat_users = {}
 
 # ============================================================================
 # CONTEXT PROCESSOR — injects current_user into every template
@@ -516,9 +528,193 @@ def cart_count():
     return jsonify({'count': count})
 
 # ============================================================================
+# KANBAN ROUTES
+# ============================================================================
+
+@app.route('/kanban')
+def kanban_page():
+    return render_template('kanban.html')
+
+@app.route('/api/kanban/tasks')
+def kanban_list():
+    tasks = docs_to_list(kanban_col.find().sort('created_at', -1))
+    return jsonify({'tasks': tasks})
+
+@app.route('/api/kanban/add', methods=['POST'])
+def kanban_add():
+    data = request.get_json()
+    task = {
+        '_id': get_next_id('kanban_tasks'),
+        'name': data.get('name', ''),
+        'description': data.get('description', ''),
+        'status': data.get('status', 'todo'),
+        'priority': data.get('priority', 'medium'),
+        'color': data.get('color', '#f59e0b'),
+        'due_date': data.get('due_date'),
+        'subtasks': data.get('subtasks', []),
+        'created_at': datetime.utcnow().isoformat()
+    }
+    kanban_col.insert_one(task)
+    return jsonify({'success': True, 'task_id': task['_id']})
+
+@app.route('/api/kanban/update', methods=['POST'])
+def kanban_update():
+    data = request.get_json()
+    task_id = data.get('task_id')
+    update = {}
+    for f in ['name', 'description', 'status', 'priority', 'color', 'due_date', 'subtasks']:
+        if f in data:
+            update[f] = data[f]
+    kanban_col.update_one({'_id': task_id}, {'$set': update})
+    return jsonify({'success': True})
+
+@app.route('/api/kanban/move', methods=['POST'])
+def kanban_move():
+    data = request.get_json()
+    kanban_col.update_one({'_id': data['task_id']}, {'$set': {'status': data['status']}})
+    return jsonify({'success': True})
+
+@app.route('/api/kanban/delete', methods=['POST'])
+def kanban_delete():
+    data = request.get_json()
+    kanban_col.delete_one({'_id': data['task_id']})
+    return jsonify({'success': True})
+
+# ============================================================================
+# CHAT ROUTES & SOCKET EVENTS
+# ============================================================================
+
+@app.route('/chat')
+def chat_page():
+    return render_template('chat.html')
+
+@socketio.on('set_username')
+def handle_set_username(data):
+    chat_users[request.sid] = data.get('username', 'Anonymous')
+    emit('online_count', {'count': len(chat_users)}, broadcast=True)
+
+@socketio.on('join_room')
+def handle_join(data):
+    room = data.get('room', 'general')
+    join_room(room)
+    username = chat_users.get(request.sid, 'Someone')
+    # Send last 50 messages as history
+    history = list(chat_messages_col.find({'room': room}).sort('created_at', -1).limit(50))
+    history.reverse()
+    history_list = [{'username': m.get('username',''), 'message': m.get('message',''), 'time': m.get('time','')} for m in history]
+    emit('message_history', {'messages': history_list})
+    emit('system_message', {'message': f'{username} joined the room'}, room=room)
+    emit('online_count', {'count': len(chat_users)}, broadcast=True)
+
+@socketio.on('typing')
+def handle_typing(data):
+    room = data.get('room', 'general')
+    username = chat_users.get(request.sid, '')
+    if username:
+        emit('user_typing', {'username': username}, room=room, include_self=False)
+
+@socketio.on('stop_typing')
+def handle_stop_typing(data):
+    room = data.get('room', 'general')
+    username = chat_users.get(request.sid, '')
+    if username:
+        emit('user_stop_typing', {'username': username}, room=room, include_self=False)
+
+@socketio.on('leave_room')
+def handle_leave(data):
+    room = data.get('room', 'general')
+    leave_room(room)
+    username = chat_users.get(request.sid, 'Someone')
+    emit('system_message', {'message': f'{username} left the room'}, room=room)
+
+@socketio.on('send_message')
+def handle_message(data):
+    room = data.get('room', 'general')
+    message = data.get('message', '')
+    username = data.get('username', 'Anonymous')
+    now = datetime.utcnow()
+    msg_doc = {
+        '_id': get_next_id('chat_messages'),
+        'room': room,
+        'username': username,
+        'message': message,
+        'time': now.strftime('%H:%M'),
+        'created_at': now
+    }
+    chat_messages_col.insert_one(msg_doc)
+    emit('new_message', {'username': username, 'message': message, 'time': msg_doc['time']}, room=room)
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    chat_users.pop(request.sid, None)
+    emit('online_count', {'count': len(chat_users)}, broadcast=True)
+
+# ============================================================================
+# AI TOOL ROUTES
+# ============================================================================
+
+@app.route('/ai-tool')
+def ai_tool_page():
+    return render_template('ai_tool.html')
+
+@app.route('/api/ai/process', methods=['POST'])
+def ai_process():
+    data = request.get_json()
+    text = data.get('text', '').strip()
+    mode = data.get('mode', 'summarize')
+
+    if not text:
+        return jsonify({'success': False, 'message': 'Please provide some text.'}), 400
+
+    import time
+    time.sleep(1)  # Simulate processing delay
+
+    result = ''
+    if mode == 'summarize':
+        sentences = re.split(r'(?<=[.!?])\s+', text)
+        if len(sentences) <= 2:
+            result = text
+        else:
+            # Take first sentence and every other sentence for summary
+            key_sentences = [sentences[0]]
+            for i, s in enumerate(sentences[1:], 1):
+                if i % 2 == 0 or i == len(sentences) - 1:
+                    key_sentences.append(s)
+            result = ' '.join(key_sentences)
+        result = f"📝 Summary:\n\n{result}\n\n— Condensed from {len(sentences)} sentences to {len(result.split('. '))} key points."
+
+    elif mode == 'translate':
+        target_lang = data.get('target_lang', 'Indonesian')
+        # Mock translation — in production, integrate with a real API
+        result = f"🌍 Translation to {target_lang}:\n\n[Mock translation — this is a demo]\n\nOriginal ({len(text)} chars):\n{text[:200]}{'...' if len(text) > 200 else ''}\n\n💡 To enable real translation, connect an API key (Google Translate, DeepL, etc.)"
+
+    elif mode == 'tone':
+        target_tone = data.get('target_tone', 'professional')
+        tone_prefixes = {
+            'professional': 'In a professional context, ',
+            'casual': 'So basically, ',
+            'friendly': 'Hey! Just wanted to share — ',
+            'formal': 'It is hereby stated that ',
+            'humorous': 'You won\'t believe this, but '
+        }
+        prefix = tone_prefixes.get(target_tone, '')
+        # Simplistic tone mock — just prepend and adjust
+        result = f"🎭 {target_tone.title()} Tone:\n\n{prefix}{text[0].lower()}{text[1:]}\n\n— Tone adjusted to: {target_tone}"
+
+    elif mode == 'explain':
+        word_count = len(text.split())
+        result = f"💡 Explanation:\n\nThe provided text ({word_count} words) discusses the following key concepts:\n\n"
+        sentences = re.split(r'(?<=[.!?])\s+', text)
+        for i, s in enumerate(sentences[:5], 1):
+            result += f"{i}. {s.strip()}\n   → This point establishes {'the context' if i == 1 else 'supporting information'}.\n\n"
+        result += f"Overall, the text covers {min(len(sentences), 5)} main ideas in {word_count} words."
+
+    return jsonify({'success': True, 'result': result})
+
+# ============================================================================
 # MAIN
 # ============================================================================
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True, port=8000)
+    socketio.run(app, debug=True, port=8000)

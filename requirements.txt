@@ -3,3 +3,5 @@ Flask-Cors==4.0.0
 pymongo[srv]==4.6.0
 python-dotenv==1.0.0
 flask-bcrypt==1.0.1
+flask-socketio==5.3.6
+simple-websocket==1.0.0

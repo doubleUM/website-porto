@@ -143,49 +143,80 @@
                         </div>
                     </a>
 
-                    <div class="hub-project hub-project-disabled anim-fade" data-anim data-status="coming-soon" role="article" aria-label="Project coming soon">
+                    <a class="hub-project anim-fade" data-anim data-status="live" href="{{ url_for('kanban_page') }}">
                         <div class="hub-project-thumb">
-                            <div class="hub-thumb-placeholder hub-thumb-soon">
-                                <span>🧠</span>
-                                <span class="hub-thumb-label">Coming Soon</span>
+                            <div class="hub-thumb-placeholder">
+                                <span>📋</span>
+                                <span class="hub-thumb-label">Task Manager</span>
                             </div>
                         </div>
                         <div class="hub-project-body">
                             <div class="hub-project-top">
-                                <h3 class="hub-h3">Project #2</h3>
-                                <span class="hub-pill">Coming soon</span>
+                                <h3 class="hub-h3">TaskFlow — Kanban Board</h3>
+                                <span class="hub-pill hub-pill-live">Live</span>
                             </div>
-                            <p class="hub-project-text">Placeholder slot for your next website.</p>
+                            <p class="hub-project-text">Drag-and-drop task manager with columns, priorities, and color-coded cards.</p>
                             <div class="hub-project-tags">
-                                <span class="hub-tech-tag hub-tech-tag-muted">TBD</span>
+                                <span class="hub-tech-tag">Flask</span>
+                                <span class="hub-tech-tag">Drag & Drop</span>
+                                <span class="hub-tech-tag">MongoDB</span>
                             </div>
                             <div class="hub-project-meta">
-                                <span>Route: <code>/</code></span>
+                                <span>Route: <code>/kanban</code></span>
+                                <span class="hub-arrow">→</span>
                             </div>
                         </div>
-                    </div>
+                    </a>
 
-                    <div class="hub-project hub-project-disabled anim-fade" data-anim data-status="coming-soon" role="article" aria-label="Project coming soon">
+                    <a class="hub-project anim-fade" data-anim data-status="live" href="{{ url_for('chat_page') }}">
                         <div class="hub-project-thumb">
-                            <div class="hub-thumb-placeholder hub-thumb-soon">
-                                <span>🎨</span>
-                                <span class="hub-thumb-label">Coming Soon</span>
+                            <div class="hub-thumb-placeholder">
+                                <span>💬</span>
+                                <span class="hub-thumb-label">Real-time Chat</span>
                             </div>
                         </div>
                         <div class="hub-project-body">
                             <div class="hub-project-top">
-                                <h3 class="hub-h3">Project #3</h3>
-                                <span class="hub-pill">Coming soon</span>
+                                <h3 class="hub-h3">BuzzChat — Chat App</h3>
+                                <span class="hub-pill hub-pill-live">Live</span>
                             </div>
-                            <p class="hub-project-text">Another placeholder slot for a future project.</p>
+                            <p class="hub-project-text">Multi-room real-time chat with WebSocket messaging and online status.</p>
                             <div class="hub-project-tags">
-                                <span class="hub-tech-tag hub-tech-tag-muted">TBD</span>
+                                <span class="hub-tech-tag">Flask-SocketIO</span>
+                                <span class="hub-tech-tag">WebSockets</span>
+                                <span class="hub-tech-tag">MongoDB</span>
                             </div>
                             <div class="hub-project-meta">
-                                <span>Route: <code>/</code></span>
+                                <span>Route: <code>/chat</code></span>
+                                <span class="hub-arrow">→</span>
                             </div>
                         </div>
-                    </div>
+                    </a>
+
+                    <a class="hub-project anim-fade" data-anim data-status="live" href="{{ url_for('ai_tool_page') }}">
+                        <div class="hub-project-thumb">
+                            <div class="hub-thumb-placeholder">
+                                <span>🤖</span>
+                                <span class="hub-thumb-label">AI-Powered</span>
+                            </div>
+                        </div>
+                        <div class="hub-project-body">
+                            <div class="hub-project-top">
+                                <h3 class="hub-h3">TextForge — AI Tool</h3>
+                                <span class="hub-pill hub-pill-live">Live</span>
+                            </div>
+                            <p class="hub-project-text">AI text processor — summarize, translate, change tone, and explain content.</p>
+                            <div class="hub-project-tags">
+                                <span class="hub-tech-tag">Flask</span>
+                                <span class="hub-tech-tag">NLP</span>
+                                <span class="hub-tech-tag">REST API</span>
+                            </div>
+                            <div class="hub-project-meta">
+                                <span>Route: <code>/ai-tool</code></span>
+                                <span class="hub-arrow">→</span>
+                            </div>
+                        </div>
+                    </a>
                 </div>
             </div>
         </section>
