@@ -533,7 +533,22 @@ def cart_count():
 
 @app.route('/kanban')
 def kanban_page():
-    return render_template('kanban.html')
+    return render_template('kanban/dashboard.html')
+
+
+@app.route('/kanban/board')
+def kanban_board():
+    return render_template('kanban/board.html')
+
+
+@app.route('/kanban/timeline')
+def kanban_timeline():
+    return render_template('kanban/timeline.html')
+
+
+@app.route('/kanban/rules')
+def kanban_rules():
+    return render_template('kanban/rules.html')
 
 @app.route('/api/kanban/tasks')
 def kanban_list():
@@ -586,7 +601,17 @@ def kanban_delete():
 
 @app.route('/chat')
 def chat_page():
-    return render_template('chat.html')
+    return render_template('chat_lobby.html')
+
+
+@app.route('/chat/app')
+def chat_app_page():
+    return render_template('chat_app.html')
+
+
+@app.route('/chat/settings')
+def chat_settings_page():
+    return render_template('chat_settings.html')
 
 @socketio.on('set_username')
 def handle_set_username(data):
@@ -655,7 +680,22 @@ def handle_disconnect():
 
 @app.route('/ai-tool')
 def ai_tool_page():
-    return render_template('ai_tool.html')
+    return render_template('ai_landing.html')
+
+
+@app.route('/ai-tool/studio')
+def ai_tool_studio():
+    return render_template('ai_studio.html')
+
+
+@app.route('/ai-tool/presets')
+def ai_tool_presets():
+    return render_template('ai_presets.html')
+
+
+@app.route('/ai-tool/docs')
+def ai_tool_docs():
+    return render_template('ai_docs.html')
 
 @app.route('/api/ai/process', methods=['POST'])
 def ai_process():

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TaskFlow{% endblock %}</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kanban.css') }}">
+    {% block head_extra %}{% endblock %}
+</head>
+
+<body class="kb-shell-body">
+    <div class="kb-shell">
+        <aside class="kb-shell-sidebar">
+            <div class="kb-shell-brand">
+                <span class="kb-shell-mark" aria-hidden="true">✳</span>
+                <div>
+                    <div class="kb-shell-name">TaskFlow</div>
+                    <div class="kb-shell-tagline">Workspace</div>
+                </div>
+            </div>
+            <nav class="kb-shell-nav" aria-label="TaskFlow sections">
+                <a href="{{ url_for('kanban_page') }}"
+                    class="kb-shell-link {% if request.endpoint == 'kanban_page' %}is-active{% endif %}">
+                    <span class="kb-shell-ico">◇</span> Overview
+                </a>
+                <a href="{{ url_for('kanban_board') }}"
+                    class="kb-shell-link {% if request.endpoint == 'kanban_board' %}is-active{% endif %}">
+                    <span class="kb-shell-ico">▦</span> Board
+                </a>
+                <a href="{{ url_for('kanban_timeline') }}"
+                    class="kb-shell-link {% if request.endpoint == 'kanban_timeline' %}is-active{% endif %}">
+                    <span class="kb-shell-ico">〜</span> Timeline
+                </a>
+                <a href="{{ url_for('kanban_rules') }}"
+                    class="kb-shell-link {% if request.endpoint == 'kanban_rules' %}is-active{% endif %}">
+                    <span class="kb-shell-ico">⚡</span> Automation
+                </a>
+            </nav>
+            <div class="kb-shell-footer">
+                <a href="{{ url_for('portfolio_home') }}" class="kb-shell-hub">&larr; Portfolio hub</a>
+            </div>
+        </aside>
+        <div class="kb-shell-main">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

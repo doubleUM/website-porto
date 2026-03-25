@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TextForge — Presets</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌗</text></svg>">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ai_swiss.css') }}">
+</head>
+
+<body class="tf-body">
+    {% include 'ai_nav.html' %}
+    <div class="tf-wrap">
+        <p class="tf-hero-num">03 / Presets</p>
+        <h1 class="tf-h1">Reusable starters.</h1>
+        <p class="tf-lead">Store named snippets in the browser. Open one in Studio with a single click.</p>
+
+        <form id="preset-form"
+            style="max-width:520px;margin-bottom:32px;border:2px solid var(--tf-border);padding:20px;background:#fff;">
+            <div class="tf-form-row">
+                <label for="p-name">Name</label>
+                <input id="p-name" required placeholder="e.g. Release notes">
+            </div>
+            <div class="tf-form-row">
+                <label for="p-mode">Default mode</label>
+                <select id="p-mode">
+                    <option value="summarize">Summarize</option>
+                    <option value="translate">Translate</option>
+                    <option value="tone">Tone</option>
+                    <option value="explain">Explain</option>
+                </select>
+            </div>
+            <div class="tf-form-row">
+                <label for="p-body">Starter text</label>
+                <textarea id="p-body" rows="5" placeholder="Injected into the studio input…"></textarea>
+            </div>
+            <button type="submit" class="tf-btn tf-btn-solid">Save preset</button>
+        </form>
+
+        <h3 style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;">Library</h3>
+        <div id="preset-list"></div>
+    </div>
+    <script>
+        const STUDIO_URL = {{ url_for('ai_tool_studio') | tojson }};
+        const KEY = 'tf-presets-v1';
+        function load() { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { return []; } }
+        function save(arr) { localStorage.setItem(KEY, JSON.stringify(arr)); }
+        function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+        function render() {
+            const arr = load();
+            const el = document.getElementById('preset-list');
+            if (!arr.length) { el.innerHTML = '<p style="color:var(--tf-muted);font-size:14px;">No presets yet.</p>'; return; }
+            el.innerHTML = arr.map(function (p, i) {
+                return '<div class="tf-preset-card"><h4>' + esc(p.name) + '</h4><p>Mode: ' + esc(p.mode) + '</p><p style="margin-top:8px;">' + esc(p.body.slice(0, 160)) + (p.body.length > 160 ? '…' : '') + '</p>' +
+                    '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">' +
+                    '<button type="button" class="tf-btn tf-btn-solid tf-open" data-i="' + i + '">Open in studio</button>' +
+                    '<button type="button" class="tf-btn" data-del="' + i + '">Remove</button></div></div>';
+            }).join('');
+            el.querySelectorAll('[data-del]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var idx = parseInt(btn.dataset.del, 10);
+                    var a = load(); a.splice(idx, 1); save(a); render();
+                });
+            });
+            el.querySelectorAll('.tf-open').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var p = load()[parseInt(btn.dataset.i, 10)];
+                    if (!p) return;
+                    sessionStorage.setItem('tf-preset-load', JSON.stringify({ mode: p.mode, text: p.body }));
+                    window.location.href = STUDIO_URL;
+                });
+            });
+        }
+        document.getElementById('preset-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            var name = document.getElementById('p-name').value.trim();
+            var mode = document.getElementById('p-mode').value;
+            var body = document.getElementById('p-body').value.trim();
+            if (!name || !body) return;
+            var a = load(); a.unshift({ name: name, mode: mode, body: body }); save(a);
+            e.target.reset(); render();
+        });
+        render();
+    </script>
+</body>
+
+</html>

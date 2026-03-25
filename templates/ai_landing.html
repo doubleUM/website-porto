@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TextForge — AI text workspace">
+    <title>TextForge — Intro</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌗</text></svg>">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ai_swiss.css') }}">
+</head>
+
+<body class="tf-body">
+    {% include 'ai_nav.html' %}
+    <div class="tf-wrap">
+        <p class="tf-hero-num">01 / Laboratory</p>
+        <h1 class="tf-h1">Text tooling on a strict grid.</h1>
+        <p class="tf-lead">TextForge uses a Swiss-inspired layout: light background, red accent, monospace data. It is
+            intentionally unrelated to the purple portfolio hub, the paper Kanban app, or the brutalist chat.</p>
+        <div class="tf-actions">
+            <a href="{{ url_for('ai_tool_studio') }}" class="tf-btn tf-btn-solid">Open studio</a>
+            <a href="{{ url_for('ai_tool_docs') }}" class="tf-btn">Read API</a>
+        </div>
+        <div class="tf-grid-3">
+            <div class="tf-tile">
+                <h3>Modes</h3>
+                <p>Summarize, translate (mock), tone shift, and explain — same backend routes as before.</p>
+            </div>
+            <div class="tf-tile">
+                <h3>Presets</h3>
+                <p>Save reusable prompts and starter text in the browser; wire to a database when you are ready.</p>
+            </div>
+            <div class="tf-tile">
+                <h3>Exports</h3>
+                <p>Copy and download outputs. History still mirrors the studio session in localStorage.</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

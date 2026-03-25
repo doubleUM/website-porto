@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BuzzChat — real-time rooms (lobby)">
+    <title>BuzzChat — Lobby</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+</head>
+
+<body>
+    <div class="bz-lobby">
+        <div class="bz-lobby-top">
+            <div>
+                <span class="bz-stamp">REAL-TIME · SOCKET.IO</span>
+                <h1>Buzz<br>Chat</h1>
+                <p class="bz-lobby-lead">A separate visual language from the rest of your portfolio — chunky type,
+                    hard shadows, flat color. Pick where to go next.</p>
+            </div>
+            <a href="{{ url_for('portfolio_home') }}" class="ch-back" title="Portfolio">←</a>
+        </div>
+        <div class="bz-cards">
+            <a class="bz-card bz-card-pink" href="{{ url_for('chat_app_page') }}">
+                <h2>Enter chat</h2>
+                <p>Multi-room WebSocket app: General, Random, Tech Talk, Chill Zone. Typing indicator, history, unread
+                    badges.</p>
+            </a>
+            <a class="bz-card bz-card-cyan" href="{{ url_for('chat_settings_page') }}">
+                <h2>Settings</h2>
+                <p>Sound, desktop alerts, compact density — stored in the browser for this demo.</p>
+            </a>
+            <div class="bz-card bz-card-muted">
+                <h2>Video (soon)</h2>
+                <p>Placeholder slot — not wired. Keeps the lobby feeling like a product hub.</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

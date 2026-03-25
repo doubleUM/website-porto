@@ -1,0 +1,70 @@
+{% extends 'kanban/layout.html' %}
+{% block title %}Automation — TaskFlow{% endblock %}
+
+{% block content %}
+<section class="kb-rules">
+    <header class="kb-rules-head">
+        <h1 class="kb-rules-title">Automation recipes</h1>
+        <p class="kb-rules-lead">UI-only toggles for a richer demo — wire these to webhooks or your queue later.</p>
+    </header>
+
+    <div class="kb-rules-grid">
+        <article class="kb-rule-card">
+            <div class="kb-rule-top">
+                <h2 class="kb-rule-h2">When a card lands in Done</h2>
+                <label class="kb-toggle"><input type="checkbox" checked data-rule="done-notify"><span
+                        class="kb-toggle-ui"></span></label>
+            </div>
+            <p class="kb-rule-desc">Post a summary line to the activity log and optionally notify assignees.</p>
+            <ul class="kb-rule-meta">
+                <li>Trigger: column = Done</li>
+                <li>Cooldown: 5 min</li>
+            </ul>
+        </article>
+        <article class="kb-rule-card">
+            <div class="kb-rule-top">
+                <h2 class="kb-rule-h2">High priority overdue</h2>
+                <label class="kb-toggle"><input type="checkbox" data-rule="overdue-escalate"><span
+                        class="kb-toggle-ui"></span></label>
+            </div>
+            <p class="kb-rule-desc">Flag cards that are high priority and past due with a red accent stripe.</p>
+            <ul class="kb-rule-meta">
+                <li>Condition: priority = high AND due &lt; today</li>
+            </ul>
+        </article>
+        <article class="kb-rule-card">
+            <div class="kb-rule-top">
+                <h2 class="kb-rule-h2">Stale “In progress”</h2>
+                <label class="kb-toggle"><input type="checkbox" checked data-rule="stale-nudge"><span
+                        class="kb-toggle-ui"></span></label>
+            </div>
+            <p class="kb-rule-desc">After 7 days without an update, add a “nudge” label on the card face.</p>
+            <ul class="kb-rule-meta">
+                <li>Window: 7 days</li>
+            </ul>
+        </article>
+        <article class="kb-rule-card kb-rule-card-muted">
+            <div class="kb-rule-top">
+                <h2 class="kb-rule-h2">Webhook — Slack</h2>
+                <label class="kb-toggle"><input type="checkbox" disabled><span class="kb-toggle-ui"></span></label>
+            </div>
+            <p class="kb-rule-desc">Coming soon: POST JSON payload on any column move.</p>
+        </article>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.querySelectorAll('.kb-rule-card input[type="checkbox"]:not([disabled])').forEach(function (el) {
+        var key = 'kb-rule-' + (el.dataset.rule || el.closest('.kb-rule-card').querySelector('.kb-rule-h2').textContent.slice(0, 12));
+        try {
+            var v = localStorage.getItem(key);
+            if (v !== null) el.checked = v === '1';
+        } catch (e) { }
+        el.addEventListener('change', function () {
+            try { localStorage.setItem(key, el.checked ? '1' : '0'); } catch (e) { }
+        });
+    });
+</script>
+{% endblock %}

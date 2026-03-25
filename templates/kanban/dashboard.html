@@ -1,0 +1,78 @@
+{% extends 'kanban/layout.html' %}
+{% block title %}Overview — TaskFlow{% endblock %}
+
+{% block content %}
+<section class="kb-dash">
+    <header class="kb-dash-header">
+        <div>
+            <p class="kb-dash-eyebrow">Good day</p>
+            <h1 class="kb-dash-title">Project overview</h1>
+            <p class="kb-dash-lead">A calm, editorial workspace — separate from your other demos. Track flow across
+                the board, timeline, and lightweight automations.</p>
+        </div>
+        <div class="kb-dash-actions">
+            <a href="{{ url_for('kanban_board') }}" class="kb-btn kb-btn-primary">Open board</a>
+            <a href="{{ url_for('kanban_timeline') }}" class="kb-btn kb-btn-ghost">Week view</a>
+        </div>
+    </header>
+
+    <div class="kb-dash-grid">
+        <article class="kb-dash-card kb-dash-card-wide">
+            <h2 class="kb-dash-h2">Sprint health</h2>
+            <p class="kb-dash-muted">Live counts from your saved tasks.</p>
+            <div class="kb-dash-metrics" id="dash-metrics">
+                <div class="kb-dash-metric">
+                    <span class="kb-dash-metric-val" id="dm-total">—</span>
+                    <span class="kb-dash-metric-lbl">Total</span>
+                </div>
+                <div class="kb-dash-metric">
+                    <span class="kb-dash-metric-val kb-accent-todo" id="dm-todo">—</span>
+                    <span class="kb-dash-metric-lbl">To do</span>
+                </div>
+                <div class="kb-dash-metric">
+                    <span class="kb-dash-metric-val kb-accent-progress" id="dm-prog">—</span>
+                    <span class="kb-dash-metric-lbl">In progress</span>
+                </div>
+                <div class="kb-dash-metric">
+                    <span class="kb-dash-metric-val kb-accent-done" id="dm-done">—</span>
+                    <span class="kb-dash-metric-lbl">Done</span>
+                </div>
+            </div>
+        </article>
+        <article class="kb-dash-card">
+            <h2 class="kb-dash-h2">Shortcuts</h2>
+            <ul class="kb-dash-list">
+                <li><a href="{{ url_for('kanban_board') }}">Drag cards between columns</a></li>
+                <li><a href="{{ url_for('kanban_timeline') }}">See due dates on a week strip</a></li>
+                <li><a href="{{ url_for('kanban_rules') }}">Toggle automation recipes</a></li>
+            </ul>
+        </article>
+        <article class="kb-dash-card">
+            <h2 class="kb-dash-h2">This workspace</h2>
+            <p class="kb-dash-muted">Paper-and-ink visual system · serif headlines · forest accent — intentionally not
+                matching the portfolio hub or other projects.</p>
+        </article>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (async function () {
+        try {
+            const res = await fetch('/api/kanban/tasks');
+            const data = await res.json();
+            const tasks = data.tasks || [];
+            const todo = tasks.filter(t => t.status === 'todo').length;
+            const prog = tasks.filter(t => t.status === 'in-progress').length;
+            const done = tasks.filter(t => t.status === 'done').length;
+            document.getElementById('dm-total').textContent = tasks.length;
+            document.getElementById('dm-todo').textContent = todo;
+            document.getElementById('dm-prog').textContent = prog;
+            document.getElementById('dm-done').textContent = done;
+        } catch (e) {
+            document.getElementById('dm-total').textContent = '?';
+        }
+    })();
+</script>
+{% endblock %}

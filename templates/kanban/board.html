@@ -1,0 +1,430 @@
+{% extends 'kanban/layout.html' %}
+{% block title %}Board — TaskFlow{% endblock %}
+
+{% block content %}
+<header class="kb-header">
+    <div class="kb-container">
+        <nav class="kb-nav">
+            <div class="kb-brand">
+                <span class="kb-brand-icon">▦</span>
+                <span class="kb-brand-text">Board</span>
+            </div>
+            <div class="kb-toolbar">
+                <div class="kb-search-wrap">
+                    <svg class="kb-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    <input type="text" id="search-input" placeholder="Search tasks..." class="kb-search">
+                </div>
+                <select id="filter-priority" class="kb-filter-select">
+                    <option value="all">All Priorities</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+                <button class="kb-btn kb-btn-primary" id="add-task-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5" stroke-linecap="round">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    New Task
+                </button>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<div class="kb-stats-bar">
+    <div class="kb-container">
+        <div class="kb-stats">
+            <div class="kb-stat">
+                <span class="kb-stat-num" id="stat-total">0</span>
+                <span class="kb-stat-label">Total</span>
+            </div>
+            <div class="kb-stat">
+                <span class="kb-stat-num kb-stat-todo" id="stat-todo">0</span>
+                <span class="kb-stat-label">To Do</span>
+            </div>
+            <div class="kb-stat">
+                <span class="kb-stat-num kb-stat-progress" id="stat-progress">0</span>
+                <span class="kb-stat-label">In Progress</span>
+            </div>
+            <div class="kb-stat">
+                <span class="kb-stat-num kb-stat-done" id="stat-done">0</span>
+                <span class="kb-stat-label">Done</span>
+            </div>
+            <div class="kb-stat kb-stat-wide">
+                <div class="kb-progress-bar">
+                    <div class="kb-progress-fill" id="progress-fill"></div>
+                </div>
+                <span class="kb-stat-label"><span id="stat-pct">0</span>% Complete</span>
+            </div>
+            <div class="kb-stat">
+                <span class="kb-stat-num kb-stat-overdue" id="stat-overdue">0</span>
+                <span class="kb-stat-label">Overdue</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<main class="kb-main">
+    <div class="kb-board">
+        <div class="kb-column" data-status="todo">
+            <div class="kb-column-header">
+                <div class="kb-column-title">
+                    <span class="kb-column-dot kb-dot-todo"></span>
+                    <h2>To Do</h2>
+                    <span class="kb-count" data-count="todo">0</span>
+                </div>
+            </div>
+            <div class="kb-cards" id="col-todo" data-status="todo"></div>
+        </div>
+        <div class="kb-column" data-status="in-progress">
+            <div class="kb-column-header">
+                <div class="kb-column-title">
+                    <span class="kb-column-dot kb-dot-progress"></span>
+                    <h2>In Progress</h2>
+                    <span class="kb-count" data-count="in-progress">0</span>
+                </div>
+            </div>
+            <div class="kb-cards" id="col-in-progress" data-status="in-progress"></div>
+        </div>
+        <div class="kb-column" data-status="done">
+            <div class="kb-column-header">
+                <div class="kb-column-title">
+                    <span class="kb-column-dot kb-dot-done"></span>
+                    <h2>Done</h2>
+                    <span class="kb-count" data-count="done">0</span>
+                </div>
+            </div>
+            <div class="kb-cards" id="col-done" data-status="done"></div>
+        </div>
+    </div>
+</main>
+
+<div class="kb-overlay" id="modal-overlay">
+    <div class="kb-modal" id="task-modal">
+        <div class="kb-modal-header">
+            <h3 id="modal-title">New Task</h3>
+            <button type="button" class="kb-modal-close" id="modal-close">&times;</button>
+        </div>
+        <form id="task-form">
+            <input type="hidden" id="task-id">
+            <div class="kb-field">
+                <label for="task-name">Title</label>
+                <input type="text" id="task-name" placeholder="What needs to be done?" required>
+            </div>
+            <div class="kb-field">
+                <label for="task-desc">Description</label>
+                <textarea id="task-desc" rows="3" placeholder="Add details (optional)"></textarea>
+            </div>
+            <div class="kb-field-row">
+                <div class="kb-field">
+                    <label for="task-priority">Priority</label>
+                    <select id="task-priority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div class="kb-field">
+                    <label for="task-status">Status</label>
+                    <select id="task-status">
+                        <option value="todo">To Do</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="done">Done</option>
+                    </select>
+                </div>
+            </div>
+            <div class="kb-field">
+                <label for="task-due">Due Date</label>
+                <input type="date" id="task-due" class="kb-date-input">
+            </div>
+            <div class="kb-field">
+                <label>Color</label>
+                <div class="kb-colors">
+                    <label class="kb-color-pick"><input type="radio" name="color" value="#b45309" checked><span
+                            style="background:#b45309"></span></label>
+                    <label class="kb-color-pick"><input type="radio" name="color" value="#1d4ed8"><span
+                            style="background:#1d4ed8"></span></label>
+                    <label class="kb-color-pick"><input type="radio" name="color" value="#15803d"><span
+                            style="background:#15803d"></span></label>
+                    <label class="kb-color-pick"><input type="radio" name="color" value="#b91c1c"><span
+                            style="background:#b91c1c"></span></label>
+                    <label class="kb-color-pick"><input type="radio" name="color" value="#6b21a8"><span
+                            style="background:#6b21a8"></span></label>
+                    <label class="kb-color-pick"><input type="radio" name="color" value="#be185d"><span
+                            style="background:#be185d"></span></label>
+                </div>
+            </div>
+            <div class="kb-field">
+                <label>Subtasks</label>
+                <div class="kb-subtasks" id="subtasks-container"></div>
+                <button type="button" class="kb-add-subtask" id="add-subtask-btn">+ Add subtask</button>
+            </div>
+            <div class="kb-modal-actions">
+                <button type="button" class="kb-btn kb-btn-danger" id="delete-task-btn" style="display:none">Delete
+                </button>
+                <div style="flex:1"></div>
+                <button type="button" class="kb-btn kb-btn-ghost" id="modal-cancel">Cancel</button>
+                <button type="submit" class="kb-btn kb-btn-primary" id="save-task-btn">Save Task</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="kb-overlay" id="confirm-overlay">
+    <div class="kb-confirm">
+        <div class="kb-confirm-icon">⚠</div>
+        <h3>Delete Task?</h3>
+        <p>This action cannot be undone.</p>
+        <div class="kb-confirm-actions">
+            <button type="button" class="kb-btn kb-btn-ghost" id="confirm-cancel">Cancel</button>
+            <button type="button" class="kb-btn kb-btn-danger" id="confirm-delete">Delete</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const API = '/api/kanban';
+    let allTasks = [];
+    let searchQuery = '';
+    let filterPriority = 'all';
+    let pendingDeleteId = null;
+
+    function priorityIcon(p) {
+        var map = { low: '·', medium: '··', high: '···' };
+        return map[p] || '··';
+    }
+
+    function escHtml(str) {
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
+
+    function isOverdue(due) {
+        if (!due) return false;
+        return new Date(due) < new Date(new Date().toDateString());
+    }
+
+    function updateStats() {
+        const todo = allTasks.filter(t => t.status === 'todo').length;
+        const prog = allTasks.filter(t => t.status === 'in-progress').length;
+        const done = allTasks.filter(t => t.status === 'done').length;
+        const total = allTasks.length;
+        const overdue = allTasks.filter(t => t.status !== 'done' && isOverdue(t.due_date)).length;
+        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+        document.getElementById('stat-total').textContent = total;
+        document.getElementById('stat-todo').textContent = todo;
+        document.getElementById('stat-progress').textContent = prog;
+        document.getElementById('stat-done').textContent = done;
+        document.getElementById('stat-overdue').textContent = overdue;
+        document.getElementById('stat-pct').textContent = pct;
+        document.getElementById('progress-fill').style.width = pct + '%';
+    }
+
+    function getFilteredTasks() {
+        return allTasks.filter(t => {
+            if (searchQuery && !t.name.toLowerCase().includes(searchQuery) && !(t.description || '').toLowerCase().includes(searchQuery)) return false;
+            if (filterPriority !== 'all' && t.priority !== filterPriority) return false;
+            return true;
+        });
+    }
+
+    function renderSubtaskProgress(subtasks) {
+        if (!subtasks || subtasks.length === 0) return '';
+        const done = subtasks.filter(s => s.done).length;
+        const pct = Math.round((done / subtasks.length) * 100);
+        return '<div class="kb-card-subtasks"><div class="kb-sub-bar"><div class="kb-sub-fill" style="width:' + pct + '%"></div></div><span>' + done + '/' + subtasks.length + '</span></div>';
+    }
+
+    function renderBoard() {
+        var filtered = getFilteredTasks();
+        ['todo', 'in-progress', 'done'].forEach(function (status) {
+            var col = document.getElementById('col-' + status);
+            var tasks = filtered.filter(function (t) { return t.status === status; });
+            document.querySelector('[data-count="' + status + '"]').textContent = tasks.length;
+
+            col.innerHTML = tasks.map(function (t) {
+                var overdue = t.status !== 'done' && isOverdue(t.due_date);
+                var dueHtml = '';
+                if (t.due_date) {
+                    var d = new Date(t.due_date);
+                    dueHtml = '<span class="kb-card-due ' + (overdue ? 'kb-overdue' : '') + '">' + (overdue ? '! ' : '') + d.toLocaleDateString() + '</span>';
+                }
+                return '<div class="kb-card ' + (overdue ? 'kb-card-overdue' : '') + '" draggable="true" data-id="' + t.id + '" style="border-left:3px solid ' + (t.color || '#b45309') + '">' +
+                    '<div class="kb-card-header">' +
+                    '<span class="kb-priority">' + priorityIcon(t.priority) + '</span>' +
+                    '<button type="button" class="kb-card-edit" data-id="' + t.id + '">Edit</button>' +
+                    '</div>' +
+                    '<h4 class="kb-card-title">' + escHtml(t.name) + '</h4>' +
+                    (t.description ? '<p class="kb-card-desc">' + escHtml(t.description) + '</p>' : '') +
+                    renderSubtaskProgress(t.subtasks) +
+                    '<div class="kb-card-footer">' +
+                    (dueHtml || '<span class="kb-card-date">' + new Date(t.created_at).toLocaleDateString() + '</span>') +
+                    '</div>' +
+                    '</div>';
+            }).join('');
+
+            col.querySelectorAll('.kb-card').forEach(setupDrag);
+            col.querySelectorAll('.kb-card-edit').forEach(function (btn) {
+                btn.addEventListener('click', function (e) { e.stopPropagation(); openEditModal(btn.dataset.id); });
+            });
+        });
+        updateStats();
+    }
+
+    document.getElementById('search-input').addEventListener('input', function (e) {
+        searchQuery = e.target.value.toLowerCase();
+        renderBoard();
+    });
+    document.getElementById('filter-priority').addEventListener('change', function (e) {
+        filterPriority = e.target.value;
+        renderBoard();
+    });
+
+    function setupDrag(card) {
+        card.addEventListener('dragstart', function (e) {
+            e.dataTransfer.setData('text/plain', card.dataset.id);
+            card.classList.add('kb-dragging');
+        });
+        card.addEventListener('dragend', function () { card.classList.remove('kb-dragging'); });
+    }
+
+    document.querySelectorAll('.kb-cards').forEach(function (col) {
+        col.addEventListener('dragover', function (e) { e.preventDefault(); col.classList.add('kb-drop-target'); });
+        col.addEventListener('dragleave', function () { col.classList.remove('kb-drop-target'); });
+        col.addEventListener('drop', function (e) {
+            e.preventDefault();
+            col.classList.remove('kb-drop-target');
+            moveTask(e.dataTransfer.getData('text/plain'), col.dataset.status);
+        });
+    });
+
+    async function moveTask(taskId, newStatus) {
+        var task = allTasks.find(function (t) { return String(t.id) === String(taskId); });
+        if (!task || task.status === newStatus) return;
+        task.status = newStatus;
+        renderBoard();
+        await fetch(API + '/move', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ task_id: parseInt(taskId, 10), status: newStatus }) });
+    }
+
+    var subtasksContainer = document.getElementById('subtasks-container');
+    document.getElementById('add-subtask-btn').addEventListener('click', function () {
+        addSubtaskRow('', false);
+    });
+
+    function addSubtaskRow(text, done) {
+        var row = document.createElement('div');
+        row.className = 'kb-subtask-row';
+        row.innerHTML = '<input type="checkbox" class="kb-sub-check" ' + (done ? 'checked' : '') + '><input type="text" class="kb-sub-input" value="' + escHtml(text) + '" placeholder="Subtask...">' +
+            '<button type="button" class="kb-sub-remove">&times;</button>';
+        row.querySelector('.kb-sub-remove').addEventListener('click', function () { row.remove(); });
+        subtasksContainer.appendChild(row);
+    }
+
+    function getSubtasks() {
+        var subs = [];
+        subtasksContainer.querySelectorAll('.kb-subtask-row').forEach(function (row) {
+            var text = row.querySelector('.kb-sub-input').value.trim();
+            if (text) subs.push({ text: text, done: row.querySelector('.kb-sub-check').checked });
+        });
+        return subs;
+    }
+
+    var overlay = document.getElementById('modal-overlay');
+    var form = document.getElementById('task-form');
+    var deleteBtn = document.getElementById('delete-task-btn');
+    var modalTitle = document.getElementById('modal-title');
+
+    function openModal() { overlay.classList.add('is-open'); }
+    function closeModal() {
+        overlay.classList.remove('is-open');
+        form.reset();
+        document.getElementById('task-id').value = '';
+        deleteBtn.style.display = 'none';
+        modalTitle.textContent = 'New Task';
+        subtasksContainer.innerHTML = '';
+    }
+
+    document.getElementById('add-task-btn').addEventListener('click', function () { closeModal(); openModal(); });
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    document.getElementById('modal-cancel').addEventListener('click', closeModal);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+
+    function openEditModal(taskId) {
+        var task = allTasks.find(function (t) { return String(t.id) === String(taskId); });
+        if (!task) return;
+        document.getElementById('task-id').value = task.id;
+        document.getElementById('task-name').value = task.name;
+        document.getElementById('task-desc').value = task.description || '';
+        document.getElementById('task-priority').value = task.priority;
+        document.getElementById('task-status').value = task.status;
+        document.getElementById('task-due').value = task.due_date || '';
+        var colorRadio = document.querySelector('input[name="color"][value="' + task.color + '"]');
+        if (colorRadio) colorRadio.checked = true;
+        subtasksContainer.innerHTML = '';
+        if (task.subtasks) task.subtasks.forEach(function (s) { addSubtaskRow(s.text, s.done); });
+        modalTitle.textContent = 'Edit Task';
+        deleteBtn.style.display = 'block';
+        openModal();
+    }
+
+    var confirmOverlay = document.getElementById('confirm-overlay');
+    deleteBtn.addEventListener('click', function () {
+        pendingDeleteId = document.getElementById('task-id').value;
+        confirmOverlay.classList.add('is-open');
+    });
+    document.getElementById('confirm-cancel').addEventListener('click', function () {
+        confirmOverlay.classList.remove('is-open');
+        pendingDeleteId = null;
+    });
+    document.getElementById('confirm-delete').addEventListener('click', async function () {
+        if (pendingDeleteId) {
+            await fetch(API + '/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ task_id: parseInt(pendingDeleteId, 10) }) });
+            pendingDeleteId = null;
+            confirmOverlay.classList.remove('is-open');
+            closeModal();
+            await loadTasks();
+        }
+    });
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var taskId = document.getElementById('task-id').value;
+        var payload = {
+            name: document.getElementById('task-name').value,
+            description: document.getElementById('task-desc').value,
+            priority: document.getElementById('task-priority').value,
+            status: document.getElementById('task-status').value,
+            color: document.querySelector('input[name="color"]:checked').value,
+            due_date: document.getElementById('task-due').value || null,
+            subtasks: getSubtasks()
+        };
+        if (taskId) {
+            payload.task_id = parseInt(taskId, 10);
+            await fetch(API + '/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        } else {
+            await fetch(API + '/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        }
+        closeModal();
+        await loadTasks();
+    });
+
+    async function loadTasks() {
+        var res = await fetch(API + '/tasks');
+        var data = await res.json();
+        allTasks = data.tasks || [];
+        renderBoard();
+    }
+
+    loadTasks();
+</script>
+{% endblock %}

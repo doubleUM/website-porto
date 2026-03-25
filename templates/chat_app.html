@@ -1,21 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="BuzzChat — Real-time chat with rooms, emojis, and avatars">
-    <title>BuzzChat — Real-time Chat</title>
+    <title>BuzzChat — Rooms</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
 </head>
+
 <body>
+    <header class="bz-topbar">
+        <span class="bz-stamp" style="background:var(--bz-pink);color:var(--bz-ink);">BUZZCHAT</span>
+        <div class="bz-top-links">
+            <a href="{{ url_for('chat_page') }}">Lobby</a>
+            <a href="{{ url_for('chat_settings_page') }}">Settings</a>
+            <a href="{{ url_for('portfolio_home') }}">Portfolio</a>
+        </div>
+    </header>
     <div class="ch-app">
-        <!-- Sidebar -->
         <aside class="ch-sidebar" id="sidebar">
             <div class="ch-sidebar-header">
-                <a href="{{ url_for('portfolio_home') }}" class="ch-back" title="Back to Portfolio">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-                </a>
+                <a href="{{ url_for('chat_page') }}" class="ch-back" title="Lobby">←</a>
                 <div class="ch-brand">
                     <span>💬</span>
                     <span class="ch-brand-text">BuzzChat</span>
@@ -31,22 +38,22 @@
 
             <div class="ch-rooms-label">Rooms</div>
             <div class="ch-rooms" id="room-list">
-                <button class="ch-room is-active" data-room="general">
+                <button type="button" class="ch-room is-active" data-room="general">
                     <span class="ch-room-icon">🌐</span>
                     <span class="ch-room-name">General</span>
                     <span class="ch-room-badge" data-badge="general" style="display:none">0</span>
                 </button>
-                <button class="ch-room" data-room="random">
+                <button type="button" class="ch-room" data-room="random">
                     <span class="ch-room-icon">🎲</span>
                     <span class="ch-room-name">Random</span>
                     <span class="ch-room-badge" data-badge="random" style="display:none">0</span>
                 </button>
-                <button class="ch-room" data-room="tech">
+                <button type="button" class="ch-room" data-room="tech">
                     <span class="ch-room-icon">💻</span>
                     <span class="ch-room-name">Tech Talk</span>
                     <span class="ch-room-badge" data-badge="tech" style="display:none">0</span>
                 </button>
-                <button class="ch-room" data-room="chill">
+                <button type="button" class="ch-room" data-room="chill">
                     <span class="ch-room-icon">☕</span>
                     <span class="ch-room-name">Chill Zone</span>
                     <span class="ch-room-badge" data-badge="chill" style="display:none">0</span>
@@ -61,10 +68,9 @@
             </div>
         </aside>
 
-        <!-- Main chat -->
         <main class="ch-main">
             <header class="ch-chat-header">
-                <button class="ch-menu-btn" id="menu-toggle">☰</button>
+                <button type="button" class="ch-menu-btn" id="menu-toggle">☰</button>
                 <div>
                     <h2 id="room-title">🌐 General</h2>
                     <p class="ch-room-status" id="typing-status">Real-time chat</p>
@@ -81,13 +87,16 @@
 
             <div class="ch-input-bar">
                 <div class="ch-input-wrap">
-                    <button class="ch-emoji-toggle" id="emoji-toggle" title="Emoji">😊</button>
+                    <button type="button" class="ch-emoji-toggle" id="emoji-toggle" title="Emoji">😊</button>
                     <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" disabled>
-                    <button class="ch-send-btn" id="send-btn" disabled>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    <button type="button" class="ch-send-btn" id="send-btn" disabled>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13" />
+                            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                        </svg>
                     </button>
                 </div>
-                <!-- Emoji picker -->
                 <div class="ch-emoji-picker" id="emoji-picker" style="display:none">
                     <div class="ch-emoji-grid" id="emoji-grid"></div>
                 </div>
@@ -101,7 +110,7 @@
         let currentRoom = 'general';
         let username = '';
         let typingTimeout = null;
-        let unreadCounts = {general:0, random:0, tech:0, chill:0};
+        let unreadCounts = { general: 0, random: 0, tech: 0, chill: 0 };
 
         const msgContainer = document.getElementById('messages');
         const msgInput = document.getElementById('message-input');
@@ -112,10 +121,7 @@
         const onlineCount = document.getElementById('online-count');
         const typingStatus = document.getElementById('typing-status');
 
-        // =====================================================================
-        // AVATAR
-        // =====================================================================
-        const avatarColors = ['#34d399','#3b82f6','#f59e0b','#ec4899','#a855f7','#ef4444','#06b6d4','#84cc16'];
+        const avatarColors = ['#ffeb3b', '#ff90e8', '#7bfafb', '#fff', '#c4f000', '#ffa94d', '#b197fc', '#69db7c'];
         function getAvatarColor(name) {
             let hash = 0;
             for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -125,13 +131,11 @@
             return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
         }
 
-        // =====================================================================
-        // EMOJI PICKER
-        // =====================================================================
-        const emojis = ['😀','😂','😍','🤔','👍','🎉','🔥','❤️','😎','🙌','💯','😊','🤣','😢','😡','👀','✨','🚀','💪','🙏','😴','🤝','🎊','🌈','⚡','🌟','💬','✅','❌','⏰'];
+        const emojis = ['😀', '😂', '😍', '🤔', '👍', '🎉', '🔥', '❤️', '😎', '🙌', '💯', '😊', '🤣', '😢', '😡', '👀', '✨', '🚀', '💪', '🙏', '😴', '🤝', '🎊', '🌈', '⚡', '🌟', '💬', '✅', '❌', '⏰'];
         const emojiGrid = document.getElementById('emoji-grid');
         emojis.forEach(e => {
             const btn = document.createElement('button');
+            btn.type = 'button';
             btn.className = 'ch-emoji-btn';
             btn.textContent = e;
             btn.addEventListener('click', () => {
@@ -146,9 +150,6 @@
             picker.style.display = picker.style.display === 'none' ? 'grid' : 'none';
         });
 
-        // =====================================================================
-        // USERNAME
-        // =====================================================================
         usernameInput.addEventListener('input', () => {
             username = usernameInput.value.trim();
             const hasName = username.length > 0;
@@ -157,9 +158,6 @@
             if (hasName) socket.emit('set_username', { username });
         });
 
-        // =====================================================================
-        // ROOMS
-        // =====================================================================
         roomBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const newRoom = btn.dataset.room;
@@ -171,10 +169,8 @@
                 btn.classList.add('is-active');
                 roomTitle.textContent = btn.querySelector('.ch-room-icon').textContent + ' ' + btn.querySelector('.ch-room-name').textContent;
                 typingStatus.textContent = 'Real-time chat';
-                // Reset unread
                 unreadCounts[currentRoom] = 0;
                 updateBadges();
-                // Clear messages — history will be loaded via socket
                 msgContainer.innerHTML = '';
                 document.getElementById('sidebar').classList.remove('is-open');
             });
@@ -194,9 +190,6 @@
             });
         }
 
-        // =====================================================================
-        // TYPING INDICATOR
-        // =====================================================================
         msgInput.addEventListener('input', () => {
             if (!username) return;
             socket.emit('typing', { room: currentRoom });
@@ -213,9 +206,6 @@
             typingStatus.textContent = 'Real-time chat';
         });
 
-        // =====================================================================
-        // MESSAGING
-        // =====================================================================
         function sendMessage() {
             const text = msgInput.value.trim();
             if (!text || !username) return;
@@ -241,11 +231,11 @@
                     '<div class="ch-msg-name">' + escHtml(data.username) + '</div>' +
                     '<div class="ch-msg-bubble">' + escHtml(data.message) + '</div>' +
                     '<div class="ch-msg-time">' + (data.time || '') + '</div>' +
-                '</div></div>' :
-                '<div class="ch-msg-content">' +
-                    '<div class="ch-msg-bubble">' + escHtml(data.message) + '</div>' +
-                    '<div class="ch-msg-time">' + (data.time || '') + '</div>' +
-                '</div>');
+                    '</div></div>' :
+                    '<div class="ch-msg-content">' +
+                        '<div class="ch-msg-bubble">' + escHtml(data.message) + '</div>' +
+                        '<div class="ch-msg-time">' + (data.time || '') + '</div>' +
+                        '</div>');
             return div;
         }
 
@@ -263,7 +253,6 @@
             msgContainer.appendChild(renderMessage(data, false));
             msgContainer.scrollTop = msgContainer.scrollHeight;
             typingStatus.textContent = 'Real-time chat';
-            // Increment unread if message is in non-active room
             if (data._room && data._room !== currentRoom) {
                 unreadCounts[data._room] = (unreadCounts[data._room] || 0) + 1;
                 updateBadges();
@@ -288,13 +277,12 @@
             return d.innerHTML;
         }
 
-        // Join default room
         socket.emit('join_room', { room: currentRoom });
 
-        // Mobile menu
         document.getElementById('menu-toggle').addEventListener('click', () => {
             document.getElementById('sidebar').classList.toggle('is-open');
         });
     </script>
 </body>
+
 </html>

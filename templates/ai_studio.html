@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TextForge — Studio</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌗</text></svg>">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ai_swiss.css') }}">
+</head>
+
+<body class="tf-body">
+    {% include 'ai_nav.html' %}
+    <div class="tf-wrap">
+        <p class="tf-studio-title">02 / Studio</p>
+
+        <div class="tf-modes">
+            <button type="button" class="tf-mode is-active" data-mode="summarize">Summarize</button>
+            <button type="button" class="tf-mode" data-mode="translate">Translate</button>
+            <button type="button" class="tf-mode" data-mode="tone">Tone</button>
+            <button type="button" class="tf-mode" data-mode="explain">Explain</button>
+        </div>
+
+        <div class="tf-options" id="options-row">
+            <div class="tf-opt" id="opt-translate" style="display:none">
+                <label for="target-lang">Language</label>
+                <select id="target-lang">
+                    <option value="Indonesian">Indonesian</option>
+                    <option value="Spanish">Spanish</option>
+                    <option value="French">French</option>
+                    <option value="German">German</option>
+                    <option value="Japanese">Japanese</option>
+                </select>
+            </div>
+            <div class="tf-opt" id="opt-tone" style="display:none">
+                <label for="target-tone">Tone</label>
+                <select id="target-tone">
+                    <option value="professional">Professional</option>
+                    <option value="casual">Casual</option>
+                    <option value="friendly">Friendly</option>
+                    <option value="formal">Formal</option>
+                    <option value="humorous">Humorous</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="tf-stats" id="text-stats">
+            <div><span id="ts-words">0</span> words</div>
+            <div><span id="ts-chars">0</span> chars</div>
+            <div><span id="ts-sentences">0</span> sentences</div>
+            <div>~<span id="ts-reading">0</span> min read</div>
+        </div>
+
+        <div class="tf-workspace">
+            <div class="tf-panel">
+                <div class="tf-panel-h">
+                    <span>Input</span>
+                    <button type="button" class="tf-small-btn" id="clear-btn">Clear</button>
+                </div>
+                <textarea id="input-text" placeholder="Paste or type your text here..."></textarea>
+            </div>
+            <div class="tf-divider">
+                <button type="button" class="tf-run" id="process-btn" title="Run">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                </button>
+            </div>
+            <div class="tf-panel">
+                <div class="tf-panel-h">
+                    <span>Output</span>
+                    <div>
+                        <button type="button" class="tf-small-btn" id="copy-btn" style="display:none">Copy</button>
+                        <button type="button" class="tf-small-btn" id="download-btn" style="display:none">Download</button>
+                    </div>
+                </div>
+                <div class="tf-output" id="output-text">
+                    <div class="tf-placeholder">Result appears here after you run.</div>
+                </div>
+            </div>
+        </div>
+
+        <p style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--tf-muted);margin-bottom:8px;">Sample inputs</p>
+        <div class="tf-chips">
+            <button type="button" class="tf-chip" data-text="Artificial intelligence (AI) is intelligence demonstrated by machines, as opposed to natural intelligence displayed by animals including humans.">AI definition</button>
+            <button type="button" class="tf-chip" data-text="Climate change refers to long-term shifts in temperatures and weather patterns driven largely by greenhouse gas emissions.">Climate</button>
+            <button type="button" class="tf-chip" data-text="Python is a high-level programming language emphasizing readability and broad standard libraries.">Python</button>
+        </div>
+
+        <div class="tf-history-block">
+            <h3>Session history</h3>
+            <div class="tf-history-list" id="history-list">
+                <div class="tf-placeholder" style="padding:20px;">No runs yet</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modes = document.querySelectorAll('.tf-mode');
+        const inputText = document.getElementById('input-text');
+        const outputText = document.getElementById('output-text');
+        const processBtn = document.getElementById('process-btn');
+        const copyBtn = document.getElementById('copy-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const historyList = document.getElementById('history-list');
+        const optTranslate = document.getElementById('opt-translate');
+        const optTone = document.getElementById('opt-tone');
+
+        let currentMode = 'summarize';
+        let processingHistory = JSON.parse(localStorage.getItem('tf-history') || '[]');
+
+        modes.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modes.forEach(b => b.classList.remove('is-active'));
+                btn.classList.add('is-active');
+                currentMode = btn.dataset.mode;
+                optTranslate.style.display = currentMode === 'translate' ? 'flex' : 'none';
+                optTone.style.display = currentMode === 'tone' ? 'flex' : 'none';
+            });
+        });
+
+        inputText.addEventListener('input', updateStats);
+        function updateStats() {
+            const text = inputText.value;
+            const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+            const chars = text.length;
+            const sentences = text.trim() ? (text.match(/[.!?]+/g) || []).length || 1 : 0;
+            const readMins = Math.max(1, Math.ceil(words / 200));
+            document.getElementById('ts-words').textContent = words;
+            document.getElementById('ts-chars').textContent = chars;
+            document.getElementById('ts-sentences').textContent = sentences;
+            document.getElementById('ts-reading').textContent = words > 0 ? readMins : 0;
+        }
+
+        clearBtn.addEventListener('click', () => {
+            inputText.value = '';
+            updateStats();
+            outputText.innerHTML = '<div class="tf-placeholder">Result appears here after you run.</div>';
+            copyBtn.style.display = 'none';
+            downloadBtn.style.display = 'none';
+        });
+
+        processBtn.addEventListener('click', async () => {
+            const text = inputText.value.trim();
+            if (!text) return;
+            outputText.innerHTML = '<div class="tf-loading"><div class="tf-spinner"></div><p>Running pipeline…</p></div>';
+            processBtn.disabled = true;
+            copyBtn.style.display = 'none';
+            downloadBtn.style.display = 'none';
+            const payload = { text, mode: currentMode };
+            if (currentMode === 'translate') payload.target_lang = document.getElementById('target-lang').value;
+            if (currentMode === 'tone') payload.target_tone = document.getElementById('target-tone').value;
+            try {
+                const res = await fetch('/api/ai/process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    outputText.innerHTML = '<div class="tf-result">' + escHtml(data.result) + '</div>';
+                    copyBtn.style.display = 'inline-flex';
+                    downloadBtn.style.display = 'inline-flex';
+                    addToHistory(currentMode, text, data.result);
+                } else {
+                    outputText.innerHTML = '<div class="tf-error">' + escHtml(data.message || 'Error') + '</div>';
+                }
+            } catch (err) {
+                outputText.innerHTML = '<div class="tf-error">Connection failed</div>';
+            }
+            processBtn.disabled = false;
+        });
+
+        copyBtn.addEventListener('click', () => {
+            const result = outputText.querySelector('.tf-result');
+            if (result) {
+                navigator.clipboard.writeText(result.textContent);
+                copyBtn.textContent = 'Copied';
+                setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
+            }
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            const result = outputText.querySelector('.tf-result');
+            if (result) {
+                const blob = new Blob([result.textContent], { type: 'text/plain' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'textforge.txt';
+                a.click();
+                URL.revokeObjectURL(a.href);
+            }
+        });
+
+        function addToHistory(mode, input, output) {
+            processingHistory.unshift({
+                mode,
+                input: input.slice(0, 80) + (input.length > 80 ? '…' : ''),
+                output: output.slice(0, 120) + (output.length > 120 ? '…' : ''),
+                time: new Date().toLocaleString()
+            });
+            if (processingHistory.length > 20) processingHistory.pop();
+            localStorage.setItem('tf-history', JSON.stringify(processingHistory));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            historyList.innerHTML = processingHistory.length === 0
+                ? '<div class="tf-placeholder" style="padding:16px;">No runs yet</div>'
+                : processingHistory.map(function (h) {
+                    return '<div class="tf-hist-item"><strong>' + escHtml(h.mode) + '</strong> · ' + escHtml(h.time) +
+                        '<br><span style="color:var(--tf-muted)">' + escHtml(h.input) + '</span></div>';
+                }).join('');
+        }
+
+        document.querySelectorAll('.tf-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                inputText.value = chip.dataset.text;
+                updateStats();
+            });
+        });
+
+        function escHtml(str) {
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
+        }
+
+        renderHistory();
+
+        try {
+            var raw = sessionStorage.getItem('tf-preset-load');
+            if (raw) {
+                sessionStorage.removeItem('tf-preset-load');
+                var o = JSON.parse(raw);
+                if (o.text) inputText.value = o.text;
+                if (o.mode) {
+                    currentMode = o.mode;
+                    modes.forEach(function (b) {
+                        b.classList.toggle('is-active', b.dataset.mode === o.mode);
+                    });
+                    optTranslate.style.display = currentMode === 'translate' ? 'flex' : 'none';
+                    optTone.style.display = currentMode === 'tone' ? 'flex' : 'none';
+                }
+                updateStats();
+            }
+        } catch (e) { /* ignore */ }
+    </script>
+</body>
+
+</html>

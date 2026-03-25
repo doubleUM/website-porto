@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuzzChat — Settings</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+</head>
+
+<body>
+    <header class="bz-topbar">
+        <span class="bz-stamp" style="background:var(--bz-yellow);color:var(--bz-ink);">SETTINGS</span>
+        <div class="bz-top-links">
+            <a href="{{ url_for('chat_page') }}">Lobby</a>
+            <a href="{{ url_for('chat_app_page') }}">Chat</a>
+            <a href="{{ url_for('portfolio_home') }}">Portfolio</a>
+        </div>
+    </header>
+    <div class="bz-set">
+        <h1>Preferences</h1>
+        <p class="bz-lobby-lead">Toggles persist in <code>localStorage</code> only.</p>
+        <div class="bz-set-row">
+            <label for="pref-sound">Sound on new message</label>
+            <input type="checkbox" id="pref-sound" class="bz-check">
+        </div>
+        <div class="bz-set-row">
+            <label for="pref-desktop">Desktop notification prompt</label>
+            <input type="checkbox" id="pref-desktop" class="bz-check">
+        </div>
+        <div class="bz-set-row">
+            <label for="pref-compact">Compact message density</label>
+            <input type="checkbox" id="pref-compact" class="bz-check">
+        </div>
+        <p style="margin-top:24px;font-size:12px;max-width:50ch;">
+            <a href="{{ url_for('chat_page') }}" style="color:var(--bz-ink);font-weight:700;">← Back to lobby</a>
+        </p>
+    </div>
+    <script>
+        const keys = { sound: 'bz-pref-sound', desk: 'bz-pref-desktop', compact: 'bz-pref-compact' };
+        function load() {
+            document.getElementById('pref-sound').checked = localStorage.getItem(keys.sound) === '1';
+            document.getElementById('pref-desktop').checked = localStorage.getItem(keys.desk) === '1';
+            document.getElementById('pref-compact').checked = localStorage.getItem(keys.compact) === '1';
+        }
+        document.getElementById('pref-sound').addEventListener('change', e => localStorage.setItem(keys.sound, e.target.checked ? '1' : '0'));
+        document.getElementById('pref-desktop').addEventListener('change', e => {
+            localStorage.setItem(keys.desk, e.target.checked ? '1' : '0');
+            if (e.target.checked && 'Notification' in window) Notification.requestPermission();
+        });
+        document.getElementById('pref-compact').addEventListener('change', e => localStorage.setItem(keys.compact, e.target.checked ? '1' : '0'));
+        load();
+    </script>
+</body>
+
+</html>

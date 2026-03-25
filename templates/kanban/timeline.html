@@ -1,0 +1,120 @@
+{% extends 'kanban/layout.html' %}
+{% block title %}Timeline — TaskFlow{% endblock %}
+
+{% block content %}
+<section class="kb-tl">
+    <header class="kb-tl-header">
+        <div>
+            <h1 class="kb-tl-title">Week timeline</h1>
+            <p class="kb-tl-sub">Tasks with due dates appear on the day strip. Undated work sits in the backlog lane.
+            </p>
+        </div>
+        <div class="kb-tl-week-label" id="week-range"></div>
+    </header>
+
+    <div class="kb-tl-board">
+        <div class="kb-tl-days" id="tl-days" role="list"></div>
+        <aside class="kb-tl-backlog">
+            <h2 class="kb-tl-h2">Backlog <span class="kb-tl-count" id="bl-count">0</span></h2>
+            <p class="kb-tl-hint">No due date set</p>
+            <div id="tl-backlog" class="kb-tl-cards"></div>
+        </aside>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function () {
+        const daysEl = document.getElementById('tl-days');
+        const backlogEl = document.getElementById('tl-backlog');
+        const weekRangeEl = document.getElementById('week-range');
+        const blCount = document.getElementById('bl-count');
+
+        function startOfWeek(d) {
+            const x = new Date(d);
+            const day = x.getDay();
+            const diff = x.getDate() - day + (day === 0 ? -6 : 1);
+            x.setDate(diff);
+            x.setHours(0, 0, 0, 0);
+            return x;
+        }
+
+        function dayKey(dt) {
+            return dt.toISOString().slice(0, 10);
+        }
+
+        async function load() {
+            const res = await fetch('/api/kanban/tasks');
+            const data = await res.json();
+            const tasks = data.tasks || [];
+
+            const start = startOfWeek(new Date());
+            const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            daysEl.innerHTML = '';
+            const end = new Date(start);
+            end.setDate(end.getDate() + 6);
+            weekRangeEl.textContent = start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' – ' + end.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+
+            const byDay = {};
+            for (let i = 0; i < 7; i++) {
+                const dt = new Date(start);
+                dt.setDate(dt.getDate() + i);
+                byDay[dayKey(dt)] = [];
+            }
+
+            const backlog = [];
+            tasks.forEach(t => {
+                if (!t.due_date) {
+                    backlog.push(t);
+                    return;
+                }
+                const k = t.due_date.slice(0, 10);
+                if (byDay[k]) byDay[k].push(t);
+                else backlog.push(t);
+            });
+
+            for (let i = 0; i < 7; i++) {
+                const dt = new Date(start);
+                dt.setDate(dt.getDate() + i);
+                const k = dayKey(dt);
+                const col = document.createElement('div');
+                col.className = 'kb-tl-day';
+                col.setAttribute('role', 'listitem');
+                const isToday = dayKey(new Date()) === k;
+                col.innerHTML = '<div class="kb-tl-dayhead' + (isToday ? ' is-today' : '') + '">' +
+                    '<span class="kb-tl-dow">' + dayNames[i] + '</span>' +
+                    '<span class="kb-tl-dom">' + dt.getDate() + '</span></div>' +
+                    '<div class="kb-tl-daycards" data-day="' + k + '"></div>';
+                const cardHost = col.querySelector('.kb-tl-daycards');
+                (byDay[k] || []).forEach(t => {
+                    cardHost.appendChild(renderMiniCard(t));
+                });
+                daysEl.appendChild(col);
+            }
+
+            backlogEl.innerHTML = '';
+            backlog.forEach(t => backlogEl.appendChild(renderMiniCard(t)));
+            blCount.textContent = String(backlog.length);
+        }
+
+        function renderMiniCard(t) {
+            const el = document.createElement('a');
+            el.href = '{{ url_for("kanban_board") }}';
+            el.className = 'kb-tl-mini';
+            el.style.borderLeftColor = t.color || '#b45309';
+            el.innerHTML = '<span class="kb-tl-mini-title">' + esc(t.name) + '</span>' +
+                '<span class="kb-tl-mini-meta">' + (t.status || '') + '</span>';
+            return el;
+        }
+
+        function esc(s) {
+            const d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
+
+        load();
+    })();
+</script>
+{% endblock %}
