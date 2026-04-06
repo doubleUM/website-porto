@@ -7,6 +7,27 @@
             <a href="{{ url_for('ai_tool_studio') }}" class="tf-nav-link {% if request.endpoint == 'ai_tool_studio' %}is-on{% endif %}">Studio</a>
             <a href="{{ url_for('ai_tool_presets') }}" class="tf-nav-link {% if request.endpoint == 'ai_tool_presets' %}is-on{% endif %}">Presets</a>
             <a href="{{ url_for('ai_tool_docs') }}" class="tf-nav-link {% if request.endpoint == 'ai_tool_docs' %}is-on{% endif %}">API</a>
+            <button type="button" class="tf-theme-toggle" id="theme-toggle" title="Toggle Theme">
+                <span class="theme-icon-dark">🌙</span>
+                <span class="theme-icon-light">☀️</span>
+            </button>
         </nav>
     </div>
 </header>
+
+<script>
+    (function () {
+        const theme = localStorage.getItem('hub-theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+    })();
+
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        const html = document.documentElement;
+        themeToggle.addEventListener('click', () => {
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('hub-theme', next);
+        });
+    }
+</script>

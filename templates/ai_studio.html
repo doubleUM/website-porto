@@ -7,6 +7,12 @@
     <title>TextForge — Studio</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌗</text></svg>">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ai_swiss.css') }}">
+    <script>
+        (function () {
+            const theme = localStorage.getItem('hub-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 </head>
 
 <body class="tf-body">

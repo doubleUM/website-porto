@@ -17,6 +17,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
     {% block extra_css %}{% endblock %}
+
+    <!-- Theme Initialization Script -->
+    <script>
+        (function () {
+            const theme = localStorage.getItem('hub-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 </head>
 
 <body>
@@ -26,6 +34,7 @@
             <a href="{{ url_for('store_home') }}" class="navbar-brand">🚗 AutoParts Pro</a>
 
             <ul class="navbar-nav">
+                <li><a href="{{ url_for('portfolio_home') }}" class="nav-link">Portfolio</a></li>
                 <li><a href="{{ url_for('store_home') }}" class="nav-link">Home</a></li>
                 <li><a href="{{ url_for('products') }}" class="nav-link">Products</a></li>
                 <li><a href="{{ url_for('admin') }}" class="nav-link">Admin</a></li>
@@ -34,6 +43,12 @@
                         🛒
                         <span class="cart-badge" id="cart-count">0</span>
                     </a>
+                </li>
+                <li>
+                    <button type="button" class="theme-toggle-btn" id="theme-toggle" title="Toggle Theme">
+                        <span class="theme-icon-dark">🌙</span>
+                        <span class="theme-icon-light">☀️</span>
+                    </button>
                 </li>
                 {% if current_user %}
                 <li style="display: flex; align-items: center; gap: var(--space-sm);">
@@ -99,6 +114,19 @@
     <!-- JavaScript -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block extra_js %}{% endblock %}
+
+    <!-- Theme Toggle Script -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', next);
+                localStorage.setItem('hub-theme', next);
+            });
+        }
+    </script>
 </body>
 
 </html>

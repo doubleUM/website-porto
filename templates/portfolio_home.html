@@ -10,6 +10,10 @@
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/portfolio.css') }}">
+    <style>
+        [data-theme="dark"] .theme-img-light { display: none; }
+        [data-theme="light"] .theme-img-dark { display: none; }
+    </style>
 </head>
 
 <body>
@@ -122,7 +126,8 @@
                 <div class="hub-grid">
                     <a class="hub-project anim-fade" data-anim data-status="live" href="{{ url_for('store_home') }}">
                         <div class="hub-project-thumb">
-                            <img src="{{ url_for('static', filename='images/spareparts-preview.png') }}" alt="Car Spareparts Store preview" class="hub-thumb-img">
+                            <img src="{{ url_for('static', filename='images/spareparts-dark.png') }}" alt="Car Spareparts Store preview (Dark)" class="hub-thumb-img theme-img-dark">
+                            <img src="{{ url_for('static', filename='images/spareparts-light.png') }}" alt="Car Spareparts Store preview (Light)" class="hub-thumb-img theme-img-light">
                         </div>
                         <div class="hub-project-body">
                             <div class="hub-project-top">
@@ -145,10 +150,8 @@
 
                     <a class="hub-project anim-fade" data-anim data-status="live" href="{{ url_for('kanban_page') }}">
                         <div class="hub-project-thumb">
-                            <div class="hub-thumb-placeholder">
-                                <span>📋</span>
-                                <span class="hub-thumb-label">Task Manager</span>
-                            </div>
+                            <img src="{{ url_for('static', filename='images/kanban-dark.png') }}" alt="TaskFlow preview (Dark)" class="hub-thumb-img theme-img-dark">
+                            <img src="{{ url_for('static', filename='images/kanban-light.png') }}" alt="TaskFlow preview (Light)" class="hub-thumb-img theme-img-light">
                         </div>
                         <div class="hub-project-body">
                             <div class="hub-project-top">
@@ -170,10 +173,8 @@
 
                     <a class="hub-project anim-fade" data-anim data-status="live" href="{{ url_for('chat_page') }}">
                         <div class="hub-project-thumb">
-                            <div class="hub-thumb-placeholder">
-                                <span>💬</span>
-                                <span class="hub-thumb-label">Real-time Chat</span>
-                            </div>
+                            <img src="{{ url_for('static', filename='images/chat-dark.png') }}" alt="BuzzChat preview (Dark)" class="hub-thumb-img theme-img-dark">
+                            <img src="{{ url_for('static', filename='images/chat-light.png') }}" alt="BuzzChat preview (Light)" class="hub-thumb-img theme-img-light">
                         </div>
                         <div class="hub-project-body">
                             <div class="hub-project-top">
@@ -195,10 +196,8 @@
 
                     <a class="hub-project anim-fade" data-anim data-status="live" href="{{ url_for('ai_tool_page') }}">
                         <div class="hub-project-thumb">
-                            <div class="hub-thumb-placeholder">
-                                <span>🤖</span>
-                                <span class="hub-thumb-label">AI-Powered</span>
-                            </div>
+                            <img src="{{ url_for('static', filename='images/ai-tool-dark.png') }}" alt="TextForge preview (Dark)" class="hub-thumb-img theme-img-dark">
+                            <img src="{{ url_for('static', filename='images/ai-tool-light.png') }}" alt="TextForge preview (Light)" class="hub-thumb-img theme-img-light">
                         </div>
                         <div class="hub-project-body">
                             <div class="hub-project-top">

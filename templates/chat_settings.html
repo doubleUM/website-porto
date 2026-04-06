@@ -7,6 +7,12 @@
     <title>BuzzChat — Settings</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+    <script>
+        (function () {
+            const theme = localStorage.getItem('hub-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 </head>
 
 <body>
@@ -15,6 +21,10 @@
         <div class="bz-top-links">
             <a href="{{ url_for('chat_page') }}">Lobby</a>
             <a href="{{ url_for('chat_app_page') }}">Chat</a>
+            <button type="button" class="bz-theme-toggle" id="theme-toggle" title="Toggle Theme">
+                <span class="theme-icon-dark">🌙</span>
+                <span class="theme-icon-light">☀️</span>
+            </button>
             <a href="{{ url_for('portfolio_home') }}">Portfolio</a>
         </div>
     </header>
@@ -51,6 +61,16 @@
         });
         document.getElementById('pref-compact').addEventListener('change', e => localStorage.setItem(keys.compact, e.target.checked ? '1' : '0'));
         load();
+
+        // Theme toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', next);
+                localStorage.setItem('hub-theme', next);
+            });
+        }
     </script>
 </body>
 

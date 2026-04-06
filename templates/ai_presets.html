@@ -7,6 +7,12 @@
     <title>TextForge — Presets</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌗</text></svg>">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ai_swiss.css') }}">
+    <script>
+        (function () {
+            const theme = localStorage.getItem('hub-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 </head>
 
 <body class="tf-body">
@@ -17,7 +23,7 @@
         <p class="tf-lead">Store named snippets in the browser. Open one in Studio with a single click.</p>
 
         <form id="preset-form"
-            style="max-width:520px;margin-bottom:32px;border:2px solid var(--tf-border);padding:20px;background:#fff;">
+            style="max-width:520px;margin-bottom:32px;border:2px solid var(--tf-border);padding:20px;background:var(--tf-bg);">
             <div class="tf-form-row">
                 <label for="p-name">Name</label>
                 <input id="p-name" required placeholder="e.g. Release notes">

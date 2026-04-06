@@ -7,6 +7,12 @@
     <title>{% block title %}TaskFlow{% endblock %}</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/kanban.css') }}">
+    <script>
+        (function () {
+            const theme = localStorage.getItem('hub-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
     {% block head_extra %}{% endblock %}
 </head>
 
@@ -39,6 +45,10 @@
                 </a>
             </nav>
             <div class="kb-shell-footer">
+                <button type="button" class="kb-theme-toggle" id="theme-toggle" title="Toggle Theme">
+                    <span class="theme-icon-dark">🌙</span>
+                    <span class="theme-icon-light">☀️</span>
+                </button>
                 <a href="{{ url_for('portfolio_home') }}" class="kb-shell-hub">&larr; Portfolio hub</a>
             </div>
         </aside>
@@ -47,6 +57,15 @@
         </div>
     </div>
     {% block scripts %}{% endblock %}
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        themeToggle.addEventListener('click', () => {
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('hub-theme', next);
+        });
+    </script>
 </body>
 
 </html>

@@ -21,6 +21,7 @@
   --bg-secondary: #151932;
   --bg-tertiary: #1E2440;
   --bg-card: rgba(30, 36, 64, 0.6);
+  --bg-gradient-mid: #0F1629;
 
   --text-primary: #FFFFFF;
   --text-secondary: #B8C1EC;
@@ -76,6 +77,46 @@
   --transition-slow: 500ms ease;
 }
 
+[data-theme="light"] {
+  --bg-primary: #F3F4F6;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #E5E7EB;
+  --bg-card: rgba(255, 255, 255, 0.9);
+  --bg-gradient-mid: #E5E7EB;
+
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --text-muted: #9CA3AF;
+
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.05);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.theme-toggle-btn {
+  background: none;
+  border: none;
+  font-size: var(--text-xl);
+  cursor: pointer;
+  padding: 0 var(--space-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  transition: transform var(--transition-base);
+}
+
+.theme-toggle-btn:hover {
+  transform: scale(1.15);
+}
+
+[data-theme="dark"] .theme-icon-light { display: none; }
+[data-theme="light"] .theme-icon-dark { display: none; }
+
 /* ============================================================================
    RESET & BASE STYLES
    ============================================================================ */
@@ -92,7 +133,7 @@ html {
 
 body {
   font-family: var(--font-secondary);
-  background: linear-gradient(135deg, var(--bg-primary) 0%, #0F1629 50%, var(--bg-secondary) 100%);
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-gradient-mid) 50%, var(--bg-secondary) 100%);
   background-attachment: fixed;
   color: var(--text-primary);
   line-height: 1.6;

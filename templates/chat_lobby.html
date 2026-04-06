@@ -8,6 +8,12 @@
     <title>BuzzChat — Lobby</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+    <script>
+        (function () {
+            const theme = localStorage.getItem('hub-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 </head>
 
 <body>
@@ -19,7 +25,13 @@
                 <p class="bz-lobby-lead">A separate visual language from the rest of your portfolio — chunky type,
                     hard shadows, flat color. Pick where to go next.</p>
             </div>
-            <a href="{{ url_for('portfolio_home') }}" class="ch-back" title="Portfolio">←</a>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <button type="button" class="ch-back" id="theme-toggle" title="Toggle Theme" style="cursor: pointer; border-radius: 0;">
+                    <span class="theme-icon-dark">🌙</span>
+                    <span class="theme-icon-light">☀️</span>
+                </button>
+                <a href="{{ url_for('portfolio_home') }}" class="ch-back" title="Portfolio">←</a>
+            </div>
         </div>
         <div class="bz-cards">
             <a class="bz-card bz-card-pink" href="{{ url_for('chat_app_page') }}">
@@ -37,6 +49,15 @@
             </div>
         </div>
     </div>
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        themeToggle.addEventListener('click', () => {
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('hub-theme', next);
+        });
+    </script>
 </body>
 
 </html>

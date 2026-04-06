@@ -5,6 +5,7 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 :root {
+  /* Default: Light Theme (Swiss) */
   --tf-bg: #ffffff;
   --tf-grid: rgba(0, 0, 0, 0.06);
   --tf-ink: #0a0a0a;
@@ -13,6 +14,20 @@
   --tf-border: #0a0a0a;
   --tf-sans: "IBM Plex Sans", system-ui, sans-serif;
   --tf-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+[data-theme="dark"] {
+  --tf-bg: #0c0c0c;
+  --tf-grid: rgba(255, 255, 255, 0.05);
+  --tf-ink: #e5e5e5;
+  --tf-muted: #a3a3a3;
+  --tf-accent: #f43f5e;
+  --tf-border: #404040;
+}
+
+[data-theme="dark"] body.tf-body {
+  background-color: var(--tf-bg);
+  color: var(--tf-ink);
 }
 
 * {
@@ -100,6 +115,94 @@ body.tf-body {
   border-color: var(--tf-border);
   background: var(--tf-ink);
   color: #fff;
+}
+
+.tf-theme-toggle {
+  background: none;
+  border: 2px solid var(--tf-border);
+  color: var(--tf-ink);
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tf-theme-toggle:hover {
+  background: var(--tf-ink);
+  color: #fff;
+}
+
+[data-theme="dark"] .theme-icon-light { display: none; }
+[data-theme="light"] .theme-icon-dark { display: none; }
+
+[data-theme="dark"] .tf-top,
+[data-theme="dark"] .tf-panel,
+[data-theme="dark"] .tf-divider,
+[data-theme="dark"] .tf-tile,
+[data-theme="dark"] .tf-mode,
+[data-theme="dark"] .tf-opt,
+[data-theme="dark"] .tf-opt select,
+[data-theme="dark"] .tf-chip,
+[data-theme="dark"] .tf-hist-item,
+[data-theme="dark"] .tf-preset-card {
+  background: #1a1a1a;
+  color: var(--tf-ink);
+  border-color: var(--tf-border);
+}
+
+[data-theme="dark"] .tf-btn {
+  background: #1a1a1a;
+  color: var(--tf-ink);
+}
+
+[data-theme="dark"] .tf-btn:hover,
+[data-theme="dark"] .tf-mode:hover,
+[data-theme="dark"] .tf-nav-link:hover,
+[data-theme="dark"] .tf-exit:hover {
+  background: var(--tf-accent);
+  color: #fff;
+}
+
+[data-theme="dark"] .tf-mode.is-active,
+[data-theme="dark"] .tf-nav-link.is-on {
+  background: var(--tf-accent);
+  color: #fff;
+  border-color: var(--tf-border);
+}
+
+[data-theme="dark"] .tf-btn-solid {
+  background: var(--tf-accent);
+  color: #fff;
+}
+
+[data-theme="dark"] textarea {
+  background: #1a1a1a;
+  color: var(--tf-ink);
+}
+
+[data-theme="dark"] ::placeholder {
+  color: #525252;
+}
+
+[data-theme="dark"] .tf-docs pre {
+  background: #1a1a1a;
+  color: var(--tf-ink);
+}
+
+[data-theme="dark"] .tf-form-row input,
+[data-theme="dark"] .tf-form-row textarea,
+[data-theme="dark"] .tf-form-row select {
+  background: #1a1a1a;
+  color: var(--tf-ink);
+  border-color: var(--tf-border);
+}
+
+[data-theme="dark"] .tf-small-btn {
+  color: var(--tf-ink);
+  border-color: var(--tf-border);
 }
 
 .tf-wrap {
@@ -469,7 +572,7 @@ body.tf-body {
 .tf-hist-item {
   border: 2px solid var(--tf-border);
   padding: 12px 14px;
-  background: #fff;
+  background: var(--tf-bg);
   font-size: 12px;
 }
 
@@ -485,7 +588,7 @@ body.tf-body {
   font-size: 12px;
   padding: 16px;
   border: 2px solid var(--tf-border);
-  background: #fafafa;
+  background: var(--tf-bg);
   overflow-x: auto;
   line-height: 1.5;
   margin-bottom: 12px;
@@ -529,7 +632,7 @@ body.tf-body {
   border: 2px solid var(--tf-border);
   padding: 16px;
   margin-bottom: 10px;
-  background: #fff;
+  background: var(--tf-bg);
 }
 
 .tf-preset-card h4 {
