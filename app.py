@@ -292,7 +292,24 @@ def logout():
 
 @app.route('/')
 def portfolio_home():
-    return render_template('portfolio_home.html')
+    ignored_dirs = {'venv', '.git', '__pycache__'}
+    max_mtime = 0
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    for root, dirs, files in os.walk(base_dir):
+        dirs[:] = [d for d in dirs if d not in ignored_dirs]
+        for f in files:
+            if f.endswith('.pyc') or f == '.env': 
+                continue
+            filepath = os.path.join(root, f)
+            try:
+                mtime = os.path.getmtime(filepath)
+                if mtime > max_mtime:
+                    max_mtime = mtime
+            except Exception:
+                pass
+    last_update = datetime.fromtimestamp(max_mtime) if max_mtime > 0 else datetime.now()
+    last_update_str = last_update.strftime('%B %Y')
+    return render_template('portfolio_home.html', last_update=last_update_str)
 
 
 @app.route('/car-spareparts')
