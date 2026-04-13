@@ -333,7 +333,8 @@ body {
   background: var(--bz-ink);
   color: var(--bz-yellow);
   border-bottom: 3px solid var(--bz-ink);
-  height: 48px;
+  min-height: 48px;
+  flex-wrap: wrap;
 }
 
 .bz-top-links {

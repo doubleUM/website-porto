@@ -75,6 +75,7 @@ body.tf-body {
   .tf-brand {
     width: 100%;
     justify-content: center;
+    min-height: 36px;
   }
 
   .tf-exit {
