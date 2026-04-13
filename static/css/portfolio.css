@@ -452,7 +452,8 @@ body {
   color: var(--hub-muted);
   font-size: 14.5px;
   line-height: 1.7;
-  max-width: 68ch;
+  text-align: justify;
+  max-width: 100%;
 }
 
 /* Skill tags */
