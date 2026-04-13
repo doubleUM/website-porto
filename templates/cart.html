@@ -12,8 +12,8 @@
                 {% for item in cart_items %}
                 <div class="cart-item" id="cart-item-{{ item.id }}" data-price="{{ item.product.price }}">
                     <div
-                        style="background: var(--bg-secondary); width: 100px; height: 100px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: var(--text-4xl);">
-                        🔧
+                        style="background: var(--bg-tertiary); max-width: 100px; min-width: 100px; height: 100px; border-radius: var(--radius-sm); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        <img src="{{ item.product.image_url or '/static/images/products/air-filter.png' }}" alt="{{ item.product.name }}" style="max-height: 80%; max-width: 80%; object-fit: contain;">
                     </div>
 
                     <div class="cart-item-details">

@@ -5,7 +5,7 @@
     <div class="container">
         <!-- Breadcrumb -->
         <div style="margin-bottom: var(--space-lg);">
-            <a href="{{ url_for('index') }}" style="color: var(--text-muted);">Home</a>
+            <a href="{{ url_for('store_home') }}" style="color: var(--text-muted);">Home</a>
             <span style="color: var(--text-muted);"> / </span>
             <a href="{{ url_for('products', category=product.category_id) }}" style="color: var(--text-muted);">{{
                 product.category.name }}</a>

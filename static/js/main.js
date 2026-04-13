@@ -52,14 +52,14 @@ function addToCart(productId, quantity = 1) {
         .then(data => {
             if (data.success) {
                 updateCartCount(data.cart_count);
-                showNotification('✅ Added to cart!', 'success');
+                showNotification('Added to cart!', 'success');
             } else {
-                showNotification('❌ Failed to add to cart', 'error');
+                showNotification('Failed to add to cart', 'error');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            showNotification('❌ An error occurred', 'error');
+            showNotification('An error occurred', 'error');
         });
 }
 

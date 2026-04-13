@@ -111,6 +111,124 @@
         </div>
     </footer>
 
+    <!-- Product Detail Modal -->
+    <div class="pd-overlay" id="product-modal" style="display:none;">
+        <div class="pd-modal">
+            <button class="pd-close" onclick="closeProductModal()" title="Close">&times;</button>
+            <div class="pd-body" id="pd-body">
+                <div class="pd-loading">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .pd-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(6px);
+            z-index: 10003; display: flex; align-items: center; justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+        .pd-modal {
+            background: var(--bg-secondary); border: 1px solid var(--glass-border);
+            border-radius: 18px; max-width: 720px; width: 92%; max-height: 88vh;
+            overflow-y: auto; box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+            animation: modalPop 0.35s cubic-bezier(0.16,1,0.3,1);
+            position: relative; padding: 0;
+        }
+        .pd-close {
+            position: absolute; top: 14px; right: 16px; z-index: 10;
+            background: var(--bg-tertiary); border: 1px solid var(--glass-border);
+            color: var(--text-primary); width: 36px; height: 36px; border-radius: 50%;
+            font-size: 1.3rem; cursor: pointer; display: grid; place-items: center;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .pd-close:hover { background: var(--danger); color: #fff; transform: scale(1.1); }
+        .pd-body { padding: 0; }
+        .pd-loading {
+            padding: 80px 0; text-align: center; color: var(--text-muted);
+            font-size: var(--text-lg);
+        }
+        .pd-img-wrap {
+            background: var(--bg-tertiary); display: flex; align-items: center;
+            justify-content: center; height: 280px; border-radius: 18px 18px 0 0;
+            overflow: hidden;
+        }
+        .pd-img-wrap img {
+            max-height: 100%; max-width: 100%; object-fit: contain; padding: 24px;
+        }
+        .pd-content { padding: 28px 32px; }
+        .pd-badges { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .pd-name {
+            font-family: var(--font-primary); font-size: var(--text-2xl);
+            font-weight: 800; margin: 0 0 6px; letter-spacing: -0.02em;
+        }
+        .pd-price {
+            font-family: var(--font-primary); font-size: var(--text-xl); font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 16px; display: inline-block;
+        }
+        .pd-desc {
+            color: var(--text-secondary); font-size: var(--text-sm);
+            line-height: 1.7; margin-bottom: 20px;
+        }
+        .pd-specs {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            margin-bottom: 20px;
+        }
+        .pd-spec {
+            padding: 10px 14px; background: var(--bg-tertiary);
+            border-radius: var(--radius-md); border: 1px solid var(--glass-border);
+        }
+        .pd-spec-label {
+            font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em;
+            color: var(--text-muted); font-weight: 700; margin-bottom: 2px;
+        }
+        .pd-spec-value {
+            font-size: var(--text-sm); font-weight: 600; color: var(--text-primary);
+        }
+        .pd-compat {
+            padding: 14px 16px; background: var(--bg-tertiary);
+            border-radius: var(--radius-md); margin-bottom: 20px;
+            border-left: 3px solid var(--primary);
+        }
+        .pd-compat-title {
+            font-size: var(--text-sm); font-weight: 700; margin-bottom: 4px;
+        }
+        .pd-compat-text { font-size: var(--text-sm); color: var(--text-secondary); margin: 0; }
+        .pd-actions { display: flex; gap: 12px; align-items: center; }
+        .pd-qty {
+            display: flex; align-items: center; gap: 0;
+            border: 1px solid var(--glass-border); border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+        .pd-qty button {
+            background: var(--bg-tertiary); border: none; color: var(--text-primary);
+            width: 36px; height: 36px; font-size: 1.1rem; cursor: pointer;
+            transition: background 0.15s;
+        }
+        .pd-qty button:hover { background: var(--primary); color: #fff; }
+        .pd-qty span {
+            width: 40px; text-align: center; font-weight: 700; font-size: var(--text-sm);
+            background: var(--bg-secondary); color: var(--text-primary);
+        }
+        .pd-perks {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+            margin-top: 20px;
+        }
+        .pd-perk {
+            text-align: center; padding: 10px; background: var(--bg-tertiary);
+            border-radius: var(--radius-md); font-size: 0.7rem;
+            color: var(--text-muted); font-weight: 600;
+        }
+        .pd-perk-icon { font-size: 1.3rem; margin-bottom: 4px; }
+        @media (max-width: 600px) {
+            .pd-specs { grid-template-columns: 1fr; }
+            .pd-content { padding: 20px 18px; }
+            .pd-img-wrap { height: 200px; }
+            .pd-perks { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+        }
+    </style>
+
     <!-- JavaScript -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block extra_js %}{% endblock %}
@@ -125,6 +243,127 @@
                 html.setAttribute('data-theme', next);
                 localStorage.setItem('hub-theme', next);
             });
+        }
+    </script>
+
+    <!-- Product Modal Script -->
+    <script>
+        let modalQty = 1;
+        let modalStock = 0;
+        let modalProductId = null;
+
+        function openProductModal(productId) {
+            const modal = document.getElementById('product-modal');
+            const body = document.getElementById('pd-body');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            body.innerHTML = '<div class="pd-loading">Loading...</div>';
+            modalQty = 1;
+            modalProductId = productId;
+
+            fetch('/api/product/' + productId)
+                .then(r => r.json())
+                .then(p => {
+                    modalStock = p.stock || 0;
+                    const inStock = modalStock > 0;
+                    body.innerHTML = `
+                        <div class="pd-img-wrap">
+                            <img src="${p.image_url || '/static/images/products/air-filter.png'}" alt="${p.name}">
+                        </div>
+                        <div class="pd-content">
+                            <div class="pd-badges">
+                                ${inStock
+                                    ? `<span class="badge badge-success">In Stock (${modalStock})</span>`
+                                    : `<span class="badge badge-danger">Out of Stock</span>`}
+                                ${p.featured ? '<span class="badge badge-warning">⭐ Featured</span>' : ''}
+                                <span class="badge" style="background:var(--bg-tertiary);border:1px solid var(--glass-border);color:var(--text-secondary);">${p.category_icon || ''} ${p.category_name || ''}</span>
+                            </div>
+                            <h2 class="pd-name">${p.name}</h2>
+                            <div class="pd-price">$${parseFloat(p.price).toFixed(2)}</div>
+                            <p class="pd-desc">${p.description || 'No description available.'}</p>
+
+                            <div class="pd-specs">
+                                <div class="pd-spec">
+                                    <div class="pd-spec-label">Brand</div>
+                                    <div class="pd-spec-value">${p.brand || '—'}</div>
+                                </div>
+                                <div class="pd-spec">
+                                    <div class="pd-spec-label">Part Number</div>
+                                    <div class="pd-spec-value">${p.part_number || '—'}</div>
+                                </div>
+                                <div class="pd-spec">
+                                    <div class="pd-spec-label">Category</div>
+                                    <div class="pd-spec-value">${p.category_name || '—'}</div>
+                                </div>
+                                <div class="pd-spec">
+                                    <div class="pd-spec-label">Stock</div>
+                                    <div class="pd-spec-value">${modalStock} units</div>
+                                </div>
+                                ${p.specifications ? `
+                                <div class="pd-spec" style="grid-column: 1 / -1;">
+                                    <div class="pd-spec-label">Specifications</div>
+                                    <div class="pd-spec-value">${p.specifications}</div>
+                                </div>` : ''}
+                            </div>
+
+                            ${p.compatible_cars ? `
+                            <div class="pd-compat">
+                                <div class="pd-compat-title">🚗 Compatible Vehicles</div>
+                                <p class="pd-compat-text">${p.compatible_cars}</p>
+                            </div>` : ''}
+
+                            <div class="pd-actions">
+                                <div class="pd-qty">
+                                    <button onclick="modalChangeQty(-1)">−</button>
+                                    <span id="modal-qty">1</span>
+                                    <button onclick="modalChangeQty(1)">+</button>
+                                </div>
+                                ${inStock
+                                    ? `<button class="btn btn-primary" style="flex:1;" onclick="modalAddToCart()">🛒 Add to Cart</button>`
+                                    : `<button class="btn btn-primary" style="flex:1;opacity:0.5;" disabled>Out of Stock</button>`}
+                            </div>
+
+                            <div class="pd-perks">
+                                <div class="pd-perk"><div class="pd-perk-icon">🚚</div>Free Shipping</div>
+                                <div class="pd-perk"><div class="pd-perk-icon">✅</div>Genuine Parts</div>
+                                <div class="pd-perk"><div class="pd-perk-icon">🔄</div>Easy Returns</div>
+                            </div>
+                        </div>
+                    `;
+                })
+                .catch(() => {
+                    body.innerHTML = '<div class="pd-loading">Failed to load product details.</div>';
+                });
+        }
+
+        function closeProductModal() {
+            const modal = document.getElementById('product-modal');
+            modal.style.animation = 'fadeOut 0.2s ease forwards';
+            setTimeout(() => {
+                modal.style.display = 'none';
+                modal.style.animation = '';
+                document.body.style.overflow = '';
+            }, 200);
+        }
+
+        document.getElementById('product-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeProductModal();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeProductModal();
+        });
+
+        function modalChangeQty(delta) {
+            modalQty = Math.max(1, Math.min(modalStock, modalQty + delta));
+            const el = document.getElementById('modal-qty');
+            if (el) el.textContent = modalQty;
+        }
+
+        function modalAddToCart() {
+            if (!modalProductId) return;
+            addToCart(modalProductId, modalQty);
+            closeProductModal();
         }
     </script>
 </body>

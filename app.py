@@ -366,6 +366,17 @@ def product_detail(product_id):
     )
     return render_template('product_detail.html', product=product, related_products=related_products)
 
+@app.route('/api/product/<int:product_id>')
+def api_product_detail(product_id):
+    product_doc = products_col.find_one({'_id': product_id})
+    if not product_doc:
+        return jsonify({'error': 'Product not found'}), 404
+    product = doc_to_dict(product_doc)
+    category_doc = categories_col.find_one({'_id': product.get('category_id')})
+    product['category_name'] = doc_to_dict(category_doc)['name'] if category_doc else 'Unknown'
+    product['category_icon'] = doc_to_dict(category_doc).get('icon', '') if category_doc else ''
+    return jsonify(product)
+
 @app.route('/cart')
 def cart():
     cart_items = []

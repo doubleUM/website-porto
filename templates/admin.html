@@ -101,8 +101,8 @@
                             </td>
                             <td style="padding: var(--space-sm);">
                                 <div style="display: flex; gap: var(--space-xs);">
-                                    <a href="{{ url_for('product_detail', product_id=product.id) }}"
-                                        class="btn btn-outline btn-sm">View</a>
+                                    <button onclick="openProductModal({{ product.id }})"
+                                        class="btn btn-outline btn-sm">View</button>
                                     <button class="btn btn-sm" style="background: var(--danger); color: white;"
                                         onclick="deleteProduct({{ product.id }})">Delete</button>
                                 </div>

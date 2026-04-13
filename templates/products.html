@@ -25,19 +25,13 @@
                 <!-- Categories -->
                 <div class="filter-group">
                     <h4 class="filter-title">Categories</h4>
-                    <a href="{{ url_for('products') }}" class="filter-option"
-                        style="display: block; padding: var(--space-xs) 0;">
-                        <div class="filter-option">
-                            All Categories
-                        </div>
+                    <a href="{{ url_for('products') }}" class="filter-option">
+                        All Categories
                     </a>
                     {% for category in categories %}
-                    <a href="{{ url_for('products', category=category.id) }}" class="filter-option"
-                        style="display: block; padding: var(--space-xs) 0;">
-                        <div class="filter-option"
-                            style="{% if current_category == category.id %}color: var(--primary);{% endif %}">
-                            {{ category.icon }} {{ category.name }}
-                        </div>
+                    <a href="{{ url_for('products', category=category.id) }}" class="filter-option" {% if
+                        current_category==category.id %}style="color: var(--primary);" {% endif %}>
+                        {{ category.icon }} {{ category.name }}
                     </a>
                     {% endfor %}
                 </div>
@@ -91,8 +85,7 @@
 
                         <div class="flex-between" style="margin-top: auto;">
                             <span class="card-price">${{ "%.2f"|format(product.price) }}</span>
-                            <a href="{{ url_for('product_detail', product_id=product.id) }}"
-                                class="btn btn-outline btn-sm">Details</a>
+                            <button class="btn btn-outline btn-sm" onclick="openProductModal({{ product.id }})">Details</button>
                         </div>
                     </div>
                     {% endfor %}
