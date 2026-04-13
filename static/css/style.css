@@ -114,8 +114,13 @@
   transform: scale(1.15);
 }
 
-[data-theme="dark"] .theme-icon-light { display: none; }
-[data-theme="light"] .theme-icon-dark { display: none; }
+[data-theme="dark"] .theme-icon-light {
+  display: none;
+}
+
+[data-theme="light"] .theme-icon-dark {
+  display: none;
+}
 
 /* ============================================================================
    RESET & BASE STYLES
@@ -1039,13 +1044,30 @@ footer {
 }
 
 @media (max-width: 768px) {
+  .navbar .container {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-sm);
+  }
+
   .navbar-nav {
     gap: var(--space-sm);
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   .nav-link {
     font-size: var(--text-sm);
     padding: var(--space-xs);
+  }
+
+  .hero .flex-center {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero .btn {
+    width: 100%;
   }
 
   .grid-2,

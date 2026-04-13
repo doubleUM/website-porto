@@ -171,7 +171,10 @@
         roomBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const newRoom = btn.dataset.room;
-                if (newRoom === currentRoom) return;
+                if (newRoom === currentRoom) {
+                    document.getElementById('sidebar').classList.remove('is-open');
+                    return;
+                }
                 socket.emit('leave_room', { room: currentRoom });
                 currentRoom = newRoom;
                 socket.emit('join_room', { room: currentRoom });

@@ -1261,11 +1261,32 @@
   }
 
   .kb-board {
-    grid-template-columns: 1fr;
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-wrap: nowrap;
+    scroll-snap-type: x mandatory;
+    gap: 16px;
+    padding-bottom: 20px;
+  }
+
+  .kb-board > * {
+    flex: 0 0 85%;
+    scroll-snap-align: center;
+  }
+
+  .kb-stats-grid {
+    grid-template-columns: 1fr 1fr;
   }
 
   .kb-search {
-    width: 160px;
+    width: 100%;
+  }
+
+  .kb-toolbar {
+    width: 100%;
+    margin-top: 12px;
+    justify-content: flex-start;
   }
 
   .kb-field-row {

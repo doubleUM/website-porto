@@ -808,7 +808,8 @@ code {
   }
 
   .hub-hero-right {
-    display: none;
+    margin-top: 40px;
+    width: 100%;
   }
 
   .hub-grid {
@@ -846,9 +847,19 @@ code {
     width: calc(100% - 28px);
   }
 
-  .hub-nav {
+  .hub-hero-title {
+    font-size: 42px;
+    line-height: 1.05;
+  }
+
+  .hub-hero-subtitle {
+    font-size: 16px;
+    margin-top: 16px;
+  }
+
+  .hub-hero-action {
     flex-direction: column;
-    align-items: flex-start;
+    width: 100%;
   }
 
   .hub-nav-links {

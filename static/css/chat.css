@@ -186,8 +186,6 @@
 }
 
 body {
-  height: 100vh;
-  overflow: hidden;
   font-family: var(--bz-font-mono);
   color: var(--bz-ink);
   background: var(--bz-paper);
@@ -828,7 +826,7 @@ body {
 
 .ch-emoji-grid {
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(34px, 1fr));
   gap: 4px;
 }
 
@@ -851,7 +849,7 @@ body {
 @media (max-width: 768px) {
   .ch-app {
     grid-template-columns: 1fr;
-    height: calc(100vh - 48px);
+    height: calc(100dvh - 48px);
   }
 
   .ch-sidebar {

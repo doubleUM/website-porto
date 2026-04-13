@@ -1,7 +1,9 @@
 <header class="tf-top">
     <div class="tf-top-inner">
-        <a href="{{ url_for('portfolio_home') }}" class="tf-exit" title="Portfolio">←</a>
-        <span class="tf-wordmark">TextForge</span>
+        <div class="tf-brand" style="display: flex; align-items: center; gap: 12px;">
+            <a href="{{ url_for('portfolio_home') }}" class="tf-exit" title="Portfolio">←</a>
+            <span class="tf-wordmark" style="margin-right: 0;">TextForge</span>
+        </div>
         <nav class="tf-nav" aria-label="TextForge sections">
             <a href="{{ url_for('ai_tool_page') }}" class="tf-nav-link {% if request.endpoint == 'ai_tool_page' %}is-on{% endif %}">Intro</a>
             <a href="{{ url_for('ai_tool_studio') }}" class="tf-nav-link {% if request.endpoint == 'ai_tool_studio' %}is-on{% endif %}">Studio</a>
