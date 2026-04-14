@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Wilson's Portfolio — a hub for all my web projects">
-    <title>Wilson — Portfolio Hub</title>
+    <meta name="description" content="Wilson Manuel's Portfolio — a hub for all my web projects">
+    <title>Wilson Manuel — Portfolio Hub</title>
 
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>">
@@ -96,15 +96,19 @@
 </head>
 
 <body>
+    <!-- Background effects -->
+    <div class="hub-grid-bg" aria-hidden="true"></div>
+    <div class="hub-glow-orb hub-glow-orb--1" aria-hidden="true"></div>
+    <div class="hub-glow-orb hub-glow-orb--2" aria-hidden="true"></div>
+    <div class="hub-glow-orb hub-glow-orb--3" aria-hidden="true"></div>
+
     <header class="hub-header">
         <div class="hub-container">
             <nav class="hub-nav">
                 <a href="{{ url_for('portfolio_home') }}" class="hub-brand">
-                    <span class="hub-brand-mark">⧉</span>
-                    <span class="hub-brand-text">Wilson</span>
+                    <span class="hub-brand-text">Wilson Manuel</span>
                 </a>
                 <div class="hub-nav-links">
-                    <a href="{{ url_for('portfolio_home') }}" class="hub-link is-active">Hub</a>
                     <button class="hub-theme-toggle" id="theme-toggle" aria-label="Toggle dark/light mode">
                         <span class="theme-icon-dark">🌙</span>
                         <span class="theme-icon-light">☀️</span>
@@ -114,12 +118,13 @@
 
             <div class="hub-hero">
                 <div class="hub-hero-left anim-fade" data-anim>
-                    <p class="hub-kicker">Portfolio directory</p>
-                    <h1 class="hub-title">Choose a site</h1>
-                    <p class="hub-subtitle">This is the entry point for all projects I'm building—each one can have its
-                        own design system.</p>
+                    <p class="hub-kicker">Full-stack developer</p>
+                    <h1 class="hub-title">Building ideas into real products.</h1>
+                    <p class="hub-subtitle">A collection of full-stack applications I've designed and built — from
+                        e-commerce to AI tools, each with its own unique design system.</p>
                     <div class="hub-hero-actions">
                         <a class="hub-btn hub-btn-primary" href="#projects">Browse projects</a>
+                        <a class="hub-btn hub-btn-ghost" href="#about">About me</a>
                     </div>
                 </div>
                 <div class="hub-hero-right" aria-hidden="true">
@@ -163,12 +168,12 @@
                     <div class="hub-about-avatar">
                         <div class="hub-avatar-ring">
                             <img src="{{ url_for('static', filename='images/picture-of-me.jpg') }}"
-                                class="hub-avatar-img" alt="Wilson">
+                                class="hub-avatar-img" alt="Wilson Manuel">
                         </div>
                     </div>
                     <div class="hub-about-body">
                         <p class="hub-kicker">About me</p>
-                        <h2 class="hub-about-name">Wilson</h2>
+                        <h2 class="hub-about-name">Wilson Manuel</h2>
                         <p class="hub-about-role">AI Developer</p>
                         <p class="hub-about-bio">
                             Innovative AI Developer focused on creating high-utility products that automate complex
@@ -343,7 +348,7 @@
     <footer class="hub-footer">
         <div class="hub-container hub-footer-inner">
             <div class="hub-footer-left">
-                <div class="hub-footer-brand">⧉ Wilson</div>
+                <div class="hub-footer-brand">Wilson Manuel</div>
                 <div class="hub-footer-note">Portfolio hub • 2026</div>
             </div>
             <div class="hub-footer-center">

@@ -785,4 +785,4 @@ def ai_process():
 
 if __name__ == '__main__':
     init_db()
-    socketio.run(app, debug=True, port=8000)
+    socketio.run(app, debug=True, port=8000, allow_unsafe_werkzeug=True)
