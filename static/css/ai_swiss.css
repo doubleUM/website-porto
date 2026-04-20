@@ -5,24 +5,41 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 :root {
-  /* Default: Light Theme (Swiss) */
-  --tf-bg: #ffffff;
-  --tf-grid: rgba(0, 0, 0, 0.06);
+  /* Default: Light Theme (Swiss/Glass) */
+  --tf-bg: #f8fafc;
+  --tf-grid: rgba(0, 0, 0, 0.05);
   --tf-ink: #0a0a0a;
-  --tf-muted: #525252;
+  --tf-muted: #64748b;
   --tf-accent: #e11d48;
-  --tf-border: #0a0a0a;
+  --tf-border: rgba(0, 0, 0, 0.1);
   --tf-sans: "IBM Plex Sans", system-ui, sans-serif;
   --tf-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Glass Tokens (Light) */
+  --tf-surface: rgba(255, 255, 255, 0.5);
+  --tf-surface-ink: rgba(0, 0, 0, 0.04);
+  --tf-shard-bg: rgba(0, 0, 0, 0.02);
+  --tf-shard-blur: 20px;
+  --tf-glass-border: rgba(0, 0, 0, 0.12);
+  --tf-nav-bg: rgba(255, 255, 255, 0.7);
+  --tf-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
 }
 
 [data-theme="dark"] {
-  --tf-bg: #0c0c0c;
-  --tf-grid: rgba(255, 255, 255, 0.05);
-  --tf-ink: #e5e5e5;
-  --tf-muted: #a3a3a3;
+  --tf-bg: #030712;
+  --tf-ink: #f8fafc;
+  --tf-muted: #94a3b8;
   --tf-accent: #f43f5e;
-  --tf-border: #404040;
+  --tf-border: rgba(255, 255, 255, 0.1);
+
+  /* Glass Tokens (Dark) */
+  --tf-surface: rgba(15, 23, 42, 0.5);
+  --tf-surface-ink: rgba(255, 255, 255, 0.02);
+  --tf-shard-bg: rgba(255, 255, 255, 0.03);
+  --tf-shard-blur: 32px;
+  --tf-glass-border: rgba(255, 255, 255, 0.08);
+  --tf-nav-bg: rgba(3, 7, 18, 0.5);
+  --tf-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 [data-theme="dark"] body.tf-body {
@@ -40,29 +57,115 @@ body.tf-body {
   font-family: var(--tf-sans);
   color: var(--tf-ink);
   background-color: var(--tf-bg);
-  background-image:
-    linear-gradient(var(--tf-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--tf-grid) 1px, transparent 1px);
-  background-size: 24px 24px;
+  overflow-x: hidden;
+}
+
+/* ============================================================================
+   GLASS PRISM BACKGROUND
+   ============================================================================ */
+
+.tf-prism-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--tf-bg);
+}
+
+.tf-plasma {
+  position: absolute;
+  width: 80vw;
+  height: 80vw;
+  filter: blur(120px);
+  opacity: 0.3; /* Increased for light mode */
+  border-radius: 50%;
+  z-index: 1;
+  mix-blend-mode: multiply; /* Works best on light themes */
+}
+
+[data-theme="dark"] .tf-plasma { 
+  opacity: 0.25; 
+  mix-blend-mode: plus-lighter; /* Works best on dark themes */
+}
+
+.tf-plasma--1 {
+  top: -10%;
+  left: -20%;
+  background: radial-gradient(circle, var(--tf-accent) 0%, transparent 70%);
+  animation: plasmaMove 25s infinite alternate linear;
+}
+
+.tf-plasma--2 {
+  bottom: -10%;
+  right: -20%;
+  background: radial-gradient(circle, #3b82f6 0%, transparent 70%);
+  animation: plasmaMove 35s infinite alternate-reverse linear;
+  animation-delay: -5s;
+}
+
+@keyframes plasmaMove {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(10%, 5%) scale(1.1); }
+  100% { transform: translate(-5%, 15%) scale(0.9); }
+}
+
+.tf-shard {
+  position: absolute;
+  z-index: 2;
+  background: var(--tf-shard-bg);
+  backdrop-filter: blur(var(--tf-shard-blur));
+  -webkit-backdrop-filter: blur(var(--tf-shard-blur));
+  border: 1px solid var(--tf-glass-border);
+  animation: shardFloat 20s ease-in-out infinite alternate;
+  transform-origin: center;
+  box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.05);
+}
+
+.tf-shard--1 {
+  width: 50vw;
+  height: 50vw;
+  top: -5%;
+  left: -5%;
+  clip-path: polygon(25% 0%, 100% 25%, 75% 100%, 0% 75%);
+  opacity: 0.8;
+}
+
+.tf-shard--2 {
+  width: 45vw;
+  height: 45vw;
+  bottom: -5%;
+  right: -5%;
+  clip-path: polygon(0% 15%, 85% 0%, 100% 85%, 15% 100%);
+  animation-delay: -5s;
+  animation-duration: 25s;
+}
+
+@keyframes shardFloat {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  100% { transform: translate3d(2%, 2%, 0) rotate(5deg); }
 }
 
 .tf-top {
-  border-bottom: 2px solid var(--tf-border);
-  background: #fff;
+  border-bottom: 1px solid var(--tf-shard-border);
+  background: var(--tf-nav-bg);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 50;
+  transition: background 0.3s ease;
 }
 
 .tf-top-inner {
-  max-width: 1080px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 14px 24px;
+  padding: 20px 32px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 24px;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: space-between;
 }
 
 @media (max-width: 768px) {
@@ -169,7 +272,6 @@ body.tf-body {
   display: none;
 }
 
-[data-theme="dark"] .tf-top,
 [data-theme="dark"] .tf-panel,
 [data-theme="dark"] .tf-divider,
 [data-theme="dark"] .tf-tile,
@@ -179,7 +281,7 @@ body.tf-body {
 [data-theme="dark"] .tf-chip,
 [data-theme="dark"] .tf-hist-item,
 [data-theme="dark"] .tf-preset-card {
-  background: #1a1a1a;
+  background: var(--tf-surface);
   color: var(--tf-ink);
   border-color: var(--tf-border);
 }
@@ -306,17 +408,26 @@ body.tf-body {
 
 .tf-grid-3 {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 2px;
-  margin-top: 48px;
-  border: 2px solid var(--tf-border);
-  background: var(--tf-border);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 64px;
 }
 
 .tf-tile {
-  background: #fff;
-  padding: 24px;
-  min-height: 140px;
+  background: var(--tf-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--tf-glass-border);
+  padding: 32px;
+  border-radius: 4px;
+  box-shadow: var(--tf-shadow);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tf-tile:hover {
+  transform: translateY(-8px);
+  border-color: var(--tf-accent);
+  background: var(--tf-surface-ink);
 }
 
 .tf-tile h3 {
@@ -351,19 +462,21 @@ body.tf-body {
 }
 
 .tf-mode {
-  padding: 10px 16px;
-  border: 2px solid var(--tf-border);
-  background: #fff;
+  padding: 12px 20px;
+  border: 1px solid var(--tf-border);
+  background: var(--tf-surface);
+  backdrop-filter: blur(8px);
   font-family: var(--tf-sans);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
+  transition: all 0.2s ease;
 }
 
 .tf-mode:hover {
-  box-shadow: 4px 4px 0 var(--tf-ink);
+  background: var(--tf-surface-ink);
 }
 
 .tf-mode.is-active {

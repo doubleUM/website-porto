@@ -34,32 +34,44 @@
   --hub-grad-1: rgba(139, 92, 246, 0.12);
   --hub-grad-2: rgba(14, 165, 233, 0.08);
   --hub-grad-3: rgba(192, 132, 252, 0.06);
+
+  /* --- Cyber Technical Tokens --- */
+  --hub-cyber-grid: rgba(255, 255, 255, 0.04);
+  --hub-cyber-line: rgba(255, 255, 255, 0.08);
+  --hub-cyber-node: var(--hub-accent);
+  --hub-scanline: rgba(139, 92, 246, 0.05);
 }
 
 [data-theme="light"] {
-  --hub-bg: #f8fafc;
-  --hub-bg2: #f1f5f9;
+  --hub-bg: #f5f7f9;
+  --hub-bg2: #ebedf0;
   --hub-surface: rgba(0, 0, 0, 0.02);
   --hub-surface-2: rgba(0, 0, 0, 0.05);
   --hub-border: rgba(0, 0, 0, 0.06);
-  --hub-text: #0f172a;
+  --hub-text: #1e293b;
   --hub-muted: #64748b;
   --hub-faint: #94a3b8;
 
-  --hub-accent: #7c3aed;
-  --hub-accent-2: #0284c7;
-  --hub-accent-3: #9333ea;
-  --hub-live: #059669;
+  --hub-accent: #3b82f6;
+  --hub-accent-2: #06b6d4;
+  --hub-accent-3: #8b5cf6;
+  --hub-live: #10b981;
 
   --hub-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.08);
 
-  --hub-card-bg: rgba(255, 255, 255, 0.6);
-  --hub-card-hover-bg: rgba(255, 255, 255, 0.9);
-  --hub-nav-bg: rgba(255, 255, 255, 0.4);
+  --hub-card-bg: rgba(255, 255, 255, 0.8);
+  --hub-card-hover-bg: #ffffff;
+  --hub-nav-bg: rgba(245, 247, 249, 0.7);
 
-  --hub-grad-1: rgba(124, 58, 237, 0.06);
-  --hub-grad-2: rgba(2, 132, 199, 0.04);
-  --hub-grad-3: rgba(147, 51, 234, 0.03);
+  --hub-grad-1: rgba(59, 130, 246, 0.06);
+  --hub-grad-2: rgba(6, 182, 212, 0.04);
+  --hub-grad-3: rgba(139, 92, 246, 0.03);
+
+  /* --- Blueprint Tokens --- */
+  --hub-cyber-grid: rgba(59, 130, 246, 0.08);
+  --hub-cyber-line: rgba(59, 130, 246, 0.12);
+  --hub-cyber-node: var(--hub-accent);
+  --hub-scanline: rgba(59, 130, 246, 0.02);
 }
 
 * {
@@ -80,64 +92,77 @@ body {
   overflow-x: hidden;
 }
 
-/* ---- Dot grid layer ---- */
-.hub-grid-bg {
+/* ---- Cyber-Nexus Technical Background ---- */
+.hub-tech-bg {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-image: radial-gradient(circle, var(--hub-dot-color) 1px, transparent 1px);
-  background-size: 28px 28px;
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 20%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 20%, transparent 100%);
+  background: var(--hub-bg);
+  overflow: hidden;
 }
 
-[data-theme="dark"] { --hub-dot-color: rgba(255, 255, 255, 0.07); }
-[data-theme="light"] { --hub-dot-color: rgba(0, 0, 0, 0.06); }
+.hub-tech-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(var(--hub-cyber-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hub-cyber-grid) 1px, transparent 1px),
+    linear-gradient(var(--hub-cyber-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hub-cyber-line) 1px, transparent 1px);
+  background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+  mask-image: radial-gradient(circle at 50% 50%, black 30%, transparent 90%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 30%, transparent 90%);
+  opacity: 0.8;
+}
 
-/* ---- Ambient glow orbs (bleed through the grid) ---- */
-.hub-glow-orb {
-  position: fixed;
+.hub-tech-scanline {
+  position: absolute;
+  inset: 0;
+  height: 100px;
+  background: linear-gradient(to bottom, transparent, var(--hub-scanline), transparent);
+  animation: scanline 8s linear infinite;
+  z-index: 1;
+}
+
+.hub-tech-nodes {
+  position: absolute;
+  inset: 0;
+}
+
+.hub-node {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--hub-cyber-node);
   border-radius: 50%;
-  filter: blur(120px);
-  z-index: 0;
-  pointer-events: none;
-  animation: orbFloat 18s ease-in-out infinite alternate;
+  box-shadow: 0 0 10px var(--hub-cyber-node);
+  animation: nodePulse 4s ease-in-out infinite;
 }
 
-.hub-glow-orb--1 {
-  width: 600px;
-  height: 600px;
-  top: -8%;
-  left: -5%;
-  background: var(--hub-grad-1);
-}
-
-.hub-glow-orb--2 {
-  width: 500px;
-  height: 500px;
-  bottom: 5%;
-  right: -5%;
-  background: var(--hub-grad-2);
-  animation-delay: -9s;
-}
-
-.hub-glow-orb--3 {
-  width: 400px;
-  height: 400px;
-  top: 40%;
-  left: 30%;
-  background: var(--hub-grad-3);
-  animation-delay: -5s;
-  opacity: 0.6;
-}
-
-/* ---- Noise Texture ---- */
-body::before {
+.hub-node::before {
   content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 100;
+  position: absolute;
+  inset: -10px;
+  border: 1px solid var(--hub-cyber-node);
+  border-radius: 50%;
+  opacity: 0.2;
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes nodePulse {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.5); opacity: 0.8; }
+}
+
+@keyframes gridPan {
+  0% { background-position: 0 0; }
+  100% { background-position: 100px 100px; }
+}
   opacity: 0.03;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
