@@ -26,9 +26,9 @@
         <p>JSON body:</p>
         <pre>{
   "text": "string (required)",
-  "mode": "summarize | translate | tone | explain",
+  "mode": "summarize | translate | tone | document | ticket",
   "target_lang": "optional for translate",
-  "target_tone": "optional for tone"
+  "query": "required for document"
 }</pre>
         <p>Returns <code style="font-family:var(--tf-mono);font-size:13px;">{ "success": true, "result": "…" }</code>
             or an error object.</p>

@@ -744,6 +744,7 @@ def ai_process():
     data = request.get_json()
     text = data.get('text', '').strip()
     mode = data.get('mode', 'summarize')
+    use_ai = data.get('use_ai', False)
 
     if not text:
         return jsonify({'success': False, 'message': 'Please provide some text.'}), 400
@@ -754,52 +755,74 @@ def ai_process():
     result = ''
     try:
         if mode == 'summarize':
-            summary = ml_engine.summarize_text(text, num_sentences=max(2, len(text.split('.')) // 3))
-            result = f"📝 Extractive Summary (TF-IDF):\n\n{summary}"
+            if use_ai:
+                summary = ml_engine.summarize_text_gemini(text, num_sentences=max(2, len(text.split('.')) // 3))
+                result = f"📝 Extractive Summary (Gemini 3 Flash):\n\n{summary}"
+            else:
+                summary = ml_engine.summarize_text(text, num_sentences=max(2, len(text.split('.')) // 3))
+                result = f"📝 Extractive Summary (TF-IDF):\n\n{summary}"
 
         elif mode == 'translate':
             target_lang = data.get('target_lang', 'id')
-            
-            try:
-                translated_text = GoogleTranslator(source='auto', target=target_lang).translate(text)
-                result = f"🌍 Translation (Powered by Google Translate API):\n\n{translated_text}"
-            except Exception as t_err:
-                print(f"Translation sub-error: {t_err}")
-                result = f"🌍 Translation failed. Please try again later."
+            if use_ai:
+                prompt = f"Translate the following text to {target_lang}. Return only the translation.\n\nText: {text}"
+                translated_text = ml_engine.call_gemini(prompt)
+                result = f"🌍 Translation (Powered by Gemini 3 Flash):\n\n{translated_text}"
+            else:
+                try:
+                    translated_text = GoogleTranslator(source='auto', target=target_lang).translate(text)
+                    result = f"🌍 Translation (Powered by Google Translate API):\n\n{translated_text}"
+                except Exception as t_err:
+                    print(f"Translation sub-error: {t_err}")
+                    result = f"🌍 Translation failed. Please try again later."
 
         elif mode == 'tone':
             # Analyze tone rather than simply prepending text
-            sent_info = ml_engine.analyze_sentiment(text)
-            tone_desc = ""
-            if sent_info['polarity'] > 0.3:
-                tone_desc = "Highly Positive & Enthusiastic"
-            elif sent_info['polarity'] > 0:
-                tone_desc = "Slightly Positive / Warm"
-            elif sent_info['polarity'] < -0.3:
-                tone_desc = "Highly Negative / Critical"
-            elif sent_info['polarity'] < 0:
-                tone_desc = "Slightly Negative / Cold"
+            if use_ai:
+                sent_info = ml_engine.analyze_sentiment_gemini(text)
+                tone_desc = sent_info.get('tone', 'Neutral')
+                result = f"🎭 AI Sentiment Analysis (Gemini 3 Flash):\n\nPrimary Tone: {tone_desc}\n\nRaw Metrics:\n- Polarity: {sent_info.get('polarity', 0)}\n- Subjectivity: {sent_info.get('subjectivity', 0)}"
             else:
-                tone_desc = "Neutral / Objective"
-                
-            subj_desc = "Highly Opinionated" if sent_info['subjectivity'] > 0.6 else ("Factual / Objective" if sent_info['subjectivity'] < 0.4 else "Mixed Fact & Opinion")
+                sent_info = ml_engine.analyze_sentiment(text)
+                tone_desc = ""
+                if sent_info['polarity'] > 0.3:
+                    tone_desc = "Highly Positive & Enthusiastic"
+                elif sent_info['polarity'] > 0:
+                    tone_desc = "Slightly Positive / Warm"
+                elif sent_info['polarity'] < -0.3:
+                    tone_desc = "Highly Negative / Critical"
+                elif sent_info['polarity'] < 0:
+                    tone_desc = "Slightly Negative / Cold"
+                else:
+                    tone_desc = "Neutral / Objective"
+                    
+                subj_desc = "Highly Opinionated" if sent_info['subjectivity'] > 0.6 else ("Factual / Objective" if sent_info['subjectivity'] < 0.4 else "Mixed Fact & Opinion")
 
-            result = f"🎭 Machine Learning Sentiment Analysis (TextBlob):\n\nPrimary Tone: {tone_desc}\nObjectivity: {subj_desc}\n\nRaw Metrics:\n- Polarity: {sent_info['polarity']}\n- Subjectivity: {sent_info['subjectivity']}"
+                result = f"🎭 Machine Learning Sentiment Analysis (TextBlob):\n\nPrimary Tone: {tone_desc}\nObjectivity: {subj_desc}\n\nRaw Metrics:\n- Polarity: {sent_info['polarity']}\n- Subjectivity: {sent_info['subjectivity']}"
 
         elif mode == 'document':
             query = data.get('query', '')
             if not query:
                 result = "Please provide a query for the document Q&A."
             else:
-                rag_results = ml_engine.chat_with_document(text, query, top_k=2)
-                result = f"🔍 Document Q&A (Okapi BM25):\n\nQuery: {query}\n\n"
-                for i, r in enumerate(rag_results, 1):
-                    result += f"Match {i} (Confidence {r['score']}%):\n> {r['text']}\n\n"
+                if use_ai:
+                    rag_results = ml_engine.chat_with_document_gemini(text, query)
+                    result = f"🔍 Document Q&A (Gemini 3 Flash):\n\nQuery: {query}\n\n"
+                    for i, r in enumerate(rag_results, 1):
+                        result += f"Match {i} (Confidence {r['score']}%):\n> {r['text']}\n\n"
+                else:
+                    rag_results = ml_engine.chat_with_document(text, query, top_k=2)
+                    result = f"🔍 Document Q&A (Okapi BM25):\n\nQuery: {query}\n\n"
+                    for i, r in enumerate(rag_results, 1):
+                        result += f"Match {i} (Confidence {r['score']}%):\n> {r['text']}\n\n"
 
         elif mode == 'ticket':
-            # Naive Bayes Ticket Triage
-            res = ml_engine.categorize_ticket(text)
-            result = f"🎫 AI Support Desk Triage (Naive Bayes):\n\nPredicted Category: {res['category']}\nConfidence Score: {res['confidence']}%\n\n> This mode uses a MultinomialNB classifier trained on an internal support dataset."
+            if use_ai:
+                res = ml_engine.categorize_ticket_gemini(text)
+                result = f"🎫 AI Support Desk Triage (Gemini 3 Flash):\n\nPredicted Category: {res['category']}\nConfidence Score: {res['confidence']}%\n\n> This mode uses a Zero-Shot prompt sent to the Gemini API to categorize tickets."
+            else:
+                res = ml_engine.categorize_ticket_classic(text)
+                result = f"🎫 AI Support Desk Triage (Naive Bayes):\n\nPredicted Category: {res['category']}\nConfidence Score: {res['confidence']}%\n\n> This mode uses a MultinomialNB classifier trained on an internal support dataset."
 
     except Exception as e:
         print(f"ML Pipeline Error: {e}")

@@ -11,3 +11,5 @@ textblob
 nltk
 numpy
 deep-translator
+rank_bm25
+google-genai

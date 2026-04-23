@@ -9,6 +9,12 @@ import nltk
 from rank_bm25 import BM25Okapi
 import string
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
+from google import genai
+import os
+import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Global models
 ticket_vectorizer = None
@@ -325,10 +331,35 @@ def analyze_sentiment(text):
     return result
 
 # ============================================================================
+# GEMINI HELPER
+# ============================================================================
+
+def call_gemini(prompt, is_json=False):
+    try:
+        client = genai.Client(api_key=os.environ.get('GEMINI_API_KEY'))
+        response = client.models.generate_content(
+            model='gemini-3-flash-preview',
+            contents=prompt
+        )
+        res = response.text.replace('```json', '').replace('```', '').strip()
+        return json.loads(res) if is_json else res
+    except Exception as e:
+        print(f"Gemini API Error: {e}")
+        return json.loads('{}') if is_json else "Error communicating with AI API."
+
+def summarize_text_gemini(text, num_sentences=3):
+    prompt = f"Summarize the following text in exactly {num_sentences} sentences. Return nothing but the summary.\n\nText: {text}"
+    return call_gemini(prompt)
+
+def analyze_sentiment_gemini(text):
+    prompt = f"Analyze the sentiment of the following text. Return ONLY a JSON object with 'polarity' (a number between -1.0 and 1.0), 'subjectivity' (a number between 0.0 and 1.0), and 'tone' (Positive, Negative, or Neutral). Do not wrap in markdown.\n\nText: {text}"
+    return call_gemini(prompt, is_json=True)
+
+# ============================================================================
 # PROJECT 2: TICKET AUTO-CATEGORIZER
 # ============================================================================
 
-def categorize_ticket(text):
+def categorize_ticket_classic(text):
     """Predicts the category of a support ticket."""
     if not ticket_classifier or not ticket_vectorizer:
         init_models()
@@ -345,25 +376,38 @@ def categorize_ticket(text):
         'confidence': confidence
     }
 
+def categorize_ticket_gemini(text):
+    """Predicts the category of a support ticket using Gemini API."""
+    prompt = f"""You are an expert customer support routing AI. Analyze the following user's ticket and categorize it into exactly ONE of the following categories:
+A) Billing: Anything related to invoices, refunds, charges, or pricing.
+B) Software: Bug reports, app crashes, or errors.
+C) Account: Login issues, account management, etc.
+D) Hardware: Issues with physical devices.
+E) Sales: Purchasing inquiries, enterprise contracts, etc.
+
+Return ONLY a JSON object with two fields: "category" (the category name, e.g., "Billing", "Software", "Account", "Hardware", or "Sales") and "confidence" (a number between 0 and 100). Do not include markdown formatting or backticks.
+
+User Ticket: "{text}"
+"""
+    res = call_gemini(prompt, is_json=True)
+    return {
+        'category': res.get('category', 'Unknown'),
+        'confidence': res.get('confidence', 0)
+    }
+
 # ============================================================================
 # PROJECT 3: TASKPULSE PREDICTOR (Kanban)
 # ============================================================================
 
 def predict_task_duration(description, priority):
-    """Predicts how many days a task will take."""
-    if not task_duration_model:
-        init_models()
-        
-    word_count = len(description.split())
-    priority_level = {'low': 1, 'medium': 2, 'high': 3}.get(priority.lower(), 2)
-    
-    # Needs 2D array
-    X_pred = np.array([[word_count, priority_level]])
-    days = task_duration_model.predict(X_pred)[0]
-    
-    # Bound between 1 and 30 days
-    estimated_days = max(1, min(30, int(round(days))))
-    return estimated_days
+    """Predicts how many days a task will take using Gemini."""
+    prompt = f"Estimate how many days this software task will take to complete. Return ONLY an integer between 1 and 30.\nDescription: {description}\nPriority: {priority}"
+    try:
+        days_str = call_gemini(prompt)
+        days = int(days_str)
+        return max(1, min(30, days))
+    except:
+        return 5
 
 # ============================================================================
 # PROJECT 4: DOCUMENT CHAT (RAG / Semantic Extraction)
@@ -412,3 +456,9 @@ def chat_with_document(document, query, top_k=2):
          return [{'text': "No highly relevant information found in the document regarding that query.", 'score': 0}]
          
     return results
+
+def chat_with_document_gemini(document, query):
+    """Finds the most relevant information in a document using Gemini."""
+    prompt = f"You are a helpful assistant. Use *only* the following document to answer the query. Return your answer as plain text.\n\nDocument: {document}\n\nQuery: {query}"
+    answer = call_gemini(prompt)
+    return [{'text': answer, 'score': 99}]

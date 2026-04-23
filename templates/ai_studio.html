@@ -20,12 +20,17 @@
     <div class="tf-wrap">
         <p class="tf-studio-title">02 / Studio</p>
 
-        <div class="tf-modes">
-            <button type="button" class="tf-mode is-active" data-mode="summarize">Summarize</button>
-            <button type="button" class="tf-mode" data-mode="translate">Translate</button>
-            <button type="button" class="tf-mode" data-mode="tone">Sentiment</button>
-            <button type="button" class="tf-mode" data-mode="document">Doc Q&A</button>
-            <button type="button" class="tf-mode" data-mode="ticket">Triage</button>
+        <div class="tf-modes" style="display: flex; justify-content: space-between;">
+            <div style="display: flex; gap: 8px;">
+                <button type="button" class="tf-mode is-active" data-mode="summarize">Summarize</button>
+                <button type="button" class="tf-mode" data-mode="translate">Translate</button>
+                <button type="button" class="tf-mode" data-mode="tone">Sentiment</button>
+                <button type="button" class="tf-mode" data-mode="document">Doc Q&A</button>
+                <button type="button" class="tf-mode" data-mode="ticket">Triage</button>
+            </div>
+            <div>
+                <button type="button" class="tf-mode" id="use-ai-btn" style="margin-right: 0;">Gemini AI: OFF</button>
+            </div>
         </div>
 
         <div class="tf-options" id="options-row">
@@ -51,15 +56,9 @@
                     <option value="en">English</option>
                 </select>
             </div>
-            <div class="tf-opt" id="opt-tone" style="display:none">
-                <span style="font-size: 11px; color: var(--tf-muted);">Machine Learning Sentiment Pipeline via TextBlob</span>
-            </div>
             <div class="tf-opt" id="opt-document" style="display:none">
                 <label for="doc-query">Your Query</label>
                 <input type="text" id="doc-query" placeholder="Ask a question about the text..." style="width: 250px; padding: 6px 10px; border: 1px solid var(--tf-border); background: var(--tf-surface); color: var(--tf-ink); font-family: var(--tf-sans); font-size: 12px; border-radius: 4px;">
-            </div>
-            <div class="tf-opt" id="opt-ticket" style="display:none">
-                <span style="font-size: 11px; color: var(--tf-accent);">AI Support Triage (Naive Bayes Multi-Class Predictor)</span>
             </div>
         </div>
 
@@ -124,9 +123,7 @@
         const clearBtn = document.getElementById('clear-btn');
         const historyList = document.getElementById('history-list');
         const optTranslate = document.getElementById('opt-translate');
-        const optTone = document.getElementById('opt-tone');
         const optDocument = document.getElementById('opt-document');
-        const optTicket = document.getElementById('opt-ticket');
 
         let currentMode = 'summarize';
         let processingHistory = JSON.parse(localStorage.getItem('tf-history') || '[]');
@@ -137,10 +134,25 @@
                 btn.classList.add('is-active');
                 currentMode = btn.dataset.mode;
                 optTranslate.style.display = currentMode === 'translate' ? 'flex' : 'none';
-                optTone.style.display = currentMode === 'tone' ? 'flex' : 'none';
                 optDocument.style.display = currentMode === 'document' ? 'flex' : 'none';
-                optTicket.style.display = currentMode === 'ticket' ? 'flex' : 'none';
             });
+        });
+
+        const useAiBtn = document.getElementById('use-ai-btn');
+        let useAiEnabled = false;
+        useAiBtn.addEventListener('click', () => {
+            useAiEnabled = !useAiEnabled;
+            useAiBtn.classList.toggle('is-active', useAiEnabled);
+            useAiBtn.textContent = useAiEnabled ? 'Gemini AI: ON' : 'Gemini AI: OFF';
+            if (useAiEnabled) {
+                useAiBtn.style.backgroundColor = 'var(--tf-accent)';
+                useAiBtn.style.color = '#fff';
+                useAiBtn.style.borderColor = 'var(--tf-accent)';
+            } else {
+                useAiBtn.style.backgroundColor = '';
+                useAiBtn.style.color = '';
+                useAiBtn.style.borderColor = '';
+            }
         });
 
         inputText.addEventListener('input', updateStats);
@@ -174,6 +186,7 @@
             const payload = { text, mode: currentMode };
             if (currentMode === 'translate') payload.target_lang = document.getElementById('target-lang').value;
             if (currentMode === 'document') payload.query = document.getElementById('doc-query').value;
+            payload.use_ai = useAiEnabled;
             try {
                 const res = await fetch('/api/ai/process', {
                     method: 'POST',
@@ -264,9 +277,7 @@
                         b.classList.toggle('is-active', b.dataset.mode === o.mode);
                     });
                     optTranslate.style.display = currentMode === 'translate' ? 'flex' : 'none';
-                    optTone.style.display = currentMode === 'tone' ? 'flex' : 'none';
                     optDocument.style.display = currentMode === 'document' ? 'flex' : 'none';
-                    optTicket.style.display = currentMode === 'ticket' ? 'flex' : 'none';
                 }
                 updateStats();
             }
