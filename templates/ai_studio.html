@@ -23,30 +23,43 @@
         <div class="tf-modes">
             <button type="button" class="tf-mode is-active" data-mode="summarize">Summarize</button>
             <button type="button" class="tf-mode" data-mode="translate">Translate</button>
-            <button type="button" class="tf-mode" data-mode="tone">Tone</button>
-            <button type="button" class="tf-mode" data-mode="explain">Explain</button>
+            <button type="button" class="tf-mode" data-mode="tone">Sentiment</button>
+            <button type="button" class="tf-mode" data-mode="document">Doc Q&A</button>
+            <button type="button" class="tf-mode" data-mode="ticket">Triage</button>
         </div>
 
         <div class="tf-options" id="options-row">
             <div class="tf-opt" id="opt-translate" style="display:none">
                 <label for="target-lang">Language</label>
                 <select id="target-lang">
-                    <option value="Indonesian">Indonesian</option>
-                    <option value="Spanish">Spanish</option>
-                    <option value="French">French</option>
-                    <option value="German">German</option>
-                    <option value="Japanese">Japanese</option>
+                    <option value="id">Indonesian</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="de">German</option>
+                    <option value="ja">Japanese</option>
+                    <option value="ko">Korean</option>
+                    <option value="zh-CN">Chinese (Simplified)</option>
+                    <option value="ar">Arabic</option>
+                    <option value="ru">Russian</option>
+                    <option value="pt">Portuguese</option>
+                    <option value="it">Italian</option>
+                    <option value="hi">Hindi</option>
+                    <option value="nl">Dutch</option>
+                    <option value="tr">Turkish</option>
+                    <option value="vi">Vietnamese</option>
+                    <option value="th">Thai</option>
+                    <option value="en">English</option>
                 </select>
             </div>
             <div class="tf-opt" id="opt-tone" style="display:none">
-                <label for="target-tone">Tone</label>
-                <select id="target-tone">
-                    <option value="professional">Professional</option>
-                    <option value="casual">Casual</option>
-                    <option value="friendly">Friendly</option>
-                    <option value="formal">Formal</option>
-                    <option value="humorous">Humorous</option>
-                </select>
+                <span style="font-size: 11px; color: var(--tf-muted);">Machine Learning Sentiment Pipeline via TextBlob</span>
+            </div>
+            <div class="tf-opt" id="opt-document" style="display:none">
+                <label for="doc-query">Your Query</label>
+                <input type="text" id="doc-query" placeholder="Ask a question about the text..." style="width: 250px; padding: 6px 10px; border: 1px solid var(--tf-border); background: var(--tf-surface); color: var(--tf-ink); font-family: var(--tf-sans); font-size: 12px; border-radius: 4px;">
+            </div>
+            <div class="tf-opt" id="opt-ticket" style="display:none">
+                <span style="font-size: 11px; color: var(--tf-accent);">AI Support Triage (Naive Bayes Multi-Class Predictor)</span>
             </div>
         </div>
 
@@ -112,6 +125,8 @@
         const historyList = document.getElementById('history-list');
         const optTranslate = document.getElementById('opt-translate');
         const optTone = document.getElementById('opt-tone');
+        const optDocument = document.getElementById('opt-document');
+        const optTicket = document.getElementById('opt-ticket');
 
         let currentMode = 'summarize';
         let processingHistory = JSON.parse(localStorage.getItem('tf-history') || '[]');
@@ -123,6 +138,8 @@
                 currentMode = btn.dataset.mode;
                 optTranslate.style.display = currentMode === 'translate' ? 'flex' : 'none';
                 optTone.style.display = currentMode === 'tone' ? 'flex' : 'none';
+                optDocument.style.display = currentMode === 'document' ? 'flex' : 'none';
+                optTicket.style.display = currentMode === 'ticket' ? 'flex' : 'none';
             });
         });
 
@@ -156,7 +173,7 @@
             downloadBtn.style.display = 'none';
             const payload = { text, mode: currentMode };
             if (currentMode === 'translate') payload.target_lang = document.getElementById('target-lang').value;
-            if (currentMode === 'tone') payload.target_tone = document.getElementById('target-tone').value;
+            if (currentMode === 'document') payload.query = document.getElementById('doc-query').value;
             try {
                 const res = await fetch('/api/ai/process', {
                     method: 'POST',
@@ -248,6 +265,8 @@
                     });
                     optTranslate.style.display = currentMode === 'translate' ? 'flex' : 'none';
                     optTone.style.display = currentMode === 'tone' ? 'flex' : 'none';
+                    optDocument.style.display = currentMode === 'document' ? 'flex' : 'none';
+                    optTicket.style.display = currentMode === 'ticket' ? 'flex' : 'none';
                 }
                 updateStats();
             }

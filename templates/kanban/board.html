@@ -168,7 +168,9 @@
             <div class="kb-modal-actions">
                 <button type="button" class="kb-btn kb-btn-danger" id="delete-task-btn" style="display:none">Delete
                 </button>
-                <div style="flex:1"></div>
+                <div style="flex:1; padding-left:15px; display:flex; align-items:center;">
+                    <span id="ai-estimate-badge" style="display:none; font-size:12px; font-weight:600; padding:6px 12px; border-radius:12px; background:linear-gradient(135deg,rgba(225,29,72,0.8),rgba(153,27,27,0.8)); color:white; border:1px solid rgba(255,255,255,0.2);">✨ AI Estimate: -- days</span>
+                </div>
                 <button type="button" class="kb-btn kb-btn-ghost" id="modal-cancel">Cancel</button>
                 <button type="submit" class="kb-btn kb-btn-primary" id="save-task-btn">Save Task</button>
             </div>
@@ -417,6 +419,49 @@
         closeModal();
         await loadTasks();
     });
+
+    // --- TaskPulse Predictive AI ---
+    let aiDebounceTimer;
+    const aiBadge = document.getElementById('ai-estimate-badge');
+    const taskDescInput = document.getElementById('task-desc');
+    const taskPriorityInput = document.getElementById('task-priority');
+
+    async function fetchAIEstimate() {
+        const description = taskDescInput.value.trim();
+        const priority = taskPriorityInput.value;
+        if (!description) {
+            aiBadge.style.display = 'none';
+            return;
+        }
+        aiBadge.style.display = 'inline-block';
+        aiBadge.textContent = '✨ Estimating...';
+        
+        try {
+            const res = await fetch(API + '/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ description, priority })
+            });
+            const data = await res.json();
+            if (data.success) {
+                aiBadge.textContent = '✨ ML Estimate: ' + data.estimated_days + ' Days';
+            } else {
+                aiBadge.style.display = 'none';
+            }
+        } catch (e) {
+            aiBadge.style.display = 'none';
+        }
+    }
+
+    function scheduleAIEstimate() {
+        clearTimeout(aiDebounceTimer);
+        aiDebounceTimer = setTimeout(fetchAIEstimate, 600);
+    }
+
+    // Trigger AI estimation when description or priority changes
+    taskDescInput.addEventListener('input', scheduleAIEstimate);
+    taskPriorityInput.addEventListener('change', fetchAIEstimate);
+    // --------------------------------
 
     async function loadTasks() {
         var res = await fetch(API + '/tasks');

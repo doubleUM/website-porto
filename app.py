@@ -8,6 +8,8 @@ from datetime import datetime
 import os
 import uuid
 import re
+import ml_engine
+from deep_translator import GoogleTranslator
 
 load_dotenv()
 
@@ -623,6 +625,18 @@ def kanban_delete():
     kanban_col.delete_one({'_id': data['task_id']})
     return jsonify({'success': True})
 
+@app.route('/api/kanban/predict', methods=['POST'])
+def kanban_predict():
+    data = request.get_json()
+    description = data.get('description', '')
+    priority = data.get('priority', 'medium')
+    try:
+        estimated_days = ml_engine.predict_task_duration(description, priority)
+        return jsonify({'success': True, 'estimated_days': estimated_days})
+    except Exception as e:
+        print(f"Kanban Predict ML Error: {e}")
+        return jsonify({'success': False}), 500
+
 # ============================================================================
 # CHAT ROUTES & SOCKET EVENTS
 # ============================================================================
@@ -738,44 +752,58 @@ def ai_process():
     time.sleep(1)  # Simulate processing delay
 
     result = ''
-    if mode == 'summarize':
-        sentences = re.split(r'(?<=[.!?])\s+', text)
-        if len(sentences) <= 2:
-            result = text
-        else:
-            # Take first sentence and every other sentence for summary
-            key_sentences = [sentences[0]]
-            for i, s in enumerate(sentences[1:], 1):
-                if i % 2 == 0 or i == len(sentences) - 1:
-                    key_sentences.append(s)
-            result = ' '.join(key_sentences)
-        result = f"📝 Summary:\n\n{result}\n\n— Condensed from {len(sentences)} sentences to {len(result.split('. '))} key points."
+    try:
+        if mode == 'summarize':
+            summary = ml_engine.summarize_text(text, num_sentences=max(2, len(text.split('.')) // 3))
+            result = f"📝 Extractive Summary (TF-IDF):\n\n{summary}"
 
-    elif mode == 'translate':
-        target_lang = data.get('target_lang', 'Indonesian')
-        # Mock translation — in production, integrate with a real API
-        result = f"🌍 Translation to {target_lang}:\n\n[Mock translation — this is a demo]\n\nOriginal ({len(text)} chars):\n{text[:200]}{'...' if len(text) > 200 else ''}\n\n💡 To enable real translation, connect an API key (Google Translate, DeepL, etc.)"
+        elif mode == 'translate':
+            target_lang = data.get('target_lang', 'id')
+            
+            try:
+                translated_text = GoogleTranslator(source='auto', target=target_lang).translate(text)
+                result = f"🌍 Translation (Powered by Google Translate API):\n\n{translated_text}"
+            except Exception as t_err:
+                print(f"Translation sub-error: {t_err}")
+                result = f"🌍 Translation failed. Please try again later."
 
-    elif mode == 'tone':
-        target_tone = data.get('target_tone', 'professional')
-        tone_prefixes = {
-            'professional': 'In a professional context, ',
-            'casual': 'So basically, ',
-            'friendly': 'Hey! Just wanted to share — ',
-            'formal': 'It is hereby stated that ',
-            'humorous': 'You won\'t believe this, but '
-        }
-        prefix = tone_prefixes.get(target_tone, '')
-        # Simplistic tone mock — just prepend and adjust
-        result = f"🎭 {target_tone.title()} Tone:\n\n{prefix}{text[0].lower()}{text[1:]}\n\n— Tone adjusted to: {target_tone}"
+        elif mode == 'tone':
+            # Analyze tone rather than simply prepending text
+            sent_info = ml_engine.analyze_sentiment(text)
+            tone_desc = ""
+            if sent_info['polarity'] > 0.3:
+                tone_desc = "Highly Positive & Enthusiastic"
+            elif sent_info['polarity'] > 0:
+                tone_desc = "Slightly Positive / Warm"
+            elif sent_info['polarity'] < -0.3:
+                tone_desc = "Highly Negative / Critical"
+            elif sent_info['polarity'] < 0:
+                tone_desc = "Slightly Negative / Cold"
+            else:
+                tone_desc = "Neutral / Objective"
+                
+            subj_desc = "Highly Opinionated" if sent_info['subjectivity'] > 0.6 else ("Factual / Objective" if sent_info['subjectivity'] < 0.4 else "Mixed Fact & Opinion")
 
-    elif mode == 'explain':
-        word_count = len(text.split())
-        result = f"💡 Explanation:\n\nThe provided text ({word_count} words) discusses the following key concepts:\n\n"
-        sentences = re.split(r'(?<=[.!?])\s+', text)
-        for i, s in enumerate(sentences[:5], 1):
-            result += f"{i}. {s.strip()}\n   → This point establishes {'the context' if i == 1 else 'supporting information'}.\n\n"
-        result += f"Overall, the text covers {min(len(sentences), 5)} main ideas in {word_count} words."
+            result = f"🎭 Machine Learning Sentiment Analysis (TextBlob):\n\nPrimary Tone: {tone_desc}\nObjectivity: {subj_desc}\n\nRaw Metrics:\n- Polarity: {sent_info['polarity']}\n- Subjectivity: {sent_info['subjectivity']}"
+
+        elif mode == 'document':
+            query = data.get('query', '')
+            if not query:
+                result = "Please provide a query for the document Q&A."
+            else:
+                rag_results = ml_engine.chat_with_document(text, query, top_k=2)
+                result = f"🔍 Document Q&A (Okapi BM25):\n\nQuery: {query}\n\n"
+                for i, r in enumerate(rag_results, 1):
+                    result += f"Match {i} (Confidence {r['score']}%):\n> {r['text']}\n\n"
+
+        elif mode == 'ticket':
+            # Naive Bayes Ticket Triage
+            res = ml_engine.categorize_ticket(text)
+            result = f"🎫 AI Support Desk Triage (Naive Bayes):\n\nPredicted Category: {res['category']}\nConfidence Score: {res['confidence']}%\n\n> This mode uses a MultinomialNB classifier trained on an internal support dataset."
+
+    except Exception as e:
+        print(f"ML Pipeline Error: {e}")
+        return jsonify({'success': False, 'message': 'Machine learning inference failed.'}), 500
 
     return jsonify({'success': True, 'result': result})
 
@@ -785,4 +813,5 @@ def ai_process():
 
 if __name__ == '__main__':
     init_db()
+    ml_engine.init_models()
     socketio.run(app, debug=True, port=8000, allow_unsafe_werkzeug=True)
