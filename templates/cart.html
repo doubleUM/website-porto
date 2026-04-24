@@ -10,7 +10,7 @@
             <div>
                 {% if cart_items %}
                 {% for item in cart_items %}
-                <div class="cart-item" id="cart-item-{{ item.id }}" data-price="{{ item.product.price }}">
+                <div class="cart-item fade-in" id="cart-item-{{ item.id }}" data-price="{{ item.product.price }}" style="animation-delay: {{ loop.index0 * 0.1 }}s; animation-fill-mode: backwards;">
                     <div
                         style="background: var(--bg-tertiary); max-width: 100px; min-width: 100px; height: 100px; border-radius: var(--radius-sm); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; overflow: hidden;">
                         <img src="{{ item.product.image_url or '/static/images/products/air-filter.png' }}" alt="{{ item.product.name }}" style="max-height: 80%; max-width: 80%; object-fit: contain;">
@@ -51,7 +51,7 @@
 
             <!-- Cart Summary -->
             {% if cart_items %}
-            <div class="cart-summary">
+            <div class="cart-summary fade-in" style="animation-delay: 0.2s; animation-fill-mode: backwards;">
                 <h3 style="margin-bottom: var(--space-lg);">Order Summary</h3>
 
                 <div class="summary-row">
@@ -131,7 +131,7 @@
         let newQuantity = parseInt(quantityElem.textContent) + change;
         if (newQuantity < 1) return;
 
-        fetch('/api/cart/update', {
+        fetch('/car-spareparts/api/cart/update', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ item_id: itemId, quantity: newQuantity })
@@ -154,7 +154,7 @@
         });
         if (!confirmed) return;
 
-        fetch('/api/cart/remove/' + itemId, { method: 'DELETE' })
+        fetch('/car-spareparts/api/cart/remove/' + itemId, { method: 'DELETE' })
             .then(r => r.json())
             .then(data => {
                 if (data.success) {

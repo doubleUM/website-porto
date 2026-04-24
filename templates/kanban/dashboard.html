@@ -60,7 +60,7 @@
 <script>
     (async function () {
         try {
-            const res = await fetch('/api/kanban/tasks');
+            const res = await fetch('/kanban/api/tasks');
             const data = await res.json();
             const tasks = data.tasks || [];
             const todo = tasks.filter(t => t.status === 'todo').length;

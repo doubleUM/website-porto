@@ -25,43 +25,69 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
 # ============================================================================
 
 client = MongoClient(os.getenv('MONGODB_URI'))
-db = client.spareparts_db
+
+# Project Databases
+db_spareparts = client['car-spareparts']
+db_kanban = client['kanban']
+db_chat = client['buzz-chat']
+db_stats = client['site-stats']
+db_ai = client['text-forge']
 
 # Collections — Spareparts
-categories_col = db.categories
-products_col = db.products
-cart_items_col = db.cart_items
-orders_col = db.orders
-counters_col = db.counters
-users_col = db.users
+categories_col = db_spareparts.categories
+products_col = db_spareparts.products
+cart_items_col = db_spareparts.cart_items
+orders_col = db_spareparts.orders
+users_col = db_spareparts.users
+spareparts_counters = db_spareparts.counters
 
 # Collections — Kanban
-kanban_col = db.kanban_tasks
+kanban_col = db_kanban.kanban_tasks
+kanban_counters = db_kanban.counters
 
 # Collections — Chat
-chat_messages_col = db.chat_messages
+chat_messages_col = db_chat.chat_messages
+chat_counters = db_chat.counters
+
+# Collections — Stats
+stats_col = db_stats.site_stats
 
 # Active chat users tracker
 chat_users = {}
+
+# Active sessions tracker (for Online count)
+online_users = {}
 
 # ============================================================================
 # CONTEXT PROCESSOR — injects current_user into every template
 # ============================================================================
 
 @app.context_processor
-def inject_user():
+def inject_global_data():
     user_id = session.get('user_id')
+    
+    # Get current user
+    user = None
     if user_id:
         user = users_col.find_one({'_id': user_id}, {'password': 0})
-        return {'current_user': user}
-    return {'current_user': None}
+    
+    # Calculate cart count using the shared filter logic
+    cart_filter = get_cart_filter()
+    pipeline = [{'$match': cart_filter}, {'$group': {'_id': None, 'total': {'$sum': '$quantity'}}}]
+    cart_result = list(cart_items_col.aggregate(pipeline))
+    cart_count = cart_result[0]['total'] if cart_result else 0
+    
+    return {
+        'current_user': user,
+        'cart_count': cart_count
+    }
 
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
 
-def get_next_id(collection_name):
-    """Auto-increment integer ID using a counters collection."""
+def get_next_id(collection_name, counters_col):
+    """Auto-increment integer ID using a specific counters collection."""
     counter = counters_col.find_one_and_update(
         {'_id': collection_name},
         {'$inc': {'seq': 1}},
@@ -110,6 +136,26 @@ def docs_to_list(cursor):
     """Convert a MongoDB cursor to a list of dicts with 'id' fields."""
     return [doc_to_dict(doc) for doc in cursor]
 
+@app.before_request
+def track_analytics():
+    # Only track page views for GET requests to non-static routes
+    if request.method == 'GET' and not request.path.startswith('/static'):
+        # Increment Total Visits
+        stats_col.update_one({'_id': 'global_stats'}, {'$inc': {'total_visits': 1}}, upsert=True)
+        
+        # Track Online Users
+        if 'tracker_id' not in session:
+            session['tracker_id'] = str(uuid.uuid4())
+        
+        tracker_id = session['tracker_id']
+        online_users[tracker_id] = datetime.utcnow()
+        
+        # Cleanup old users (older than 5 mins)
+        now = datetime.utcnow()
+        expired = [tid for tid, last_seen in online_users.items() if (now - last_seen).total_seconds() > 300]
+        for tid in expired:
+            online_users.pop(tid, None)
+
 # ============================================================================
 # INITIALIZE DATABASE WITH SAMPLE DATA
 # ============================================================================
@@ -119,108 +165,108 @@ def init_db():
     if categories_col.count_documents({}) == 0:
         # Create categories
         categories_data = [
-            {'_id': get_next_id('categories'), 'name': 'Engine Parts', 'description': 'High-performance engine components', 'icon': '🔧'},
-            {'_id': get_next_id('categories'), 'name': 'Brake Systems', 'description': 'Premium brake pads and rotors', 'icon': '🛑'},
-            {'_id': get_next_id('categories'), 'name': 'Electrical', 'description': 'Batteries, alternators, and wiring', 'icon': '⚡'},
-            {'_id': get_next_id('categories'), 'name': 'Suspension', 'description': 'Shocks, struts, and control arms', 'icon': '🔩'},
-            {'_id': get_next_id('categories'), 'name': 'Filters', 'description': 'Oil, air, and fuel filters', 'icon': '🔍'},
-            {'_id': get_next_id('categories'), 'name': 'Lighting', 'description': 'Headlights, tail lights, and bulbs', 'icon': '💡'},
+            {'_id': get_next_id('categories', spareparts_counters), 'name': 'Engine Parts', 'description': 'High-performance engine components', 'icon': '🔧'},
+            {'_id': get_next_id('categories', spareparts_counters), 'name': 'Brake Systems', 'description': 'Premium brake pads and rotors', 'icon': '🛑'},
+            {'_id': get_next_id('categories', spareparts_counters), 'name': 'Electrical', 'description': 'Batteries, alternators, and wiring', 'icon': '⚡'},
+            {'_id': get_next_id('categories', spareparts_counters), 'name': 'Suspension', 'description': 'Shocks, struts, and control arms', 'icon': '🔩'},
+            {'_id': get_next_id('categories', spareparts_counters), 'name': 'Filters', 'description': 'Oil, air, and fuel filters', 'icon': '🔍'},
+            {'_id': get_next_id('categories', spareparts_counters), 'name': 'Lighting', 'description': 'Headlights, tail lights, and bulbs', 'icon': '💡'},
         ]
         categories_col.insert_many(categories_data)
 
         # Create sample products
         products_data = [
             # Engine Parts
-            {'_id': get_next_id('products'), 'name': 'Premium Oil Filter', 'description': 'High-efficiency oil filter for optimal engine protection',
+            {'_id': get_next_id('products', spareparts_counters), 'name': 'Premium Oil Filter', 'description': 'High-efficiency oil filter for optimal engine protection',
              'price': 15.99, 'stock': 150, 'brand': 'AutoPro', 'part_number': 'OF-2024',
              'category_id': 1, 'compatible_cars': 'Toyota Camry, Honda Accord, Ford Focus',
              'specifications': 'Thread size: 3/4-16, Height: 3.5 inches', 'featured': True,
              'image_url': '/static/images/products/oil-filter.png', 'created_at': datetime.utcnow()},
 
-            {'_id': get_next_id('products'), 'name': 'Spark Plug Set (4pc)', 'description': 'Iridium spark plugs for improved performance',
+            {'_id': get_next_id('products', spareparts_counters), 'name': 'Spark Plug Set (4pc)', 'description': 'Iridium spark plugs for improved performance',
              'price': 45.99, 'stock': 80, 'brand': 'NGK', 'part_number': 'SP-IR-401',
              'category_id': 1, 'compatible_cars': 'Most 4-cylinder engines',
              'specifications': 'Gap: 0.044", Thread: 14mm', 'featured': True,
              'image_url': '/static/images/products/spark-plugs.png', 'created_at': datetime.utcnow()},
 
-            {'_id': get_next_id('products'), 'name': 'Air Filter', 'description': 'High-flow air filter for better engine breathing',
+            {'_id': get_next_id('products', spareparts_counters), 'name': 'Air Filter', 'description': 'High-flow air filter for better engine breathing',
              'price': 24.99, 'stock': 120, 'brand': 'K&N', 'part_number': 'AF-3320',
              'category_id': 5, 'compatible_cars': 'Universal fit for most sedans',
              'specifications': 'Washable and reusable', 'featured': False,
              'image_url': '/static/images/products/air-filter.png', 'created_at': datetime.utcnow()},
 
             # Brake Systems
-            {'_id': get_next_id('products'), 'name': 'Ceramic Brake Pads', 'description': 'Low-dust ceramic brake pads for quiet stopping',
+            {'_id': get_next_id('products', spareparts_counters), 'name': 'Ceramic Brake Pads', 'description': 'Low-dust ceramic brake pads for quiet stopping',
              'price': 89.99, 'stock': 60, 'brand': 'Brembo', 'part_number': 'BP-CER-500',
              'category_id': 2, 'compatible_cars': 'Honda Civic, Toyota Corolla',
              'specifications': 'Front axle, includes shims', 'featured': True,
              'image_url': '/static/images/products/brake-pads.png', 'created_at': datetime.utcnow()},
 
-            {'_id': get_next_id('products'), 'name': 'Brake Rotors (Pair)', 'description': 'Slotted and drilled performance rotors',
+            {'_id': get_next_id('products', spareparts_counters), 'name': 'Brake Rotors (Pair)', 'description': 'Slotted and drilled performance rotors',
              'price': 159.99, 'stock': 40, 'brand': 'PowerStop', 'part_number': 'BR-SP-250',
              'category_id': 2, 'compatible_cars': 'Ford Mustang, Chevrolet Camaro',
              'specifications': 'Front, 12.6" diameter', 'featured': False,
              'image_url': '/static/images/products/brake-rotors.png', 'created_at': datetime.utcnow()},
 
-            {'_id': get_next_id('products'), 'name': 'Brake Fluid DOT 4', 'description': 'Premium synthetic brake fluid',
+            {'_id': get_next_id('products', spareparts_counters), 'name': 'Brake Fluid DOT 4', 'description': 'Premium synthetic brake fluid',
              'price': 12.99, 'stock': 200, 'brand': 'Castrol', 'part_number': 'BF-DOT4-500',
              'category_id': 2, 'compatible_cars': 'Universal',
              'specifications': '500ml bottle, high boiling point', 'featured': False,
              'image_url': '/static/images/products/brake-fluid.png', 'created_at': datetime.utcnow()},
 
             # Electrical
-            {'_id': get_next_id('products'), 'name': 'Car Battery 12V', 'description': 'Maintenance-free AGM battery',
+            {'_id': get_next_id('products', spareparts_counters), 'name': 'Car Battery 12V', 'description': 'Maintenance-free AGM battery',
              'price': 189.99, 'stock': 35, 'brand': 'Optima', 'part_number': 'BAT-AGM-75',
              'category_id': 3, 'compatible_cars': 'Most sedans and trucks',
              'specifications': '750 CCA, 75 Ah, 3-year warranty', 'featured': True,
              'image_url': '/static/images/products/car-battery.png', 'created_at': datetime.utcnow()},
 
-            {'_id': get_next_id('products'), 'name': 'Alternator', 'description': 'High-output alternator for reliable charging',
+            {'_id': get_next_id('products', spareparts_counters), 'name': 'Alternator', 'description': 'High-output alternator for reliable charging',
              'price': 249.99, 'stock': 25, 'brand': 'Bosch', 'part_number': 'ALT-150A',
              'category_id': 3, 'compatible_cars': 'Toyota Tacoma, 4Runner',
              'specifications': '150 Amp output', 'featured': False,
              'image_url': '/static/images/products/alternator.png', 'created_at': datetime.utcnow()},
 
             # Suspension
-            {'_id': get_next_id('products'), 'name': 'Shock Absorber Set', 'description': 'Gas-charged shock absorbers for smooth ride',
+            {'_id': get_next_id('products', spareparts_counters), 'name': 'Shock Absorber Set', 'description': 'Gas-charged shock absorbers for smooth ride',
              'price': 199.99, 'stock': 30, 'brand': 'Monroe', 'part_number': 'SH-GAS-400',
              'category_id': 4, 'compatible_cars': 'Nissan Altima, Mazda 6',
              'specifications': 'Rear pair, gas-charged', 'featured': True,
              'image_url': '/static/images/products/shock-absorbers.png', 'created_at': datetime.utcnow()},
 
-            {'_id': get_next_id('products'), 'name': 'Coil Spring Set', 'description': 'Heavy-duty coil springs',
+            {'_id': get_next_id('products', spareparts_counters), 'name': 'Coil Spring Set', 'description': 'Heavy-duty coil springs',
              'price': 139.99, 'stock': 45, 'brand': 'Eibach', 'part_number': 'CS-HD-300',
              'category_id': 4, 'compatible_cars': 'Jeep Wrangler, Cherokee',
              'specifications': 'Front pair, +2" lift', 'featured': False,
              'image_url': '/static/images/products/coil-springs.png', 'created_at': datetime.utcnow()},
 
             # Filters
-            {'_id': get_next_id('products'), 'name': 'Fuel Filter', 'description': 'High-pressure fuel filter',
+            {'_id': get_next_id('products', spareparts_counters), 'name': 'Fuel Filter', 'description': 'High-pressure fuel filter',
              'price': 19.99, 'stock': 100, 'brand': 'Wix', 'part_number': 'FF-HP-200',
              'category_id': 5, 'compatible_cars': 'Most fuel-injected vehicles',
              'specifications': 'In-line mount, 10 micron', 'featured': False,
              'image_url': '/static/images/products/fuel-filter.png', 'created_at': datetime.utcnow()},
 
-            {'_id': get_next_id('products'), 'name': 'Cabin Air Filter', 'description': 'Activated carbon cabin filter',
+            {'_id': get_next_id('products', spareparts_counters), 'name': 'Cabin Air Filter', 'description': 'Activated carbon cabin filter',
              'price': 16.99, 'stock': 110, 'brand': 'Mann', 'part_number': 'CAF-AC-150',
              'category_id': 5, 'compatible_cars': 'BMW 3-Series, Mercedes C-Class',
              'specifications': 'HEPA filtration, odor elimination', 'featured': False,
              'image_url': '/static/images/products/cabin-filter.png', 'created_at': datetime.utcnow()},
 
             # Lighting
-            {'_id': get_next_id('products'), 'name': 'LED Headlight Bulbs', 'description': 'Super bright LED conversion kit',
+            {'_id': get_next_id('products', spareparts_counters), 'name': 'LED Headlight Bulbs', 'description': 'Super bright LED conversion kit',
              'price': 79.99, 'stock': 70, 'brand': 'Osram', 'part_number': 'LED-H7-6K',
              'category_id': 6, 'compatible_cars': 'H7 socket (most European cars)',
              'specifications': '6000K white, 12000 lumens', 'featured': True,
              'image_url': '/static/images/products/led-headlights.png', 'created_at': datetime.utcnow()},
 
-            {'_id': get_next_id('products'), 'name': 'Fog Light Assembly', 'description': 'Complete fog light kit',
+            {'_id': get_next_id('products', spareparts_counters), 'name': 'Fog Light Assembly', 'description': 'Complete fog light kit',
              'price': 129.99, 'stock': 50, 'brand': 'Hella', 'part_number': 'FL-KIT-500',
              'category_id': 6, 'compatible_cars': 'Universal with custom brackets',
              'specifications': 'Includes wiring harness and switch', 'featured': False,
              'image_url': '/static/images/products/fog-light.png', 'created_at': datetime.utcnow()},
 
-            {'_id': get_next_id('products'), 'name': 'Halogen Light Bulb', 'description': 'Classic halogen headlight bulb with warm white light',
+            {'_id': get_next_id('products', spareparts_counters), 'name': 'Halogen Light Bulb', 'description': 'Classic halogen headlight bulb with warm white light',
              'price': 29.99, 'stock': 90, 'brand': 'Philips', 'part_number': 'HL-H4-3200K',
              'category_id': 6, 'compatible_cars': 'H4 socket (most Japanese and Korean cars)',
              'specifications': '3200K warm white, 1500 lumens, 55W', 'featured': False,
@@ -233,13 +279,13 @@ def init_db():
 # AUTH ROUTES
 # ============================================================================
 
-@app.route('/login')
+@app.route('/car-spareparts/login')
 def login_page():
     if session.get('user_id'):
         return redirect(url_for('store_home'))
     return render_template('login.html')
 
-@app.route('/api/auth/signup', methods=['POST'])
+@app.route('/car-spareparts/api/auth/signup', methods=['POST'])
 def signup():
     data = request.get_json()
     name = data.get('name', '').strip()
@@ -254,7 +300,7 @@ def signup():
         return jsonify({'success': False, 'message': 'An account with this email already exists.'}), 409
 
     hashed_pw = bcrypt.generate_password_hash(password).decode('utf-8')
-    user_id = get_next_id('users')
+    user_id = get_next_id('users', spareparts_counters)
     users_col.insert_one({
         '_id': user_id,
         'name': name,
@@ -268,7 +314,7 @@ def signup():
     merge_carts(user_id)
     return jsonify({'success': True, 'name': name})
 
-@app.route('/api/auth/login', methods=['POST'])
+@app.route('/car-spareparts/api/auth/login', methods=['POST'])
 def login():
     data = request.get_json()
     email = data.get('email', '').strip().lower()
@@ -283,7 +329,7 @@ def login():
     merge_carts(user['_id'])
     return jsonify({'success': True, 'name': user['name']})
 
-@app.route('/api/auth/logout')
+@app.route('/car-spareparts/api/auth/logout')
 def logout():
     session.clear()
     return redirect(url_for('portfolio_home'))
@@ -320,7 +366,7 @@ def store_home():
     categories = docs_to_list(categories_col.find())
     return render_template('index.html', featured_products=featured_products, categories=categories)
 
-@app.route('/products')
+@app.route('/car-spareparts/products')
 def products():
     category_id = request.args.get('category', type=int)
     search_query = request.args.get('search', '')
@@ -354,7 +400,7 @@ def products():
     return render_template('products.html', products=products_list, categories=categories,
                          current_category=category_id, search_query=search_query)
 
-@app.route('/product/<int:product_id>')
+@app.route('/car-spareparts/product/<int:product_id>')
 def product_detail(product_id):
     product_doc = products_col.find_one({'_id': product_id})
     if not product_doc:
@@ -368,7 +414,7 @@ def product_detail(product_id):
     )
     return render_template('product_detail.html', product=product, related_products=related_products)
 
-@app.route('/api/product/<int:product_id>')
+@app.route('/car-spareparts/api/product/<int:product_id>')
 def api_product_detail(product_id):
     product_doc = products_col.find_one({'_id': product_id})
     if not product_doc:
@@ -379,7 +425,7 @@ def api_product_detail(product_id):
     product['category_icon'] = doc_to_dict(category_doc).get('icon', '') if category_doc else ''
     return jsonify(product)
 
-@app.route('/cart')
+@app.route('/car-spareparts/cart')
 def cart():
     cart_items = []
     total = 0
@@ -391,7 +437,7 @@ def cart():
         cart_items.append(item)
     return render_template('cart.html', cart_items=cart_items, total=total)
 
-@app.route('/checkout')
+@app.route('/car-spareparts/checkout')
 def checkout():
     cart_items = []
     total = 0
@@ -403,7 +449,7 @@ def checkout():
         cart_items.append(item)
     return render_template('checkout.html', cart_items=cart_items, total=total)
 
-@app.route('/admin')
+@app.route('/car-spareparts/admin')
 def admin():
     products_list = docs_to_list(products_col.find())
     categories = docs_to_list(categories_col.find())
@@ -413,11 +459,21 @@ def admin():
         product['category'] = cat_lookup.get(product.get('category_id'), {'name': 'Unknown'})
     return render_template('admin.html', products=products_list, categories=categories)
 
+@app.route('/admin/dashboard')
+def site_dashboard():
+    stats = stats_col.find_one({'_id': 'global_stats'})
+    total_visits = stats.get('total_visits', 0) if stats else 0
+    
+    # Current online count
+    current_online = len(online_users)
+    
+    return render_template('dashboard.html', total_visits=total_visits, online_count=current_online)
+
 # ============================================================================
 # API ROUTES
 # ============================================================================
 
-@app.route('/api/cart/add', methods=['POST'])
+@app.route('/car-spareparts/api/cart/add', methods=['POST'])
 def add_to_cart():
     data = request.get_json()
     product_id = data.get('product_id')
@@ -429,7 +485,7 @@ def add_to_cart():
     if existing:
         cart_items_col.update_one({'_id': existing['_id']}, {'$inc': {'quantity': quantity}})
     else:
-        cart_items_col.insert_one({**cart_filter, '_id': get_next_id('cart_items'), 'product_id': product_id, 'quantity': quantity})
+        cart_items_col.insert_one({**cart_filter, '_id': get_next_id('cart_items', spareparts_counters), 'product_id': product_id, 'quantity': quantity})
 
     # Count only this user's cart
     pipeline = [{'$match': cart_filter}, {'$group': {'_id': None, 'total': {'$sum': '$quantity'}}}]
@@ -438,7 +494,7 @@ def add_to_cart():
 
     return jsonify({'success': True, 'cart_count': cart_count})
 
-@app.route('/api/cart/update', methods=['POST'])
+@app.route('/car-spareparts/api/cart/update', methods=['POST'])
 def update_cart():
     data = request.get_json()
     item_id = data.get('item_id')
@@ -454,7 +510,7 @@ def update_cart():
         return jsonify({'success': True})
     return jsonify({'success': False}), 404
 
-@app.route('/api/cart/remove/<int:item_id>', methods=['DELETE'])
+@app.route('/car-spareparts/api/cart/remove/<int:item_id>', methods=['DELETE'])
 def remove_from_cart(item_id):
     cart_filter = get_cart_filter()
     result = cart_items_col.delete_one({**cart_filter, '_id': item_id})
@@ -462,7 +518,7 @@ def remove_from_cart(item_id):
         return jsonify({'success': True})
     return jsonify({'success': False}), 404
 
-@app.route('/api/order', methods=['POST'])
+@app.route('/car-spareparts/api/order', methods=['POST'])
 def create_order():
     data = request.get_json()
 
@@ -482,7 +538,7 @@ def create_order():
             'price': product['price']
         })
 
-    order_id = get_next_id('orders')
+    order_id = get_next_id('orders', spareparts_counters)
     order = {
         '_id': order_id,
         'customer_name': data.get('name'),
@@ -501,12 +557,12 @@ def create_order():
     cart_items_col.delete_many(cart_filter)
     return jsonify({'success': True, 'order_id': order_id})
 
-@app.route('/api/products', methods=['POST'])
+@app.route('/car-spareparts/api/products', methods=['POST'])
 def create_product():
     data = request.get_json()
 
     product = {
-        '_id': get_next_id('products'),
+        '_id': get_next_id('products', spareparts_counters),
         'name': data.get('name'),
         'description': data.get('description'),
         'price': data.get('price'),
@@ -524,7 +580,7 @@ def create_product():
     products_col.insert_one(product)
     return jsonify({'success': True, 'product_id': product['_id']})
 
-@app.route('/api/products/<int:product_id>', methods=['PUT'])
+@app.route('/car-spareparts/api/products/<int:product_id>', methods=['PUT'])
 def update_product(product_id):
     product = products_col.find_one({'_id': product_id})
     if not product:
@@ -542,14 +598,14 @@ def update_product(product_id):
 
     return jsonify({'success': True})
 
-@app.route('/api/products/<int:product_id>', methods=['DELETE'])
+@app.route('/car-spareparts/api/products/<int:product_id>', methods=['DELETE'])
 def delete_product(product_id):
     result = products_col.delete_one({'_id': product_id})
     if result.deleted_count > 0:
         return jsonify({'success': True})
     return jsonify({'success': False}), 404
 
-@app.route('/api/cart/count')
+@app.route('/car-spareparts/api/cart/count')
 def cart_count():
     cart_filter = get_cart_filter()
     pipeline = [{'$match': cart_filter}, {'$group': {'_id': None, 'total': {'$sum': '$quantity'}}}]
@@ -580,16 +636,16 @@ def kanban_timeline():
 def kanban_rules():
     return render_template('kanban/rules.html')
 
-@app.route('/api/kanban/tasks')
+@app.route('/kanban/api/tasks')
 def kanban_list():
     tasks = docs_to_list(kanban_col.find().sort('created_at', -1))
     return jsonify({'tasks': tasks})
 
-@app.route('/api/kanban/add', methods=['POST'])
+@app.route('/kanban/api/add', methods=['POST'])
 def kanban_add():
     data = request.get_json()
     task = {
-        '_id': get_next_id('kanban_tasks'),
+        '_id': get_next_id('kanban_tasks', kanban_counters),
         'name': data.get('name', ''),
         'description': data.get('description', ''),
         'status': data.get('status', 'todo'),
@@ -602,7 +658,7 @@ def kanban_add():
     kanban_col.insert_one(task)
     return jsonify({'success': True, 'task_id': task['_id']})
 
-@app.route('/api/kanban/update', methods=['POST'])
+@app.route('/kanban/api/update', methods=['POST'])
 def kanban_update():
     data = request.get_json()
     task_id = data.get('task_id')
@@ -613,19 +669,19 @@ def kanban_update():
     kanban_col.update_one({'_id': task_id}, {'$set': update})
     return jsonify({'success': True})
 
-@app.route('/api/kanban/move', methods=['POST'])
+@app.route('/kanban/api/move', methods=['POST'])
 def kanban_move():
     data = request.get_json()
     kanban_col.update_one({'_id': data['task_id']}, {'$set': {'status': data['status']}})
     return jsonify({'success': True})
 
-@app.route('/api/kanban/delete', methods=['POST'])
+@app.route('/kanban/api/delete', methods=['POST'])
 def kanban_delete():
     data = request.get_json()
     kanban_col.delete_one({'_id': data['task_id']})
     return jsonify({'success': True})
 
-@app.route('/api/kanban/predict', methods=['POST'])
+@app.route('/kanban/api/predict', methods=['POST'])
 def kanban_predict():
     data = request.get_json()
     description = data.get('description', '')
@@ -701,7 +757,7 @@ def handle_message(data):
     username = data.get('username', 'Anonymous')
     now = datetime.utcnow()
     msg_doc = {
-        '_id': get_next_id('chat_messages'),
+        '_id': get_next_id('chat_messages', chat_counters),
         'room': room,
         'username': username,
         'message': message,
@@ -739,7 +795,7 @@ def ai_tool_presets():
 def ai_tool_docs():
     return render_template('ai_docs.html')
 
-@app.route('/api/ai/process', methods=['POST'])
+@app.route('/ai-tool/api/process', methods=['POST'])
 def ai_process():
     data = request.get_json()
     text = data.get('text', '').strip()

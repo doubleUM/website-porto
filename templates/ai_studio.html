@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TextForge — Studio</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌗</text></svg>">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌗</text></svg>">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ai_swiss.css') }}">
     <script>
         (function () {
@@ -58,7 +59,8 @@
             </div>
             <div class="tf-opt" id="opt-document" style="display:none">
                 <label for="doc-query">Your Query</label>
-                <input type="text" id="doc-query" placeholder="Ask a question about the text..." style="width: 250px; padding: 6px 10px; border: 1px solid var(--tf-border); background: var(--tf-surface); color: var(--tf-ink); font-family: var(--tf-sans); font-size: 12px; border-radius: 4px;">
+                <input type="text" id="doc-query" placeholder="Ask a question about the text..."
+                    style="width: 250px; padding: 6px 10px; border: 1px solid var(--tf-border); background: var(--tf-surface); color: var(--tf-ink); font-family: var(--tf-sans); font-size: 12px; border-radius: 4px;">
             </div>
         </div>
 
@@ -89,7 +91,8 @@
                     <span>Output</span>
                     <div>
                         <button type="button" class="tf-small-btn" id="copy-btn" style="display:none">Copy</button>
-                        <button type="button" class="tf-small-btn" id="download-btn" style="display:none">Download</button>
+                        <button type="button" class="tf-small-btn" id="download-btn"
+                            style="display:none">Download</button>
                     </div>
                 </div>
                 <div class="tf-output" id="output-text">
@@ -98,11 +101,17 @@
             </div>
         </div>
 
-        <p style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--tf-muted);margin-bottom:8px;">Sample inputs</p>
+        <p
+            style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--tf-muted);margin-bottom:8px;">
+            Sample inputs</p>
         <div class="tf-chips">
-            <button type="button" class="tf-chip" data-text="Artificial intelligence (AI) is intelligence demonstrated by machines, as opposed to natural intelligence displayed by animals including humans.">AI definition</button>
-            <button type="button" class="tf-chip" data-text="Climate change refers to long-term shifts in temperatures and weather patterns driven largely by greenhouse gas emissions.">Climate</button>
-            <button type="button" class="tf-chip" data-text="Python is a high-level programming language emphasizing readability and broad standard libraries.">Python</button>
+            <button type="button" class="tf-chip"
+                data-text="Artificial intelligence (AI) is intelligence demonstrated by machines, as opposed to natural intelligence displayed by animals including humans.">AI
+                definition</button>
+            <button type="button" class="tf-chip"
+                data-text="Climate change refers to long-term shifts in temperatures and weather patterns driven largely by greenhouse gas emissions.">Climate</button>
+            <button type="button" class="tf-chip"
+                data-text="Python is a high-level programming language emphasizing readability and broad standard libraries.">Python</button>
         </div>
 
         <div class="tf-history-block">
@@ -188,7 +197,7 @@
             if (currentMode === 'document') payload.query = document.getElementById('doc-query').value;
             payload.use_ai = useAiEnabled;
             try {
-                const res = await fetch('/api/ai/process', {
+                const res = await fetch('/ai-tool/api/process', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)

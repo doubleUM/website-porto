@@ -41,7 +41,7 @@
                 <li>
                     <a href="{{ url_for('cart') }}" class="nav-link cart-icon">
                         🛒
-                        <span class="cart-badge" id="cart-count">0</span>
+                        <span class="cart-badge" id="cart-count" {% if cart_count == 0 %}style="display: none;"{% endif %}>{{ cart_count }}</span>
                     </a>
                 </li>
                 <li>
@@ -84,6 +84,7 @@
                         <li><a href="{{ url_for('products') }}">Shop All Parts</a></li>
                         <li><a href="{{ url_for('cart') }}">Shopping Cart</a></li>
                         <li><a href="{{ url_for('admin') }}">Admin Panel</a></li>
+                        <li><a href="/admin/dashboard">Site Insights</a></li>
                     </ul>
                 </div>
 
@@ -261,7 +262,7 @@
             modalQty = 1;
             modalProductId = productId;
 
-            fetch('/api/product/' + productId)
+            fetch('/car-spareparts/api/product/' + productId)
                 .then(r => r.json())
                 .then(p => {
                     modalStock = p.stock || 0;

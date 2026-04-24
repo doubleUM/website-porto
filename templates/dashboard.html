@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block title %}Site Analytics Dashboard - Wilson Manuel{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --dash-primary: #6366f1;
+        --dash-secondary: #a855f7;
+        --dash-accent: #f43f5e;
+        --dash-bg: #0f172a;
+        --dash-card: rgba(30, 41, 59, 0.7);
+        --dash-border: rgba(255, 255, 255, 0.1);
+    }
+
+    .dash-container {
+        padding: 80px 0;
+        min-height: 100vh;
+        background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent),
+                    radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.15), transparent);
+    }
+
+    .dash-header {
+        text-align: center;
+        margin-bottom: 60px;
+        animation: fadeInDown 0.8s ease;
+    }
+
+    .dash-title {
+        font-size: 3rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 16px;
+    }
+
+    .dash-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 32px;
+        margin-bottom: 60px;
+    }
+
+    .stat-card {
+        background: var(--dash-card);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--dash-border);
+        border-radius: 24px;
+        padding: 40px;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-8px);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(135deg, var(--dash-primary), var(--dash-secondary));
+        opacity: 0;
+        transition: opacity 0.4s;
+        z-index: 0;
+    }
+
+    .stat-card:hover::before {
+        opacity: 0.05;
+    }
+
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 24px;
+        display: inline-block;
+        filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.5));
+    }
+
+    .stat-value {
+        font-size: 4.5rem;
+        font-weight: 800;
+        font-family: var(--font-primary);
+        line-height: 1;
+        margin-bottom: 8px;
+        background: linear-gradient(135deg, #fff, #94a3b8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-label {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-pulse {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        background: #10b981;
+        border-radius: 50%;
+        margin-right: 8px;
+        box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .refresh-hint {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-top: 40px;
+    }
+
+    .btn-refresh {
+        background: var(--dash-card);
+        border: 1px solid var(--dash-border);
+        color: #fff;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s;
+    }
+
+    .btn-refresh:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: rotate(5deg);
+    }
+
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash-container">
+    <div class="container">
+        <header class="dash-header">
+            <h1 class="dash-title">Site Insights</h1>
+            <p class="dash-subtitle">Real-time traffic and engagement metrics across the Wilson Manuel portfolio hub.</p>
+        </header>
+
+        <div class="stats-grid">
+            <!-- Total Visits -->
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-value" id="val-visits">{{ total_visits }}</div>
+                <div class="stat-label">Total Visits</div>
+            </div>
+
+            <!-- Users Online -->
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-value" id="val-online">{{ online_count }}</div>
+                <div class="stat-label">
+                    <span class="stat-pulse"></span>
+                    Users Online
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button class="btn-refresh" onclick="location.reload()">
+                <span>🔄</span> Refresh Data
+            </button>
+            <p class="refresh-hint">Metrics are automatically updated on every page load.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

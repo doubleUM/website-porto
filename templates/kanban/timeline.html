@@ -45,7 +45,7 @@
         }
 
         async function load() {
-            const res = await fetch('/api/kanban/tasks');
+            const res = await fetch('/kanban/api/tasks');
             const data = await res.json();
             const tasks = data.tasks || [];
 

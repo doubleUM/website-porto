@@ -7,7 +7,7 @@
 
         <div style="display: grid; grid-template-columns: 1fr 400px; gap: var(--space-xl);">
             <!-- Checkout Form -->
-            <div class="card">
+            <div class="card fade-in" style="animation-delay: 0.1s; animation-fill-mode: backwards;">
                 <h3 style="margin-bottom: var(--space-lg);">Shipping Information</h3>
 
                 <form id="checkout-form">
@@ -66,7 +66,7 @@
 
             <!-- Order Summary -->
             <div>
-                <div class="cart-summary">
+                <div class="cart-summary fade-in" style="animation-delay: 0.2s; animation-fill-mode: backwards;">
                     <h3 style="margin-bottom: var(--space-lg);">Order Summary</h3>
 
                     <div style="max-height: 300px; overflow-y: auto; margin-bottom: var(--space-lg);">
@@ -135,7 +135,7 @@
             address: this.address.value
         };
 
-        fetch('/api/order', {
+        fetch('/car-spareparts/api/order', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

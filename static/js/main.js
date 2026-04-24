@@ -4,7 +4,7 @@
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function () {
-    updateCartCount();
+    // updateCartCount(); // Now handled by server-side rendering (Jinja2) to prevent flicker
     initAddToCartButtons();
     initAnimations();
 });
@@ -14,14 +14,19 @@ document.addEventListener('DOMContentLoaded', function () {
 // ============================================================================
 
 function updateCartCount(count = null) {
+    const badge = document.getElementById('cart-count');
+    if (!badge) return;
+
     if (count !== null) {
-        document.getElementById('cart-count').textContent = count;
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'flex' : 'none';
         animateCartBadge();
     } else {
-        fetch('/api/cart/count')
+        fetch('/car-spareparts/api/cart/count')
             .then(response => response.json())
             .then(data => {
-                document.getElementById('cart-count').textContent = data.count;
+                badge.textContent = data.count;
+                badge.style.display = data.count > 0 ? 'flex' : 'none';
             });
     }
 }
@@ -38,7 +43,7 @@ function initAddToCartButtons() {
 }
 
 function addToCart(productId, quantity = 1) {
-    fetch('/api/cart/add', {
+    fetch('/car-spareparts/api/cart/add', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

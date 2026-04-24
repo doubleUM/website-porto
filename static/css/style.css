@@ -367,6 +367,7 @@ a:hover {
 .btn-primary {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
+  border: 2px solid transparent;
   box-shadow: var(--shadow-md);
 }
 
@@ -378,6 +379,7 @@ a:hover {
 .btn-secondary {
   background: linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%);
   color: var(--bg-primary);
+  border: 2px solid transparent;
   box-shadow: var(--shadow-md);
 }
 
@@ -512,7 +514,7 @@ a:hover {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: fadeInUp 0.8s ease;
+  animation: fadeInOnly 0.8s ease;
 }
 
 .hero-subtitle {
@@ -891,6 +893,16 @@ footer {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fadeInOnly {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
 

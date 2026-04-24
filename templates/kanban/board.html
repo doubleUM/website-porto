@@ -25,8 +25,8 @@
                     <option value="low">Low</option>
                 </select>
                 <button class="kb-btn kb-btn-primary" id="add-task-btn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5" stroke-linecap="round">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round">
                         <line x1="12" y1="5" x2="12" y2="19" />
                         <line x1="5" y1="12" x2="19" y2="12" />
                     </svg>
@@ -169,7 +169,9 @@
                 <button type="button" class="kb-btn kb-btn-danger" id="delete-task-btn" style="display:none">Delete
                 </button>
                 <div style="flex:1; padding-left:15px; display:flex; align-items:center;">
-                    <span id="ai-estimate-badge" style="display:none; font-size:12px; font-weight:600; padding:6px 12px; border-radius:12px; background:linear-gradient(135deg,rgba(225,29,72,0.8),rgba(153,27,27,0.8)); color:white; border:1px solid rgba(255,255,255,0.2);">✨ AI Estimate: -- days</span>
+                    <span id="ai-estimate-badge"
+                        style="display:none; font-size:12px; font-weight:600; padding:6px 12px; border-radius:12px; background:linear-gradient(135deg,rgba(225,29,72,0.8),rgba(153,27,27,0.8)); color:white; border:1px solid rgba(255,255,255,0.2);">✨
+                        AI Estimate: -- days</span>
                 </div>
                 <button type="button" class="kb-btn kb-btn-ghost" id="modal-cancel">Cancel</button>
                 <button type="submit" class="kb-btn kb-btn-primary" id="save-task-btn">Save Task</button>
@@ -193,7 +195,7 @@
 
 {% block scripts %}
 <script>
-    const API = '/api/kanban';
+    const API = '/kanban/api';
     let allTasks = [];
     let searchQuery = '';
     let filterPriority = 'all';
@@ -435,7 +437,7 @@
         }
         aiBadge.style.display = 'inline-block';
         aiBadge.textContent = '✨ Estimating...';
-        
+
         try {
             const res = await fetch(API + '/predict', {
                 method: 'POST',

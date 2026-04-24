@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TextForge — API</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌗</text></svg>">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌗</text></svg>">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ai_swiss.css') }}">
     <script>
         (function () {
@@ -22,7 +23,7 @@
         <h1 class="tf-h1">Mock processor contract.</h1>
         <p class="tf-lead">Single endpoint today; swap the handler for OpenAI, Anthropic, or your own worker.</p>
 
-        <h2>POST /api/ai/process</h2>
+        <h2>POST /ai-tool/api/process</h2>
         <p>JSON body:</p>
         <pre>{
   "text": "string (required)",
@@ -37,7 +38,8 @@
         <ul>
             <li>Demo adds ~1s artificial delay.</li>
             <li>No API key required for the mock pipeline.</li>
-            <li>Replace <code style="font-family:var(--tf-mono);font-size:12px;">ai_process()</code> in Flask when you integrate a provider.</li>
+            <li>Replace <code style="font-family:var(--tf-mono);font-size:12px;">ai_process()</code> in Flask when you
+                integrate a provider.</li>
         </ul>
 
         <h2>Related routes</h2>

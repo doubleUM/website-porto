@@ -132,7 +132,7 @@
             specifications: this.specifications.value
         };
 
-        fetch('/api/products', {
+        fetch('/car-spareparts/api/products', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -160,7 +160,7 @@
         });
         if (!confirmed) return;
 
-        fetch('/api/products/' + productId, {
+        fetch('/car-spareparts/api/products/' + productId, {
             method: 'DELETE'
         })
             .then(response => response.json())
