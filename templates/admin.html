@@ -94,9 +94,9 @@
                                 "%.2f"|format(product.price) }}</td>
                             <td style="padding: var(--space-sm);">
                                 {% if product.stock > 0 %}
-                                <span class="badge badge-success">{{ product.stock }}</span>
+                                <span class="badge badge-success badge-admin">{{ product.stock }}</span>
                                 {% else %}
-                                <span class="badge badge-danger">Out</span>
+                                <span class="badge badge-danger badge-admin">Out</span>
                                 {% endif %}
                             </td>
                             <td style="padding: var(--space-sm);">
