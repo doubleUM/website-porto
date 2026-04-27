@@ -140,12 +140,17 @@ def docs_to_list(cursor):
 def track_analytics():
     # Only track page views for GET requests to non-static routes
     if request.method == 'GET' and not request.path.startswith('/static'):
-        # Increment Total Visits
-        stats_col.update_one({'_id': 'global_stats'}, {'$inc': {'total_visits': 1}}, upsert=True)
+        # Track Unique Visitors vs Impressions
+        if 'tracker_id' not in session or 'unique_counted' not in session:
+            if 'tracker_id' not in session:
+                session['tracker_id'] = str(uuid.uuid4())
+            
+            # This is a new visitor (or first time being counted), increment unique visitors
+            stats_col.update_one({'_id': 'global_stats'}, {'$inc': {'unique_visitors': 1}}, upsert=True)
+            session['unique_counted'] = True
         
-        # Track Online Users
-        if 'tracker_id' not in session:
-            session['tracker_id'] = str(uuid.uuid4())
+        # Increment Total Impressions on every page load
+        stats_col.update_one({'_id': 'global_stats'}, {'$inc': {'total_visits': 1}}, upsert=True)
         
         tracker_id = session['tracker_id']
         online_users[tracker_id] = datetime.utcnow()
@@ -459,15 +464,19 @@ def admin():
         product['category'] = cat_lookup.get(product.get('category_id'), {'name': 'Unknown'})
     return render_template('admin.html', products=products_list, categories=categories)
 
-@app.route('/admin/dashboard')
-def site_dashboard():
+@app.route('/insights')
+def site_insights():
     stats = stats_col.find_one({'_id': 'global_stats'})
-    total_visits = stats.get('total_visits', 0) if stats else 0
+    total_impressions = stats.get('total_visits', 0) if stats else 0
+    unique_visitors = stats.get('unique_visitors', 0) if stats else 0
     
     # Current online count
     current_online = len(online_users)
     
-    return render_template('dashboard.html', total_visits=total_visits, online_count=current_online)
+    return render_template('dashboard.html', 
+                         total_impressions=total_impressions, 
+                         unique_visitors=unique_visitors,
+                         online_count=current_online)
 
 # ============================================================================
 # API ROUTES

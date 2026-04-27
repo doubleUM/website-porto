@@ -1,199 +1,149 @@
-{% extends 'base.html' %}
+{% extends 'base_insights.html' %}
 
-{% block title %}Site Analytics Dashboard - Wilson Manuel{% endblock %}
+{% block title %}Site Insights — Wilson Manuel{% endblock %}
 
 {% block extra_css %}
 <style>
-    :root {
-        --dash-primary: #6366f1;
-        --dash-secondary: #a855f7;
-        --dash-accent: #f43f5e;
-        --dash-bg: #0f172a;
-        --dash-card: rgba(30, 41, 59, 0.7);
-        --dash-border: rgba(255, 255, 255, 0.1);
-    }
-
-    .dash-container {
-        padding: 80px 0;
+    .insights-wrapper {
+        padding: 140px 0 80px;
         min-height: 100vh;
-        background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent),
-                    radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.15), transparent);
     }
 
-    .dash-header {
+    .insights-header {
         text-align: center;
         margin-bottom: 60px;
-        animation: fadeInDown 0.8s ease;
     }
 
-    .dash-title {
-        font-size: 3rem;
+    .insights-title {
+        font-family: var(--hub-heading);
+        font-size: clamp(32px, 5vw, 48px);
         font-weight: 800;
-        letter-spacing: -0.02em;
-        background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
         margin-bottom: 16px;
+        color: var(--hub-text);
+        letter-spacing: -0.02em;
     }
 
-    .dash-subtitle {
-        color: var(--text-secondary);
+    .insights-subtitle {
+        color: var(--hub-muted);
         font-size: 1.1rem;
         max-width: 600px;
         margin: 0 auto;
     }
 
-    .stats-grid {
+    .metrics-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 32px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
         margin-bottom: 60px;
     }
 
-    .stat-card {
-        background: var(--dash-card);
-        backdrop-filter: blur(12px);
-        border: 1px solid var(--dash-border);
-        border-radius: 24px;
-        padding: 40px;
-        text-align: center;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Customizing hub-stat for better focus */
+    .stat-focus {
+        padding: 40px 32px;
         position: relative;
         overflow: hidden;
     }
 
-    .stat-card:hover {
-        transform: translateY(-8px);
-        border-color: rgba(255, 255, 255, 0.2);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    .stat-focus .hub-stat-number {
+        font-size: 4rem;
+        margin-bottom: 12px;
     }
 
-    .stat-card::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: linear-gradient(135deg, var(--dash-primary), var(--dash-secondary));
-        opacity: 0;
-        transition: opacity 0.4s;
-        z-index: 0;
+    .stat-focus .hub-stat-label {
+        font-size: 14px;
+        letter-spacing: 0.2em;
     }
 
-    .stat-card:hover::before {
-        opacity: 0.05;
-    }
-
-    .stat-icon {
-        font-size: 3rem;
-        margin-bottom: 24px;
-        display: inline-block;
-        filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.5));
-    }
-
-    .stat-value {
-        font-size: 4.5rem;
-        font-weight: 800;
-        font-family: var(--font-primary);
-        line-height: 1;
-        margin-bottom: 8px;
-        background: linear-gradient(135deg, #fff, #94a3b8);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        position: relative;
-        z-index: 1;
-    }
-
-    .stat-label {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--text-secondary);
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        position: relative;
-        z-index: 1;
-    }
-
-    .stat-pulse {
-        display: inline-block;
-        width: 12px;
-        height: 12px;
-        background: #10b981;
-        border-radius: 50%;
-        margin-right: 8px;
-        box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
-        animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-        70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-    }
-
-    .refresh-hint {
-        text-align: center;
-        color: var(--text-muted);
-        font-size: 0.9rem;
-        margin-top: 40px;
-    }
-
-    .btn-refresh {
-        background: var(--dash-card);
-        border: 1px solid var(--dash-border);
-        color: #fff;
-        padding: 12px 24px;
-        border-radius: 12px;
-        font-weight: 600;
-        cursor: pointer;
+    .live-indicator {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        transition: all 0.3s;
+        color: var(--hub-live);
+        font-family: var(--hub-mono);
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-top: 16px;
     }
 
-    .btn-refresh:hover {
-        background: rgba(255, 255, 255, 0.1);
-        transform: rotate(5deg);
+    .refresh-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
     }
 
-    @keyframes fadeInDown {
-        from { opacity: 0; transform: translateY(-20px); }
-        to { opacity: 1; transform: translateY(0); }
+    .btn-insights {
+        font-family: var(--hub-font);
+        padding: 12px 28px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 300ms ease;
+        background: var(--hub-surface);
+        border: 1px solid var(--hub-border);
+        color: var(--hub-text);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-insights:hover {
+        background: var(--hub-surface-2);
+        border-color: var(--hub-accent);
+        transform: translateY(-2px);
+    }
+
+    .refresh-hint {
+        font-family: var(--hub-mono);
+        color: var(--hub-faint);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="dash-container">
-    <div class="container">
-        <header class="dash-header">
-            <h1 class="dash-title">Site Insights</h1>
-            <p class="dash-subtitle">Real-time traffic and engagement metrics across the Wilson Manuel portfolio hub.</p>
+<div class="insights-wrapper">
+    <div class="hub-container">
+        <header class="insights-header anim-fade">
+            <h1 class="insights-title">Portfolio Insights</h1>
+            <p class="insights-subtitle">Real-time engagement and traffic metrics for the Wilson Manuel portfolio ecosystem.</p>
         </header>
 
-        <div class="stats-grid">
-            <!-- Total Visits -->
-            <div class="stat-card">
-                <div class="stat-icon">📈</div>
-                <div class="stat-value" id="val-visits">{{ total_visits }}</div>
-                <div class="stat-label">Total Visits</div>
+        <div class="metrics-grid">
+            <!-- Unique Visitors -->
+            <div class="hub-stat stat-focus anim-fade" style="transition-delay: 100ms;">
+                <div class="hub-stat-number" id="val-unique">{{ unique_visitors }}</div>
+                <div class="hub-stat-label">Unique Visitors</div>
+                <div style="font-size: 0.8rem; color: var(--hub-muted); margin-top: 8px; opacity: 0.6;">Total people reached</div>
+            </div>
+
+            <!-- Total Impressions -->
+            <div class="hub-stat stat-focus anim-fade" style="transition-delay: 200ms;">
+                <div class="hub-stat-number" id="val-visits">{{ total_impressions }}</div>
+                <div class="hub-stat-label">Total Impressions</div>
+                <div style="font-size: 0.8rem; color: var(--hub-muted); margin-top: 8px; opacity: 0.6;">Total page views</div>
             </div>
 
             <!-- Users Online -->
-            <div class="stat-card">
-                <div class="stat-icon">👥</div>
-                <div class="stat-value" id="val-online">{{ online_count }}</div>
-                <div class="stat-label">
-                    <span class="stat-pulse"></span>
-                    Users Online
+            <div class="hub-stat stat-focus anim-fade" style="transition-delay: 300ms;">
+                <div class="hub-stat-number" id="val-online" style="background: linear-gradient(135deg, var(--hub-live), #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ online_count }}</div>
+                <div class="hub-stat-label">Live Now</div>
+                <div class="live-indicator">
+                    <div class="pulse-dot"></div>
+                    Active Hub Session
                 </div>
             </div>
         </div>
 
-        <div class="text-center">
-            <button class="btn-refresh" onclick="location.reload()">
-                <span>🔄</span> Refresh Data
+        <div class="refresh-section anim-fade" style="transition-delay: 300ms;">
+            <button class="btn-insights" onclick="location.reload()">
+                <span>🔄</span> Sync Live Data
             </button>
-            <p class="refresh-hint">Metrics are automatically updated on every page load.</p>
+            <p class="refresh-hint">Metrics are cached server-side and refresh on every request</p>
         </div>
     </div>
 </div>
