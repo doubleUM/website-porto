@@ -88,7 +88,8 @@
     <header class="hub-header">
         <nav class="hub-nav">
             <a href="{{ url_for('site_insights') }}" class="hub-brand">
-                <span style="font-size: 1.2rem;">📊</span> Insights
+                <span class="hub-brand-long"><span style="font-size: 1.2rem;">📊</span> Insights</span>
+                <span class="hub-brand-short"><span style="font-size: 1.2rem;">📊</span></span>
             </a>
 
             <div class="hub-nav-links">
@@ -138,6 +139,16 @@
         }, observerOptions);
 
         document.querySelectorAll('.anim-fade').forEach(el => observer.observe(el));
+
+        // Navbar Scroll Logic
+        const nav = document.querySelector('.hub-nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                nav.classList.add('is-scrolled');
+            } else {
+                nav.classList.remove('is-scrolled');
+            }
+        });
     </script>
     {% block extra_js %}{% endblock %}
 </body>

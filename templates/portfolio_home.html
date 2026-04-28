@@ -142,10 +142,14 @@
 
     <header class="hub-header">
         <nav class="hub-nav">
-            <a href="{{ url_for('portfolio_home') }}" class="hub-brand">Wilson Manuel</a>
+            <a href="{{ url_for('portfolio_home') }}" class="hub-brand">
+                <span class="hub-brand-long">Wilson Manuel's</span>
+                <span class="hub-brand-short">W. Manuel</span>
+            </a>
             <div class="hub-nav-links">
                 <a href="#projects" class="hub-link">Projects</a>
                 <a href="#about" class="hub-link">About</a>
+                <a href="{{ url_for('site_insights') }}" class="hub-link">Insights</a>
                 <button class="hub-theme-toggle" id="theme-toggle" aria-label="Toggle dark/light mode">
                     <span class="theme-icon-dark">🌙</span>
                     <span class="theme-icon-light">☀️</span>
@@ -416,9 +420,7 @@
                 <div class="hub-footer-brand">Wilson Manuel</div>
                 <div class="hub-footer-note">Portfolio hub • 2026</div>
             </div>
-            <div class="hub-footer-center">
-                <a href="{{ url_for('site_insights') }}" class="hub-link" style="font-size: 0.8rem; opacity: 0.6;">Site Insights</a>
-            </div>
+
             <div class="hub-footer-right">
                 <div class="hub-last-updated">Last updated: <time>{{ last_update }}</time></div>
             </div>
@@ -485,11 +487,9 @@
         const nav = document.querySelector('.hub-nav');
         window.addEventListener('scroll', () => {
             if (window.scrollY > 100) {
-                nav.style.background = 'var(--hub-bg)';
-                nav.style.width = 'min(450px, calc(100% - 32px))';
+                nav.classList.add('is-scrolled');
             } else {
-                nav.style.background = 'var(--hub-nav-bg)';
-                nav.style.width = 'min(600px, calc(100% - 32px))';
+                nav.classList.remove('is-scrolled');
             }
         });
 

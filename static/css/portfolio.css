@@ -82,6 +82,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -331,9 +332,9 @@ body::before {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  width: min(600px, calc(100% - 32px));
+  width: min(900px, calc(100% - 24px));
   margin: 0 auto;
-  padding: 8px 12px 8px 16px;
+  padding: 8px 24px;
   border: 1px solid var(--hub-border);
   background: var(--hub-nav-bg);
   border-radius: 100px;
@@ -343,6 +344,12 @@ body::before {
   pointer-events: auto;
   /* Re-enable for nav content */
   transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hub-nav.is-scrolled {
+  width: min(700px, calc(100% - 24px));
+  background: var(--hub-bg);
+  box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.6);
 }
 
 .hub-brand {
@@ -355,6 +362,21 @@ body::before {
   font-weight: 700;
   font-size: 14px;
   letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.hub-brand-suffix {
+  display: inline;
+}
+
+@media (max-width: 600px) {
+  .hub-brand-suffix {
+    display: none;
+  }
+}
+
+.hub-brand-short {
+  display: none;
 }
 
 .hub-nav-links {
@@ -441,14 +463,12 @@ body::before {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  min-height: 80vh;
-  justify-content: center;
-  padding-bottom: 80px;
+  padding-bottom: 60px;
+  gap: 60px;
 }
 
 .hub-hero-left {
   max-width: 800px;
-  margin-bottom: 60px;
 }
 
 .hub-kicker {
@@ -479,6 +499,7 @@ body::before {
   background: linear-gradient(135deg, var(--hub-text) 0%, var(--hub-accent) 50%, var(--hub-accent-2) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shine 8s linear infinite;
 }
@@ -847,7 +868,6 @@ body::before {
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: auto auto;
   gap: 16px;
-  margin-bottom: 40px;
 }
 
 .hub-bento-card {
@@ -907,11 +927,21 @@ body::before {
 }
 
 @media (max-width: 768px) {
+  .hub-bento-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .bento-intro,
+  .bento-stack,
+  .bento-location,
+  .bento-connect {
+    grid-column: span 1 !important;
+  }
+
   .bento-intro {
     flex-direction: column;
     text-align: center;
     gap: 20px;
-    grid-column: span 4;
   }
 
   .bento-intro-main .hub-about-bio {
@@ -1034,7 +1064,7 @@ body::before {
    ============================================================================ */
 
 .hub-section {
-  padding: 24px 0 56px;
+  padding: 0 0 60px;
 }
 
 .hub-section-head {
@@ -1332,6 +1362,7 @@ code {
     grid-template-columns: 1fr;
     min-height: auto;
     gap: 24px;
+    padding-bottom: 24px;
   }
 
   .hub-hero-right {
@@ -1354,6 +1385,10 @@ code {
   .hub-section-head {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .hub-section {
+    padding-bottom: 24px;
   }
 
   .hub-about-card {
@@ -1381,13 +1416,20 @@ code {
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 600px) {
   .hub-container {
-    width: calc(100% - 24px);
+    width: 100%;
+    padding: 0 16px;
   }
 
   .hub-title {
-    font-size: 36px;
+    font-size: clamp(28px, 8vw, 34px);
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .hub-subtitle {
+    font-size: 14px;
   }
 
   .hub-stats-grid {
@@ -1403,12 +1445,18 @@ code {
     font-size: 22px;
   }
 
+  .hub-nav {
+    padding: 6px 16px;
+    gap: 8px;
+  }
+
   .hub-nav-links {
-    width: 100%;
+    gap: 8px;
   }
 
   .hub-link {
-    width: 100%;
+    font-size: 12px;
+    padding: 6px 8px;
   }
 
   .hub-about-card {
@@ -1426,5 +1474,43 @@ code {
 
   .hub-project-thumb {
     height: 140px;
+  }
+}
+
+/* --- Ultra-Small Device Optimization (iPhone SE / 320px) --- */
+@media (max-width: 400px) {
+  .hub-nav {
+    padding: 4px 6px 4px 10px;
+    gap: 4px;
+    width: calc(100% - 16px);
+    /* Use even more screen width */
+  }
+
+  .hub-nav-links {
+    gap: 2px;
+  }
+
+  .hub-link {
+    font-size: 10px;
+    padding: 4px 6px;
+    letter-spacing: -0.02em;
+  }
+
+  .hub-brand {
+    font-size: 12px;
+  }
+
+  .hub-brand-long {
+    display: none;
+  }
+
+  .hub-brand-short {
+    display: inline;
+  }
+
+  .hub-theme-toggle {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
   }
 }
