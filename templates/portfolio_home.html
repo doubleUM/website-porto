@@ -36,7 +36,7 @@
             height: 100%;
             object-fit: cover;
             opacity: 0;
-            animation: heroSlideFade 16s infinite cubic-bezier(0.4, 0, 0.2, 1);
+            animation: heroSlideFade 20s infinite cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .hero-slider img.slide-1 {
@@ -44,14 +44,18 @@
         }
 
         .hero-slider img.slide-2 {
-            animation-delay: -12s;
+            animation-delay: -16s;
         }
 
         .hero-slider img.slide-3 {
-            animation-delay: -8s;
+            animation-delay: -12s;
         }
 
         .hero-slider img.slide-4 {
+            animation-delay: -8s;
+        }
+
+        .hero-slider img.slide-5 {
             animation-delay: -4s;
         }
 
@@ -60,15 +64,15 @@
                 opacity: 1;
             }
 
-            17% {
+            15% {
                 opacity: 1;
             }
 
-            25% {
+            20% {
                 opacity: 0;
             }
 
-            92% {
+            96% {
                 opacity: 0;
             }
 
@@ -110,26 +114,26 @@
         // Spawning system for dynamic technical nodes (Portfolio Hub)
         document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('random-nodes');
-            
+
             function spawnNode() {
                 if (container.children.length > 25) return; // Slightly more nodes for the main hub
 
                 const node = document.createElement('span');
                 node.className = 'hub-node-dynamic';
-                
+
                 const top = Math.random() * 100;
                 const left = Math.random() * 100;
-                
+
                 node.style.top = `${top}%`;
                 node.style.left = `${left}%`;
-                
+
                 container.appendChild(node);
-                
+
                 setTimeout(() => { node.remove(); }, 7000); // Matches the 7s lifecycle
             }
 
             // Initial burst
-            for(let i=0; i<10; i++) {
+            for (let i = 0; i < 10; i++) {
                 setTimeout(spawnNode, Math.random() * 4000);
             }
 
@@ -186,6 +190,8 @@
                                 class="theme-img-dark slide-3" alt="Chat">
                             <img src="{{ url_for('static', filename='images/ai-tool-dark.png') }}"
                                 class="theme-img-dark slide-4" alt="AI Tool">
+                            <img src="{{ url_for('static', filename='images/financial-planning-dark-final.png') }}"
+                                class="theme-img-dark slide-5" alt="Financial Planning">
                             <!-- Light Theme Slides -->
                             <img src="{{ url_for('static', filename='images/spareparts-light.png') }}"
                                 class="theme-img-light slide-1" alt="AutoParts">
@@ -195,12 +201,14 @@
                                 class="theme-img-light slide-3" alt="Chat">
                             <img src="{{ url_for('static', filename='images/ai-tool-light.png') }}"
                                 class="theme-img-light slide-4" alt="AI Tool">
+                            <img src="{{ url_for('static', filename='images/financial-planning-light-final.png') }}"
+                                class="theme-img-light slide-5" alt="Financial Planning">
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>>
+    </div>
     </header>
 
     <main>
@@ -405,6 +413,33 @@
                             <div class="hub-project-meta">
                                 <span>Routes: <code>/ai-tool</code> · <code>/ai-tool/studio</code></span>
                                 <span class="hub-arrow">→</span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a class="hub-project anim-fade" data-anim data-status="live"
+                        href="https://financial-planning-steel.vercel.app/" target="_blank" rel="noopener noreferrer">
+                        <div class="hub-project-thumb">
+                            <img src="{{ url_for('static', filename='images/financial-planning-dark-final.png') }}"
+                                alt="Financial Planning preview (Dark)" class="hub-thumb-img theme-img-dark">
+                            <img src="{{ url_for('static', filename='images/financial-planning-light-final.png') }}"
+                                alt="Financial Planning preview (Light)" class="hub-thumb-img theme-img-light">
+                        </div>
+                        <div class="hub-project-body">
+                            <div class="hub-project-top">
+                                <h3 class="hub-h3">Financial Planning App</h3>
+                                <span class="hub-pill hub-pill-live">Live</span>
+                            </div>
+                            <p class="hub-project-text">A modern financial planning interface to track your wealth and
+                                budget.</p>
+                            <div class="hub-project-tags">
+                                <span class="hub-tech-tag">Next.js</span>
+                                <span class="hub-tech-tag">React</span>
+                                <span class="hub-tech-tag">Vercel</span>
+                            </div>
+                            <div class="hub-project-meta">
+                                <span>External Link</span>
+                                <span class="hub-arrow">↗</span>
                             </div>
                         </div>
                     </a>
