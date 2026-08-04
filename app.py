@@ -1,6 +1,5 @@
 import os
 import sys
-import regex # Pre-import regex to bypass NLTK's Python 3.14+ CWD security block in Gunicorn
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
