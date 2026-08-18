@@ -35,8 +35,9 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: top;
             opacity: 0;
-            animation: heroSlideFade 24s infinite cubic-bezier(0.4, 0, 0.2, 1);
+            animation: heroSlideFade 32s infinite cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .hero-slider img.slide-1 {
@@ -44,22 +45,30 @@
         }
 
         .hero-slider img.slide-2 {
-            animation-delay: -20s;
+            animation-delay: -28s;
         }
 
         .hero-slider img.slide-3 {
-            animation-delay: -16s;
+            animation-delay: -24s;
         }
 
         .hero-slider img.slide-4 {
-            animation-delay: -12s;
+            animation-delay: -20s;
         }
 
         .hero-slider img.slide-5 {
-            animation-delay: -8s;
+            animation-delay: -16s;
         }
 
         .hero-slider img.slide-6 {
+            animation-delay: -12s;
+        }
+
+        .hero-slider img.slide-7 {
+            animation-delay: -8s;
+        }
+
+        .hero-slider img.slide-8 {
             animation-delay: -4s;
         }
 
@@ -68,15 +77,15 @@
                 opacity: 1;
             }
 
-            12.5% {
+            9.375% {
                 opacity: 1;
             }
 
-            16.66% {
+            12.5% {
                 opacity: 0;
             }
 
-            95.83% {
+            96.875% {
                 opacity: 0;
             }
 
@@ -198,6 +207,10 @@
                                 class="theme-img-dark slide-5" alt="Financial Planning">
                             <img src="{{ url_for('static', filename='images/retail-stock-dark.png') }}"
                                 class="theme-img-dark slide-6" alt="Retail Stock Tracker">
+                            <img src="{{ url_for('static', filename='images/rag-chat-dark.png') }}"
+                                class="theme-img-dark slide-7" alt="RAG Chat">
+                            <img src="{{ url_for('static', filename='images/sentiment-predict-dark.png') }}"
+                                class="theme-img-dark slide-8" alt="Sentiment Predict">
                             <!-- Light Theme Slides -->
                             <img src="{{ url_for('static', filename='images/spareparts-light.png') }}"
                                 class="theme-img-light slide-1" alt="AutoParts">
@@ -211,6 +224,10 @@
                                 class="theme-img-light slide-5" alt="Financial Planning">
                             <img src="{{ url_for('static', filename='images/retail-stock-light.png') }}"
                                 class="theme-img-light slide-6" alt="Retail Stock Tracker">
+                            <img src="{{ url_for('static', filename='images/rag-chat-light.png') }}"
+                                class="theme-img-light slide-7" alt="RAG Chat">
+                            <img src="{{ url_for('static', filename='images/sentiment-predict-light.png') }}"
+                                class="theme-img-light slide-8" alt="Sentiment Predict">
                         </div>
                     </div>
                 </div>
@@ -411,8 +428,7 @@
                                 <h3 class="hub-h3">TextForge — AI Tool</h3>
                                 <span class="hub-pill hub-pill-live">Live</span>
                             </div>
-                            <p class="hub-project-text">Swiss grid intro, processing studio, local presets, and
-                                documented mock API.</p>
+                            <p class="hub-project-text">An AI playground comparing traditional NLP techniques (TF-IDF, VADER, Naive Bayes) against modern LLMs (Gemini) across various text processing tasks.</p>
                             <div class="hub-project-tags">
                                 <span class="hub-tech-tag">Flask</span>
                                 <span class="hub-tech-tag">REST</span>
@@ -446,7 +462,7 @@
                                 <span class="hub-tech-tag">Vercel</span>
                             </div>
                             <div class="hub-project-meta">
-                                <span>External Link</span>
+                                <span>External Link: <code>https://financial-planning-steel.vercel.app</code></span>
                                 <span class="hub-arrow">↗</span>
                             </div>
                         </div>
@@ -472,7 +488,59 @@
                                 <span class="hub-tech-tag">Vercel</span>
                             </div>
                             <div class="hub-project-meta">
-                                <span>External Link</span>
+                                <span>External Link: <code>https://retail-stock-tracker.vercel.app</code></span>
+                                <span class="hub-arrow">↗</span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a class="hub-project anim-fade" data-anim data-status="live"
+                        href="https://rag-chat-doubleum.streamlit.app/" target="_blank" rel="noopener noreferrer">
+                        <div class="hub-project-thumb">
+                            <img src="{{ url_for('static', filename='images/rag-chat-dark.png') }}"
+                                alt="RAG Chat preview (Dark)" class="hub-thumb-img theme-img-dark">
+                            <img src="{{ url_for('static', filename='images/rag-chat-light.png') }}"
+                                alt="RAG Chat preview (Light)" class="hub-thumb-img theme-img-light">
+                        </div>
+                        <div class="hub-project-body">
+                            <div class="hub-project-top">
+                                <h3 class="hub-h3">RAG Chat System</h3>
+                                <span class="hub-pill hub-pill-live">Live</span>
+                            </div>
+                            <p class="hub-project-text">A Retrieval-Augmented Generation chatbot built with Streamlit.</p>
+                            <div class="hub-project-tags">
+                                <span class="hub-tech-tag">Streamlit</span>
+                                <span class="hub-tech-tag">RAG</span>
+                                <span class="hub-tech-tag">Python</span>
+                            </div>
+                            <div class="hub-project-meta">
+                                <span>External Link: <code>https://rag-chat-doubleum.streamlit.app</code></span>
+                                <span class="hub-arrow">↗</span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a class="hub-project anim-fade" data-anim data-status="live"
+                        href="https://sentimentpredict.streamlit.app/" target="_blank" rel="noopener noreferrer">
+                        <div class="hub-project-thumb">
+                            <img src="{{ url_for('static', filename='images/sentiment-predict-dark.png') }}"
+                                alt="Sentiment Predict preview (Dark)" class="hub-thumb-img theme-img-dark">
+                            <img src="{{ url_for('static', filename='images/sentiment-predict-light.png') }}"
+                                alt="Sentiment Predict preview (Light)" class="hub-thumb-img theme-img-light">
+                        </div>
+                        <div class="hub-project-body">
+                            <div class="hub-project-top">
+                                <h3 class="hub-h3">Sentiment Predictor</h3>
+                                <span class="hub-pill hub-pill-live">Live</span>
+                            </div>
+                            <p class="hub-project-text">An ML-powered web app for analyzing sentiment in text, built with Streamlit.</p>
+                            <div class="hub-project-tags">
+                                <span class="hub-tech-tag">Streamlit</span>
+                                <span class="hub-tech-tag">Python</span>
+                                <span class="hub-tech-tag">Scikit-learn</span>
+                            </div>
+                            <div class="hub-project-meta">
+                                <span>External Link: <code>https://sentimentpredict.streamlit.app</code></span>
                                 <span class="hub-arrow">↗</span>
                             </div>
                         </div>

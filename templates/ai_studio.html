@@ -288,6 +288,20 @@
                     optTranslate.style.display = currentMode === 'translate' ? 'flex' : 'none';
                     optDocument.style.display = currentMode === 'document' ? 'flex' : 'none';
                 }
+                if (o.useAi !== undefined) {
+                    useAiEnabled = o.useAi;
+                    useAiBtn.classList.toggle('is-active', useAiEnabled);
+                    useAiBtn.textContent = useAiEnabled ? 'Gemini AI: ON' : 'Gemini AI: OFF';
+                    if (useAiEnabled) {
+                        useAiBtn.style.backgroundColor = 'var(--tf-accent)';
+                        useAiBtn.style.color = '#fff';
+                        useAiBtn.style.borderColor = 'var(--tf-accent)';
+                    } else {
+                        useAiBtn.style.backgroundColor = '';
+                        useAiBtn.style.color = '';
+                        useAiBtn.style.borderColor = '';
+                    }
+                }
                 updateStats();
             }
         } catch (e) { /* ignore */ }

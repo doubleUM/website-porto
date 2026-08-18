@@ -20,25 +20,24 @@
     {% include 'ai_nav.html' %}
     <div class="tf-wrap">
         <p class="tf-hero-num">01 / Laboratory</p>
-        <h1 class="tf-h1">Text tooling on a strict grid.</h1>
-        <p class="tf-lead">TextForge uses a Swiss-inspired layout: light background, red accent, monospace data. It is
-            intentionally unrelated to the purple portfolio hub, the paper Kanban app, or the brutalist chat.</p>
+        <h1 class="tf-h1">The ultimate AI vs ML proving ground.</h1>
+        <p class="tf-lead">TextForge is a modern workspace designed to pit traditional Machine Learning models (like TF-IDF and Naive Bayes) against advanced Large Language Models (Gemini 3 Flash) in real-time text processing tasks.</p>
         <div class="tf-actions">
             <a href="{{ url_for('ai_tool_studio') }}" class="tf-btn tf-btn-solid">Open studio</a>
             <a href="{{ url_for('ai_tool_docs') }}" class="tf-btn">Read API</a>
         </div>
         <div class="tf-grid-3">
             <div class="tf-tile">
-                <h3>Modes</h3>
-                <p>Summarize, translate (mock), tone shift, and explain — same backend routes as before.</p>
+                <h3>NLP vs LLM</h3>
+                <p>Run head-to-head comparisons for summarization, translation, tone analysis, document Q&A, and ticket triage.</p>
             </div>
             <div class="tf-tile">
                 <h3>Presets</h3>
-                <p>Save reusable prompts and starter text in the browser; wire to a database when you are ready.</p>
+                <p>Save reusable prompts and starter text in the browser to quickly test complex logic and edge cases.</p>
             </div>
             <div class="tf-tile">
-                <h3>Exports</h3>
-                <p>Copy and download outputs. History still mirrors the studio session in localStorage.</p>
+                <h3>Architecture</h3>
+                <p>Built on Flask with a seamless integration of Scikit-learn, TextBlob, Okapi BM25, and the Google Gemini API.</p>
             </div>
         </div>
     </div>
