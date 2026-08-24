@@ -199,8 +199,7 @@
                                 class="theme-img-dark slide-1" alt="AutoParts">
                             <img src="{{ url_for('static', filename='images/kanban-dark.png') }}"
                                 class="theme-img-dark slide-2" alt="Kanban">
-                            <img src="{{ url_for('static', filename='images/chat-dark.png') }}"
-                                class="theme-img-dark slide-3" alt="Chat">
+
                             <img src="{{ url_for('static', filename='images/ai-tool-dark.png') }}"
                                 class="theme-img-dark slide-4" alt="AI Tool">
                             <img src="{{ url_for('static', filename='images/financial-planning-dark-final.png') }}"
@@ -216,8 +215,7 @@
                                 class="theme-img-light slide-1" alt="AutoParts">
                             <img src="{{ url_for('static', filename='images/kanban-light.png') }}"
                                 class="theme-img-light slide-2" alt="Kanban">
-                            <img src="{{ url_for('static', filename='images/chat-light.png') }}"
-                                class="theme-img-light slide-3" alt="Chat">
+
                             <img src="{{ url_for('static', filename='images/ai-tool-light.png') }}"
                                 class="theme-img-light slide-4" alt="AI Tool">
                             <img src="{{ url_for('static', filename='images/financial-planning-light-final.png') }}"
@@ -350,12 +348,11 @@
                                 <h3 class="hub-h3">Car Spareparts Store</h3>
                                 <span class="hub-pill hub-pill-live">Live</span>
                             </div>
-                            <p class="hub-project-text">E-commerce demo for automotive parts with cart, checkout, and
-                                admin.</p>
+                            <p class="hub-project-text">E-commerce demo for automotive parts with cart, checkout, admin, and a smart Gemini AI Assistant.</p>
                             <div class="hub-project-tags">
                                 <span class="hub-tech-tag">Flask</span>
                                 <span class="hub-tech-tag">MongoDB</span>
-                                <span class="hub-tech-tag">Jinja2</span>
+                                <span class="hub-tech-tag">Gemini AI</span>
                             </div>
                             <div class="hub-project-meta">
                                 <span>Route: <code>/car-spareparts</code></span>
@@ -390,31 +387,7 @@
                         </div>
                     </a>
 
-                    <a class="hub-project anim-fade" data-anim data-status="live" href="{{ url_for('chat_page') }}">
-                        <div class="hub-project-thumb">
-                            <img src="{{ url_for('static', filename='images/chat-dark.png') }}"
-                                alt="BuzzChat preview (Dark)" class="hub-thumb-img theme-img-dark">
-                            <img src="{{ url_for('static', filename='images/chat-light.png') }}"
-                                alt="BuzzChat preview (Light)" class="hub-thumb-img theme-img-light">
-                        </div>
-                        <div class="hub-project-body">
-                            <div class="hub-project-top">
-                                <h3 class="hub-h3">BuzzChat — Chat App</h3>
-                                <span class="hub-pill hub-pill-live">Live</span>
-                            </div>
-                            <p class="hub-project-text">Neo-brutalist UI: lobby, settings, and WebSocket rooms with
-                                typing hints & history.</p>
-                            <div class="hub-project-tags">
-                                <span class="hub-tech-tag">Flask-SocketIO</span>
-                                <span class="hub-tech-tag">WebSockets</span>
-                                <span class="hub-tech-tag">MongoDB</span>
-                            </div>
-                            <div class="hub-project-meta">
-                                <span>Routes: <code>/chat</code> · <code>/chat/app</code></span>
-                                <span class="hub-arrow">→</span>
-                            </div>
-                        </div>
-                    </a>
+
 
                     <a class="hub-project anim-fade" data-anim data-status="live" href="{{ url_for('ai_tool_page') }}">
                         <div class="hub-project-thumb">

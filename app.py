@@ -706,83 +706,31 @@ def kanban_predict():
         return jsonify({'success': False}), 500
 
 # ============================================================================
-# CHAT ROUTES & SOCKET EVENTS
+# AI ASSISTANT API
 # ============================================================================
 
-@app.route('/chat')
-def chat_page():
-    return render_template('chat_lobby.html')
-
-
-@app.route('/chat/app')
-def chat_app_page():
-    return render_template('chat_app.html')
-
-
-@app.route('/chat/settings')
-def chat_settings_page():
-    return render_template('chat_settings.html')
-
-@socketio.on('set_username')
-def handle_set_username(data):
-    chat_users[request.sid] = data.get('username', 'Anonymous')
-    emit('online_count', {'count': len(chat_users)}, broadcast=True)
-
-@socketio.on('join_room')
-def handle_join(data):
-    room = data.get('room', 'general')
-    join_room(room)
-    username = chat_users.get(request.sid, 'Someone')
-    # Send last 50 messages as history
-    history = list(chat_messages_col.find({'room': room}).sort('created_at', -1).limit(50))
-    history.reverse()
-    history_list = [{'username': m.get('username',''), 'message': m.get('message',''), 'time': m.get('time','')} for m in history]
-    emit('message_history', {'messages': history_list})
-    emit('system_message', {'message': f'{username} joined the room'}, room=room)
-    emit('online_count', {'count': len(chat_users)}, broadcast=True)
-
-@socketio.on('typing')
-def handle_typing(data):
-    room = data.get('room', 'general')
-    username = chat_users.get(request.sid, '')
-    if username:
-        emit('user_typing', {'username': username}, room=room, include_self=False)
-
-@socketio.on('stop_typing')
-def handle_stop_typing(data):
-    room = data.get('room', 'general')
-    username = chat_users.get(request.sid, '')
-    if username:
-        emit('user_stop_typing', {'username': username}, room=room, include_self=False)
-
-@socketio.on('leave_room')
-def handle_leave(data):
-    room = data.get('room', 'general')
-    leave_room(room)
-    username = chat_users.get(request.sid, 'Someone')
-    emit('system_message', {'message': f'{username} left the room'}, room=room)
-
-@socketio.on('send_message')
-def handle_message(data):
-    room = data.get('room', 'general')
-    message = data.get('message', '')
-    username = data.get('username', 'Anonymous')
-    now = datetime.utcnow()
-    msg_doc = {
-        '_id': get_next_id('chat_messages', chat_counters),
-        'room': room,
-        'username': username,
-        'message': message,
-        'time': now.strftime('%H:%M'),
-        'created_at': now
-    }
-    chat_messages_col.insert_one(msg_doc)
-    emit('new_message', {'username': username, 'message': message, 'time': msg_doc['time']}, room=room)
-
-@socketio.on('disconnect')
-def handle_disconnect():
-    chat_users.pop(request.sid, None)
-    emit('online_count', {'count': len(chat_users)}, broadcast=True)
+@app.route('/car-spareparts/api/ask', methods=['POST'])
+def chat_api_ask():
+    data = request.get_json()
+    user_message = data.get('message', '').strip()
+    chat_history = data.get('history', '')
+    
+    if not user_message:
+        return jsonify({'success': False, 'message': 'No message provided.'}), 400
+        
+    # Get inventory context
+    products = list(products_col.find())
+    inventory_context = "Available Products:\n"
+    for p in products:
+        inventory_context += f"- {p.get('name')} (Brand: {p.get('brand')}, Price: ${p.get('price')}): {p.get('description')}. Compatible with: {p.get('compatible_cars')}.\n"
+        
+    # Query AI
+    try:
+        ai_response = ml_engine.ask_shopping_assistant(inventory_context, user_message, chat_history)
+        return jsonify({'success': True, 'response': ai_response})
+    except Exception as e:
+        print(f"AI Assistant Error: {e}")
+        return jsonify({'success': False, 'message': 'Error processing your request.'}), 500
 
 # ============================================================================
 # AI TOOL ROUTES

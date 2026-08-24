@@ -462,3 +462,26 @@ def chat_with_document_gemini(document, query):
     prompt = f"You are a helpful assistant. Use *only* the following document to answer the query. Return your answer as plain text.\n\nDocument: {document}\n\nQuery: {query}"
     answer = call_gemini(prompt)
     return [{'text': answer, 'score': 99}]
+
+# ============================================================================
+# PROJECT 5: AI SHOPPING ASSISTANT
+# ============================================================================
+
+def ask_shopping_assistant(inventory_context, user_message, chat_history=""):
+    """AI Assistant specifically for Car Spareparts using Gemini."""
+    prompt = f"""You are a friendly and helpful AI shopping assistant for a car spareparts store.
+Use the following store inventory context to answer the user's questions. 
+If the user asks something completely unrelated to cars, parts, or the store, politely redirect them.
+
+Inventory Context:
+{inventory_context}
+
+Previous Chat History:
+{chat_history}
+
+User Message: {user_message}
+
+Answer concisely and clearly in plain text, but you can use basic formatting or emojis."""
+    
+    answer = call_gemini(prompt)
+    return answer
