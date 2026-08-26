@@ -16,6 +16,12 @@
   --kb-accent: #ff90e8;
   --kb-accent-soft: rgba(255, 144, 232, 0.2);
   --kb-accent-text: #a1127d;
+  /* Text sitting on the vivid --kb-bg sidebar (not on cards/surfaces). */
+  --kb-on-bg: #0a0a0a;
+  --kb-on-bg-muted: rgba(10, 10, 10, 0.72);
+  --kb-on-bg-accent: #a1127d;
+  --kb-info: #1d4ed8;
+  --kb-danger: #b91c1c;
   --kb-rust: #ff90e8;
   --kb-ink: #0a0a0a;
   --kb-paper: #faf8f3;
@@ -39,6 +45,12 @@
   --kb-accent: #0f3d2e;
   --kb-accent-soft: rgba(15, 61, 46, 0.2);
   --kb-accent-text: #34d399;
+  --kb-on-bg: #052e22;
+  --kb-on-bg-muted: rgba(5, 46, 34, 0.78);
+  --kb-on-bg-accent: #03231a;
+  /* Lightened so status text clears 4.5:1 on the near-black cards. */
+  --kb-info: #60a5fa;
+  --kb-danger: #f87171;
   --kb-rust: #0f3d2e;
   --kb-ink: #e2f5ed;
   --kb-paper: #0a1f17;
@@ -76,6 +88,7 @@
   padding: 28px 20px;
   border-right: 3px solid var(--kb-border);
   background: var(--kb-bg2);
+  color: var(--kb-on-bg);
   display: flex;
   flex-direction: column;
   position: sticky;
@@ -112,7 +125,7 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--kb-muted);
+  color: var(--kb-on-bg-muted);
   margin-top: 2px;
 }
 
@@ -130,20 +143,21 @@
   padding: 10px 12px;
   border-radius: 10px;
   text-decoration: none;
-  color: var(--kb-muted);
+  color: var(--kb-on-bg-muted);
   font-weight: 600;
   font-size: 14px;
   transition: background 0.15s, color 0.15s;
 }
 
 .kb-shell-link:hover {
-  background: var(--kb-surface-2);
-  color: var(--kb-ink);
+  /* Translucent darkening reads correctly on both brand backgrounds. */
+  background: rgba(0, 0, 0, 0.10);
+  color: var(--kb-on-bg);
 }
 
 .kb-shell-link.is-active {
   background: var(--kb-accent-soft);
-  color: var(--kb-accent-text);
+  color: var(--kb-on-bg-accent);
   box-shadow: inset 0 0 0 1px rgba(22, 101, 52, 0.18);
 }
 
@@ -161,7 +175,7 @@
 
 .kb-shell-hub {
   font-size: 13px;
-  color: var(--kb-accent-text);
+  color: var(--kb-on-bg-accent);
   font-weight: 600;
   text-decoration: none;
 }
@@ -312,7 +326,7 @@
 }
 
 .kb-dash-metric-val.kb-accent-progress {
-  color: #1d4ed8;
+  color: var(--kb-info);
 }
 
 .kb-dash-metric-val.kb-accent-done {
@@ -721,7 +735,7 @@
 }
 
 .kb-stat-progress {
-  color: #1d4ed8;
+  color: var(--kb-info);
 }
 
 .kb-stat-done {
@@ -729,7 +743,7 @@
 }
 
 .kb-stat-overdue {
-  color: #b91c1c;
+  color: var(--kb-danger);
 }
 
 .kb-stat-wide {
@@ -794,7 +808,7 @@
 
 .kb-btn-danger {
   background: rgba(185, 28, 28, 0.08);
-  color: #b91c1c;
+  color: var(--kb-danger);
   border-color: rgba(185, 28, 28, 0.2);
 }
 
@@ -856,7 +870,7 @@
 }
 
 .kb-dot-progress {
-  background: #1d4ed8;
+  background: var(--kb-info);
 }
 
 .kb-dot-done {
@@ -998,7 +1012,7 @@
 }
 
 .kb-card-due.kb-overdue {
-  color: #b91c1c;
+  color: var(--kb-danger);
   font-weight: 700;
 }
 
@@ -1172,7 +1186,7 @@
 }
 
 .kb-sub-remove:hover {
-  color: #b91c1c;
+  color: var(--kb-danger);
 }
 
 .kb-add-subtask {
