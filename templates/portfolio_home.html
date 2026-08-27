@@ -160,6 +160,7 @@
                 <span class="hub-brand-short">W. Manuel</span>
             </a>
             <div class="hub-nav-links">
+                <a href="#skills" class="hub-link">Skills</a>
                 <a href="#projects" class="hub-link">Projects</a>
                 <a href="#about" class="hub-link">About</a>
                 <a href="{{ url_for('site_insights') }}" class="hub-link">Insights</a>
@@ -263,18 +264,39 @@
                         </div>
                     </div>
 
-                    <!-- Stack Tile -->
+                    <!-- Focus Tile -->
                     <div class="hub-bento-card bento-stack anim-fade" data-anim style="transition-delay: 100ms;">
-                        <p class="hub-kicker">Tech Stack</p>
-                        <div class="hub-about-skills">
-                            <span class="hub-skill-tag">Python</span>
-                            <span class="hub-skill-tag">Flask</span>
-                            <span class="hub-skill-tag">JavaScript</span>
-                            <span class="hub-skill-tag">MongoDB</span>
-                            <span class="hub-skill-tag">HTML / CSS</span>
-                            <span class="hub-skill-tag">REST APIs</span>
-                            <span class="hub-skill-tag">WebSockets</span>
-                        </div>
+                        <p class="hub-kicker">Focus</p>
+                        <ul class="hub-focus-list">
+                            <li class="hub-focus-item">
+                                <span class="hub-focus-mark" aria-hidden="true"></span>
+                                <div>
+                                    <span class="hub-focus-title">AI Integration</span>
+                                    <span class="hub-focus-desc">LLM-backed features built into products people actually use.</span>
+                                </div>
+                            </li>
+                            <li class="hub-focus-item">
+                                <span class="hub-focus-mark" aria-hidden="true"></span>
+                                <div>
+                                    <span class="hub-focus-title">Applied Machine Learning</span>
+                                    <span class="hub-focus-desc">Categorization and sentiment models aimed at a measurable outcome.</span>
+                                </div>
+                            </li>
+                            <li class="hub-focus-item">
+                                <span class="hub-focus-mark" aria-hidden="true"></span>
+                                <div>
+                                    <span class="hub-focus-title">Full-Stack Delivery</span>
+                                    <span class="hub-focus-desc">Owning a product end to end, from data model to deployed UI.</span>
+                                </div>
+                            </li>
+                            <li class="hub-focus-item">
+                                <span class="hub-focus-mark" aria-hidden="true"></span>
+                                <div>
+                                    <span class="hub-focus-title">Data Analysis &amp; Testing</span>
+                                    <span class="hub-focus-desc">Turning raw data into decisions, and verifying what ships.</span>
+                                </div>
+                            </li>
+                        </ul>
                     </div>
 
                     <!-- Location Tile -->
@@ -310,6 +332,101 @@
                                         d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 6.817h-18.779l5.513-6.812zm9.208-1.264l4.616-3.741v9.348l-4.616-5.607z" />
                                 </svg>
                             </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technical Skills Section -->
+        <section class="hub-section" id="skills">
+            <div class="hub-container">
+                <div class="hub-section-head anim-fade" data-anim>
+                    <div>
+                        <p class="hub-kicker">Capabilities</p>
+                        <h2 class="hub-h2">Technical Skills</h2>
+                    </div>
+                </div>
+
+                <div class="hub-skills-grid">
+                    <div class="hub-skill-group anim-fade" data-anim style="transition-delay: 0ms;">
+                        <div class="hub-skill-group-head">
+                            <span class="hub-skill-num">01</span>
+                            <h3 class="hub-skill-group-title">Languages</h3>
+                        </div>
+                        <div class="hub-skill-list">
+                            <span class="hub-skill-tag">Python</span>
+                            <span class="hub-skill-tag">JavaScript</span>
+                            <span class="hub-skill-tag">HTML5</span>
+                            <span class="hub-skill-tag">CSS3</span>
+                        </div>
+                    </div>
+                    <div class="hub-skill-group anim-fade" data-anim style="transition-delay: 60ms;">
+                        <div class="hub-skill-group-head">
+                            <span class="hub-skill-num">02</span>
+                            <h3 class="hub-skill-group-title">Frontend</h3>
+                        </div>
+                        <div class="hub-skill-list">
+                            <span class="hub-skill-tag">React</span>
+                            <span class="hub-skill-tag">Next.js</span>
+                            <span class="hub-skill-tag">Vite</span>
+                            <span class="hub-skill-tag">Streamlit</span>
+                            <span class="hub-skill-tag">Jinja2</span>
+                            <span class="hub-skill-tag">Responsive UI</span>
+                        </div>
+                    </div>
+                    <div class="hub-skill-group anim-fade" data-anim style="transition-delay: 120ms;">
+                        <div class="hub-skill-group-head">
+                            <span class="hub-skill-num">03</span>
+                            <h3 class="hub-skill-group-title">Backend &amp; APIs</h3>
+                        </div>
+                        <div class="hub-skill-list">
+                            <span class="hub-skill-tag">Flask</span>
+                            <span class="hub-skill-tag">REST APIs</span>
+                            <span class="hub-skill-tag">Session Auth</span>
+                            <span class="hub-skill-tag">Bcrypt</span>
+                        </div>
+                    </div>
+                    <div class="hub-skill-group anim-fade" data-anim style="transition-delay: 180ms;">
+                        <div class="hub-skill-group-head">
+                            <span class="hub-skill-num">04</span>
+                            <h3 class="hub-skill-group-title">AI &amp; Machine Learning</h3>
+                        </div>
+                        <div class="hub-skill-list">
+                            <span class="hub-skill-tag">scikit-learn</span>
+                            <span class="hub-skill-tag">Gemini API</span>
+                            <span class="hub-skill-tag">NLTK</span>
+                            <span class="hub-skill-tag">TextBlob</span>
+                            <span class="hub-skill-tag">NumPy</span>
+                            <span class="hub-skill-tag">TF-IDF</span>
+                            <span class="hub-skill-tag">Naive Bayes</span>
+                            <span class="hub-skill-tag">Linear Regression</span>
+                            <span class="hub-skill-tag">RAG / BM25</span>
+                            <span class="hub-skill-tag">Google Translate API</span>
+                        </div>
+                    </div>
+                    <div class="hub-skill-group anim-fade" data-anim style="transition-delay: 240ms;">
+                        <div class="hub-skill-group-head">
+                            <span class="hub-skill-num">05</span>
+                            <h3 class="hub-skill-group-title">Data &amp; Storage</h3>
+                        </div>
+                        <div class="hub-skill-list">
+                            <span class="hub-skill-tag">MongoDB</span>
+                            <span class="hub-skill-tag">PyMongo</span>
+                            <span class="hub-skill-tag">Data Analysis</span>
+                        </div>
+                    </div>
+                    <div class="hub-skill-group anim-fade" data-anim style="transition-delay: 300ms;">
+                        <div class="hub-skill-group-head">
+                            <span class="hub-skill-num">06</span>
+                            <h3 class="hub-skill-group-title">Tools &amp; Deploy</h3>
+                        </div>
+                        <div class="hub-skill-list">
+                            <span class="hub-skill-tag">Git</span>
+                            <span class="hub-skill-tag">GitHub</span>
+                            <span class="hub-skill-tag">Render</span>
+                            <span class="hub-skill-tag">Vercel</span>
+                            <span class="hub-skill-tag">Streamlit Cloud</span>
                         </div>
                     </div>
                 </div>

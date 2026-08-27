@@ -3,7 +3,6 @@ from textblob import TextBlob
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics.pairwise import cosine_similarity
 from nltk.tokenize import sent_tokenize, word_tokenize
 import nltk
 from rank_bm25 import BM25Okapi

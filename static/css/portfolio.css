@@ -803,12 +803,6 @@ body::before {
 }
 
 /* Skill tags */
-.hub-about-skills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 16px;
-}
 
 .hub-skill-tag {
   padding: 5px 12px;
@@ -1401,10 +1395,6 @@ code {
     text-align: center;
   }
 
-  .hub-about-skills {
-    justify-content: center;
-  }
-
   .hub-social-links {
     justify-content: center;
   }
@@ -1513,4 +1503,108 @@ code {
     height: 28px;
     font-size: 11px;
   }
+}
+
+
+/* ============================================================
+   TECHNICAL SKILLS
+   ============================================================ */
+.hub-skills-grid {
+  display: grid;
+  /* 300px min -> 3 columns inside the 1120px container, so the six groups
+     land as a clean 3x2 grid instead of 4+2. */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+.hub-skill-group {
+  padding: 22px;
+  border-radius: var(--hub-radius);
+  background: var(--hub-card-bg);
+  border: 1px solid var(--hub-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform 400ms cubic-bezier(0.23, 1, 0.32, 1),
+              background 400ms ease, border-color 400ms ease;
+}
+
+.hub-skill-group:hover {
+  transform: translateY(-3px);
+  background: var(--hub-card-hover-bg);
+  border-color: rgba(139, 92, 246, 0.28);
+}
+
+.hub-skill-group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+.hub-skill-num {
+  font-family: var(--hub-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--hub-accent);
+}
+
+.hub-skill-group-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.hub-skill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+@media (max-width: 640px) {
+  .hub-skills-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- About: Focus tile ---- */
+.hub-focus-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 13px;
+}
+
+.hub-focus-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.hub-focus-mark {
+  flex-shrink: 0;
+  margin-top: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--hub-accent);
+  box-shadow: 0 0 8px var(--hub-accent);
+}
+
+.hub-focus-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--hub-text);
+}
+
+.hub-focus-desc {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--hub-muted);
 }

@@ -1,15 +1,11 @@
 import os
-import sys
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
-from flask_socketio import SocketIO, emit, join_room, leave_room
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from datetime import datetime
-import os
 import uuid
-import re
 
 import ml_engine
 from deep_translator import GoogleTranslator
@@ -19,7 +15,6 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 bcrypt = Bcrypt(app)
-socketio = SocketIO(app, cors_allowed_origins='*')
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
 
@@ -790,7 +785,7 @@ def ai_process():
                     result = f"🌍 Translation (Powered by Google Translate API):\n\n{translated_text}"
                 except Exception as t_err:
                     print(f"Translation sub-error: {t_err}")
-                    result = f"🌍 Translation failed. Please try again later."
+                    result = "🌍 Translation failed. Please try again later."
 
         elif mode == 'tone':
             # Analyze tone rather than simply prepending text
@@ -853,4 +848,4 @@ def ai_process():
 if __name__ == '__main__':
     init_db()
     ml_engine.init_models()
-    socketio.run(app, debug=True, port=8000, allow_unsafe_werkzeug=True)
+    app.run(debug=True, port=8000)
