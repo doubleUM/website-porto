@@ -1608,3 +1608,38 @@ code {
   line-height: 1.55;
   color: var(--hub-muted);
 }
+
+/* ============================================================
+   REDUCED MOTION
+   Animations are cut to a near-zero duration rather than removed,
+   so rules that animate FROM opacity:0 still end up visible.
+   Two cases need explicit handling because their resting state is
+   opacity:0 -- killing the animation outright would blank them.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Scroll reveals: show immediately, no travel. */
+  .anim-fade {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Hero carousel: stop cycling and hold a single slide. Without
+     this every slide would finish at opacity:1 and stack. */
+  .hero-slider img {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+
+  .hero-slider img.slide-1 {
+    opacity: 1 !important;
+  }
+}

@@ -4,8 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Wilson Manuel's Portfolio — a hub for all my web projects">
-    <title>Wilson Manuel — Portfolio Hub</title>
+    <meta name="description" content="AI Developer building high-utility products: AI-integrated platforms, categorization and sentiment models, and full-stack web apps.">
+    <meta name="author" content="Wilson Manuel">
+    <meta name="theme-color" content="#030408" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f5f7f9" media="(prefers-color-scheme: light)">
+    <title>Wilson Manuel — AI Developer &amp; Full-Stack Portfolio</title>
+    <link rel="canonical" href="{{ url_for('portfolio_home', _external=True) }}">
+
+    <!-- Open Graph (Facebook, LinkedIn, WhatsApp, Discord) -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Wilson Manuel">
+    <meta property="og:title" content="Wilson Manuel — AI Developer &amp; Full-Stack Portfolio">
+    <meta property="og:description" content="AI Developer building high-utility products: AI-integrated platforms, categorization and sentiment models, and full-stack web apps.">
+    <meta property="og:url" content="{{ url_for('portfolio_home', _external=True) }}">
+    <meta property="og:image" content="{{ url_for('static', filename='images/og-cover.png', _external=True) }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Wilson Manuel's portfolio — Building ideas into real products">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Wilson Manuel — AI Developer &amp; Full-Stack Portfolio">
+    <meta name="twitter:description" content="AI Developer building high-utility products: AI-integrated platforms, categorization and sentiment models, and full-stack web apps.">
+    <meta name="twitter:image" content="{{ url_for('static', filename='images/og-cover.png', _external=True) }}">
+    <meta name="twitter:image:alt" content="Wilson Manuel's portfolio — Building ideas into real products">
 
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>">

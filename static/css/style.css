@@ -1186,3 +1186,20 @@ footer {
   box-shadow: var(--shadow-md);
   border-color: var(--glass-border);
 }
+
+/* ============================================================
+   REDUCED MOTION
+   Honour the OS "reduce motion" setting. Animations are cut to a
+   near-zero duration rather than removed, so rules that animate
+   FROM opacity:0 still land on their final visible state.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
