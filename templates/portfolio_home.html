@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="AI Developer building high-utility products: AI-integrated platforms, categorization and sentiment models, and full-stack web apps.">
+    <meta name="description"
+        content="AI Developer building high-utility products: AI-integrated platforms, categorization and sentiment models, and full-stack web apps.">
     <meta name="author" content="Wilson Manuel">
     <meta name="theme-color" content="#030408" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#f5f7f9" media="(prefers-color-scheme: light)">
@@ -15,7 +16,8 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Wilson Manuel">
     <meta property="og:title" content="Wilson Manuel — AI Developer &amp; Full-Stack Portfolio">
-    <meta property="og:description" content="AI Developer building high-utility products: AI-integrated platforms, categorization and sentiment models, and full-stack web apps.">
+    <meta property="og:description"
+        content="AI Developer building high-utility products: AI-integrated platforms, categorization and sentiment models, and full-stack web apps.">
     <meta property="og:url" content="{{ url_for('portfolio_home', _external=True) }}">
     <meta property="og:image" content="{{ url_for('static', filename='images/og-cover.png', _external=True) }}">
     <meta property="og:image:width" content="1200">
@@ -26,7 +28,8 @@
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Wilson Manuel — AI Developer &amp; Full-Stack Portfolio">
-    <meta name="twitter:description" content="AI Developer building high-utility products: AI-integrated platforms, categorization and sentiment models, and full-stack web apps.">
+    <meta name="twitter:description"
+        content="AI Developer building high-utility products: AI-integrated platforms, categorization and sentiment models, and full-stack web apps.">
     <meta name="twitter:image" content="{{ url_for('static', filename='images/og-cover.png', _external=True) }}">
     <meta name="twitter:image:alt" content="Wilson Manuel's portfolio — Building ideas into real products">
 
@@ -60,7 +63,7 @@
             object-fit: cover;
             object-position: top;
             opacity: 0;
-            animation: heroSlideFade 28s infinite cubic-bezier(0.4, 0, 0.2, 1);
+            animation: heroSlideFade 24s infinite cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .hero-slider img.slide-1 {
@@ -68,26 +71,22 @@
         }
 
         .hero-slider img.slide-2 {
-            animation-delay: -24s;
-        }
-
-        .hero-slider img.slide-3 {
             animation-delay: -20s;
         }
 
-        .hero-slider img.slide-4 {
+        .hero-slider img.slide-3 {
             animation-delay: -16s;
         }
 
-        .hero-slider img.slide-5 {
+        .hero-slider img.slide-4 {
             animation-delay: -12s;
         }
 
-        .hero-slider img.slide-6 {
+        .hero-slider img.slide-5 {
             animation-delay: -8s;
         }
 
-        .hero-slider img.slide-7 {
+        .hero-slider img.slide-6 {
             animation-delay: -4s;
         }
 
@@ -96,15 +95,15 @@
                 opacity: 1;
             }
 
-            10.7143% {
+            12.5% {
                 opacity: 1;
             }
 
-            14.2857% {
+            16.6667% {
                 opacity: 0;
             }
 
-            96.4286% {
+            95.8333% {
                 opacity: 0;
             }
 
@@ -185,6 +184,7 @@
             <div class="hub-nav-links">
                 <a href="#skills" class="hub-link">Skills</a>
                 <a href="#projects" class="hub-link">Projects</a>
+                <a href="#contact" class="hub-link">Contact</a>
                 <a href="#about" class="hub-link">About</a>
                 <a href="{{ url_for('site_insights') }}" class="hub-link">Insights</a>
                 <button class="hub-theme-toggle" id="theme-toggle" aria-label="Toggle dark/light mode">
@@ -228,8 +228,6 @@
                                 class="theme-img-dark slide-5" alt="Retail Stock Tracker">
                             <img src="{{ url_for('static', filename='images/rag-chat-dark.png') }}"
                                 class="theme-img-dark slide-6" alt="RAG Chat">
-                            <img src="{{ url_for('static', filename='images/sentiment-predict-dark.png') }}"
-                                class="theme-img-dark slide-7" alt="Sentiment Predict">
                             <!-- Light Theme Slides -->
                             <img src="{{ url_for('static', filename='images/spareparts-light.png') }}"
                                 class="theme-img-light slide-1" alt="AutoParts">
@@ -244,8 +242,6 @@
                                 class="theme-img-light slide-5" alt="Retail Stock Tracker">
                             <img src="{{ url_for('static', filename='images/rag-chat-light.png') }}"
                                 class="theme-img-light slide-6" alt="RAG Chat">
-                            <img src="{{ url_for('static', filename='images/sentiment-predict-light.png') }}"
-                                class="theme-img-light slide-7" alt="Sentiment Predict">
                         </div>
                     </div>
                 </div>
@@ -295,28 +291,32 @@
                                 <span class="hub-focus-mark" aria-hidden="true"></span>
                                 <div>
                                     <span class="hub-focus-title">AI Integration</span>
-                                    <span class="hub-focus-desc">LLM-backed features built into products people actually use.</span>
+                                    <span class="hub-focus-desc">LLM-backed features built into products people actually
+                                        use.</span>
                                 </div>
                             </li>
                             <li class="hub-focus-item">
                                 <span class="hub-focus-mark" aria-hidden="true"></span>
                                 <div>
                                     <span class="hub-focus-title">Applied Machine Learning</span>
-                                    <span class="hub-focus-desc">Categorization and sentiment models aimed at a measurable outcome.</span>
+                                    <span class="hub-focus-desc">Categorization and sentiment models aimed at a
+                                        measurable outcome.</span>
                                 </div>
                             </li>
                             <li class="hub-focus-item">
                                 <span class="hub-focus-mark" aria-hidden="true"></span>
                                 <div>
                                     <span class="hub-focus-title">Full-Stack Delivery</span>
-                                    <span class="hub-focus-desc">Owning a product end to end, from data model to deployed UI.</span>
+                                    <span class="hub-focus-desc">Owning a product end to end, from data model to
+                                        deployed UI.</span>
                                 </div>
                             </li>
                             <li class="hub-focus-item">
                                 <span class="hub-focus-mark" aria-hidden="true"></span>
                                 <div>
                                     <span class="hub-focus-title">Data Analysis &amp; Testing</span>
-                                    <span class="hub-focus-desc">Turning raw data into decisions, and verifying what ships.</span>
+                                    <span class="hub-focus-desc">Turning raw data into decisions, and verifying what
+                                        ships.</span>
                                 </div>
                             </li>
                         </ul>
@@ -328,33 +328,6 @@
                         <div class="location-content">
                             <div class="location-time" id="local-time">-- : --</div>
                             <div class="location-city">Jakarta, Indonesia</div>
-                        </div>
-                    </div>
-
-                    <!-- Connect Tile -->
-                    <div class="hub-bento-card bento-connect anim-fade" data-anim style="transition-delay: 300ms;">
-                        <p class="hub-kicker">Connect</p>
-                        <div class="hub-social-links">
-                            <a href="https://github.com/doubleUM" target="_blank" class="hub-social"
-                                aria-label="GitHub">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                    <path
-                                        d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                                </svg>
-                            </a>
-                            <a href="https://www.linkedin.com/in/wilson-manuel-1249b820b/" target="_blank"
-                                class="hub-social" aria-label="LinkedIn">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                    <path
-                                        d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                                </svg>
-                            </a>
-                            <a href="mailto:wilsonmanuel111@gmail.com" class="hub-social" aria-label="Email">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                    <path
-                                        d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 6.817h-18.779l5.513-6.812zm9.208-1.264l4.616-3.741v9.348l-4.616-5.607z" />
-                                </svg>
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -484,7 +457,8 @@
                                 <h3 class="hub-h3">Car Spareparts Store</h3>
                                 <span class="hub-pill hub-pill-live">Live</span>
                             </div>
-                            <p class="hub-project-text">E-commerce demo for automotive parts with cart, checkout, admin, and a smart Gemini AI Assistant.</p>
+                            <p class="hub-project-text">E-commerce demo for automotive parts with cart, checkout, admin,
+                                and a smart Gemini AI Assistant.</p>
                             <div class="hub-project-tags">
                                 <span class="hub-tech-tag">Flask</span>
                                 <span class="hub-tech-tag">MongoDB</span>
@@ -537,7 +511,9 @@
                                 <h3 class="hub-h3">TextForge — AI Tool</h3>
                                 <span class="hub-pill hub-pill-live">Live</span>
                             </div>
-                            <p class="hub-project-text">An AI playground comparing traditional NLP techniques (TF-IDF, VADER, Naive Bayes) against modern LLMs (Gemini) across various text processing tasks.</p>
+                            <p class="hub-project-text">An AI playground comparing traditional NLP techniques (TF-IDF,
+                                VADER, Naive Bayes) against modern LLMs (Gemini) across various text processing tasks.
+                            </p>
                             <div class="hub-project-tags">
                                 <span class="hub-tech-tag">Flask</span>
                                 <span class="hub-tech-tag">REST</span>
@@ -616,7 +592,8 @@
                                 <h3 class="hub-h3">RAG Chat System</h3>
                                 <span class="hub-pill hub-pill-live">Live</span>
                             </div>
-                            <p class="hub-project-text">A Retrieval-Augmented Generation chatbot built with Streamlit.</p>
+                            <p class="hub-project-text">A Retrieval-Augmented Generation chatbot built with Streamlit.
+                            </p>
                             <div class="hub-project-tags">
                                 <span class="hub-tech-tag">Streamlit</span>
                                 <span class="hub-tech-tag">RAG</span>
@@ -629,45 +606,120 @@
                         </div>
                     </a>
 
-                    <a class="hub-project anim-fade" data-anim data-status="live"
-                        href="https://sentimentpredict.streamlit.app/" target="_blank" rel="noopener noreferrer">
-                        <div class="hub-project-thumb">
-                            <img src="{{ url_for('static', filename='images/sentiment-predict-dark.png') }}"
-                                alt="Sentiment Predict preview (Dark)" class="hub-thumb-img theme-img-dark">
-                            <img src="{{ url_for('static', filename='images/sentiment-predict-light.png') }}"
-                                alt="Sentiment Predict preview (Light)" class="hub-thumb-img theme-img-light">
-                        </div>
-                        <div class="hub-project-body">
-                            <div class="hub-project-top">
-                                <h3 class="hub-h3">Sentiment Predictor</h3>
-                                <span class="hub-pill hub-pill-live">Live</span>
-                            </div>
-                            <p class="hub-project-text">An ML-powered web app for analyzing sentiment in text, built with Streamlit.</p>
-                            <div class="hub-project-tags">
-                                <span class="hub-tech-tag">Streamlit</span>
-                                <span class="hub-tech-tag">Python</span>
-                                <span class="hub-tech-tag">Scikit-learn</span>
-                            </div>
-                            <div class="hub-project-meta">
-                                <span>External Link: <code>https://sentimentpredict.streamlit.app</code></span>
-                                <span class="hub-arrow">↗</span>
-                            </div>
-                        </div>
-                    </a>
-
                 </div>
             </div>
         </section>
     </main>
 
+    <!-- Contact / Closing CTA -->
+    <section class="hub-section" id="contact">
+        <div class="hub-container">
+            <div class="hub-contact anim-fade" data-anim>
+                <p class="hub-kicker">Get in touch</p>
+                <h2 class="hub-contact-title">Have something you want built?</h2>
+                <p class="hub-contact-lead">
+                    I'm open to roles and freelance work in AI integration and full-stack development.
+                </p>
+                <div class="hub-email-row">
+                    <div style="display: flex; align-items: center; color: var(--hub-muted);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 6.817h-18.779l5.513-6.812zm9.208-1.264l4.616-3.741v9.348l-4.616-5.607z" />
+                        </svg>
+                    </div>
+                    <code class="hub-email-addr" id="contact-email">wilsonmanuel111@gmail.com</code>
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <button type="button" class="hub-email-copy" id="copy-email" data-email="wilsonmanuel111@gmail.com"
+                            aria-label="Copy email address to clipboard">
+                            <svg class="i-copy" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="9" y="9" width="12" height="12" rx="2" />
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                            </svg>
+                            <svg class="i-check" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                                aria-hidden="true">
+                                <path d="m20 6-11 11-5-5" />
+                            </svg>
+                        </button>
+                        <span class="hub-email-status" id="copy-status" role="status" aria-live="polite" style="position: absolute; left: 100%; margin-left: 10px; white-space: nowrap; min-width: auto;"></span>
+                    </div>
+                </div>
+
+                <div class="hub-contact-actions">
+                    {% if resume_url %}
+                    <a class="hub-btn hub-btn-ghost" href="{{ resume_url }}" download>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 3v12" />
+                            <path d="m7 12 5 5 5-5" />
+                            <path d="M5 21h14" />
+                        </svg> Download CV
+                    </a>
+                    {% endif %}
+                    <a class="hub-btn hub-btn-ghost hub-btn-icon" href="mailto:wilsonmanuel111@gmail.com"
+                        aria-label="Send Email">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 6.817h-18.779l5.513-6.812zm9.208-1.264l4.616-3.741v9.348l-4.616-5.607z" />
+                        </svg>
+                    </a>
+                    <a class="hub-btn hub-btn-ghost hub-btn-icon" href="https://github.com/doubleUM"
+                        target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                        </svg>
+                    </a>
+                    <a class="hub-btn hub-btn-ghost hub-btn-icon" href="https://www.linkedin.com/in/wilson-manuel-1249b820b/"
+                        target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <footer class="hub-footer">
         <div class="hub-container hub-footer-inner">
             <div class="hub-footer-left">
                 <div class="hub-footer-brand">Wilson Manuel</div>
-                <div class="hub-footer-note">Portfolio hub • 2026</div>
+                <div class="hub-footer-note">AI Developer · Jakarta, Indonesia</div>
             </div>
 
+            <nav class="hub-footer-nav" aria-label="Footer">
+                <a href="#skills">Skills</a>
+                <a href="#projects">Projects</a>
+                <a href="#about">About</a>
+                <a href="#contact">Contact</a>
+                <a href="{{ url_for('site_insights') }}">Insights</a>
+            </nav>
+
             <div class="hub-footer-right">
+                <div class="hub-footer-social">
+                    <a href="https://github.com/doubleUM" target="_blank" rel="noopener noreferrer" class="hub-social"
+                        aria-label="GitHub">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                        </svg>
+                    </a>
+                    <a href="https://www.linkedin.com/in/wilson-manuel-1249b820b/" target="_blank"
+                        rel="noopener noreferrer" class="hub-social" aria-label="LinkedIn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                        </svg>
+                    </a>
+                    <a href="#contact" class="hub-social" aria-label="Email — jump to contact options"
+                        title="Email — jump to contact options">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 6.817h-18.779l5.513-6.812zm9.208-1.264l4.616-3.741v9.348l-4.616-5.607z" />
+                        </svg>
+                    </a>
+                </div>
                 <div class="hub-last-updated">Last updated: <time>{{ last_update }}</time></div>
             </div>
         </div>
@@ -773,6 +825,62 @@
             root.setAttribute('data-theme', newTheme);
             localStorage.setItem('hub-theme', newTheme);
         });
+
+        // =========================================================================
+        // Copy email to clipboard
+        // mailto: does nothing when no mail client is registered, so the address
+        // is shown in full and copyable. navigator.clipboard needs a secure
+        // context, hence the execCommand fallback.
+        // =========================================================================
+        (function () {
+            const btn = document.getElementById('copy-email');
+            const status = document.getElementById('copy-status');
+            if (!btn) return;
+
+            function legacyCopy(text) {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.setAttribute('readonly', '');
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                let ok = false;
+                try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+                document.body.removeChild(ta);
+                return ok;
+            }
+
+            let resetTimer;
+            function feedback(ok) {
+                clearTimeout(resetTimer);
+                btn.classList.toggle('is-copied', ok);
+                status.textContent = ok ? 'Copied' : 'Press Ctrl+C';
+                if (!ok) {
+                    const range = document.createRange();
+                    range.selectNodeContents(document.getElementById('contact-email'));
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+                resetTimer = setTimeout(function () {
+                    btn.classList.remove('is-copied');
+                    status.textContent = '';
+                }, 2200);
+            }
+
+            btn.addEventListener('click', function () {
+                const email = btn.dataset.email;
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(email)
+                        .then(function () { feedback(true); })
+                        .catch(function () { feedback(legacyCopy(email)); });
+                } else {
+                    feedback(legacyCopy(email));
+                }
+            });
+        })();
+
     </script>
 </body>
 

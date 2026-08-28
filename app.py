@@ -22,6 +22,9 @@ bcrypt = Bcrypt(app)
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
 
+# Downloadable CV. Rendered only when this file exists in static/.
+RESUME_FILENAME = 'Wilson-Manuel-CV.pdf'
+
 # ============================================================================
 # DATABASE CONNECTION
 # ============================================================================
@@ -369,7 +372,15 @@ def portfolio_home():
                 pass
     last_update = datetime.fromtimestamp(max_mtime) if max_mtime > 0 else datetime.now()
     last_update_str = last_update.strftime('%B %Y')
-    return render_template('portfolio_home.html', last_update=last_update_str)
+
+    # Only surface the CV button once the file is actually there, so the link
+    # can never 404. Drop the PDF at static/RESUME_FILENAME to switch it on.
+    resume_path = os.path.join(base_dir, 'static', RESUME_FILENAME)
+    resume_url = url_for('static', filename=RESUME_FILENAME) if os.path.isfile(resume_path) else None
+
+    return render_template('portfolio_home.html',
+                           last_update=last_update_str,
+                           resume_url=resume_url)
 
 
 @app.route('/car-spareparts')
