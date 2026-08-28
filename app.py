@@ -747,6 +747,23 @@ def chat_api_ask():
         print(f"AI Assistant Error: {e}")
         return jsonify({'success': False, 'message': 'Error processing your request.'}), 500
 
+@app.route('/api/portfolio/chat', methods=['POST'])
+def portfolio_chat():
+    data = request.get_json() or {}
+    user_message = data.get('message', '').strip()
+    chat_history = data.get('history', '')
+
+    if not user_message:
+        return jsonify({'success': False, 'message': 'Please provide a message.'}), 400
+
+    try:
+        response = ml_engine.ask_portfolio_assistant(user_message, chat_history)
+        return jsonify({'success': True, 'response': response})
+    except Exception as e:
+        print(f"Portfolio Assistant Error: {e}")
+        return jsonify({'success': False, 'message': 'Failed to get response from AI assistant.'}), 500
+
+
 # ============================================================================
 # AI TOOL ROUTES
 # ============================================================================

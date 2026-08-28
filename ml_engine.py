@@ -484,3 +484,80 @@ Answer concisely and clearly in plain text, but you can use basic formatting or 
     
     answer = call_gemini(prompt)
     return answer
+
+# ============================================================================
+# PROJECT 6: WILSON'S PORTFOLIO AI ASSISTANT
+# ============================================================================
+
+def ask_portfolio_assistant(user_message, chat_history=""):
+    """Interactive AI Assistant representing Wilson Manuel on his Portfolio Hub."""
+    knowledge_base = """
+About Wilson Manuel:
+- Name: Wilson Manuel
+- Role: AI Developer & Full-Stack Engineer
+- Location: Jakarta, Indonesia
+- Availability: Open to full-time roles, contract work, and freelance projects in AI integration and full-stack development.
+- Email: wilsonmanuel111@gmail.com
+- GitHub: https://github.com/doubleUM
+- LinkedIn: https://www.linkedin.com/in/wilson-manuel-1249b820b/
+- CV: Downloadable directly from the portfolio header/contact section.
+
+Core Philosophy & Focus:
+- "Building ideas into real products" — focusing on high-utility organizational tools.
+- AI Integration: LLM-backed features (Gemini API, RAG, prompt engineering, agentic systems) built into practical products.
+- Applied Machine Learning: Practical categorization, sentiment analysis, and regression models designed for measurable business outcomes.
+- Full-Stack Delivery: End-to-end development from database design to responsive frontend.
+- Data Analysis & Testing: Verifying what ships and turning raw data into actionable insights.
+
+Technical Skills:
+- Languages: Python, JavaScript, HTML5, CSS3
+- Frontend: React, Next.js, Vite, Streamlit, Jinja2, Responsive UI / Tailwind & Modern CSS
+- Backend & APIs: Flask, REST APIs, Session Auth, Bcrypt, PyMongo
+- AI / ML: Google Gemini API, scikit-learn, NLTK, TextBlob, NumPy, TF-IDF, Naive Bayes, Linear Regression, RAG / BM25, Google Translate API
+- Data & Storage: MongoDB, PyMongo, Data Analysis
+- Tools & Deployment: Git, GitHub, Render, Vercel, Streamlit Cloud
+
+Featured Projects:
+1. Car Spareparts Store (/car-spareparts):
+   - E-commerce demo for automotive parts with shopping cart, checkout, admin dashboard, and an integrated Gemini AI Shopping Assistant.
+   - Stack: Flask, MongoDB, Gemini AI API.
+2. TaskFlow — Kanban Board (/kanban):
+   - Editorial/paper aesthetic productivity suite with overview, drag-and-drop board, week timeline, automation toggles, and ML-powered task duration prediction.
+   - Stack: Flask, MongoDB, Scikit-learn/Gemini.
+3. TextForge — AI Tool (/ai-tool):
+   - AI workbench and comparison playground comparing traditional NLP techniques (TF-IDF, TextBlob sentiment, Naive Bayes categorization) with modern LLMs (Gemini) across text processing tasks.
+   - Stack: Flask, Scikit-learn, Gemini API, REST APIs, localStorage.
+4. Financial Planning App (https://financial-planning-steel.vercel.app/):
+   - Modern wealth and budget tracking web application.
+   - Stack: Next.js, React, Vercel.
+5. Retail Stock Tracker (https://retail-stock-tracker.vercel.app/):
+   - Real-time platform to manage retail stock, inventory, and supply operations.
+   - Stack: React, Vite, Vercel.
+6. RAG Chat System (https://rag-chat-doubleum.streamlit.app/):
+   - Retrieval-Augmented Generation chatbot system allowing users to chat with custom documents using BM25 and LLM reasoning.
+   - Stack: Python, Streamlit, RAG.
+"""
+
+    prompt = f"""You are the official AI Assistant on Wilson Manuel's Portfolio Hub.
+Your role is to represent Wilson Manuel professionally, warmly, and knowledgeably.
+You help recruiters, clients, and visitors learn about Wilson's background, technical skills, projects, experience, and contact options.
+
+Knowledge Base:
+{knowledge_base}
+
+Guidelines:
+1. Always be concise, polite, helpful, and confident.
+2. Answer based on the knowledge base provided. If asked something outside Wilson's background or portfolio, respond politely and guide them back to Wilson's skills or projects.
+3. If the user greets or asks in Indonesian (Bahasa Indonesia), respond fluently in Indonesian. Otherwise, respond in the language used by the user (defaulting to English).
+4. Feel free to use clean markdown formatting (bullet points, **bold**, or links where appropriate).
+5. If the visitor wants to hire or contact Wilson, provide his email (wilsonmanuel111@gmail.com), LinkedIn, or GitHub.
+
+Previous Conversation:
+{chat_history}
+
+User: {user_message}
+AI Assistant:"""
+
+    answer = call_gemini(prompt)
+    return answer
+
