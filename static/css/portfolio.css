@@ -2107,13 +2107,31 @@ code {
   font-weight: 700;
 }
 
+.hub-ai-msg-bot .hub-ai-bubble p {
+  margin: 0 0 12px 0;
+  line-height: 1.6;
+}
+
+.hub-ai-msg-bot .hub-ai-bubble p:last-child {
+  margin-bottom: 0;
+}
+
 .hub-ai-msg-bot .hub-ai-bubble ul {
-  margin: 6px 0;
+  margin: 8px 0 12px 0;
   padding-left: 18px;
 }
 
+.hub-ai-msg-bot .hub-ai-bubble ul:last-child {
+  margin-bottom: 0;
+}
+
 .hub-ai-msg-bot .hub-ai-bubble li {
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  line-height: 1.55;
+}
+
+.hub-ai-msg-bot .hub-ai-bubble li:last-child {
+  margin-bottom: 0;
 }
 
 .hub-ai-msg-bot .hub-ai-bubble code {
