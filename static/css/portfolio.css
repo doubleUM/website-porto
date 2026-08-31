@@ -1800,6 +1800,123 @@ code {
 }
 
 /* ============================================================
+   JOURNEY & EXPERIENCE TIMELINE
+   ============================================================ */
+
+.hub-timeline-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+@media (min-width: 900px) {
+  .hub-timeline-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+  }
+}
+
+.hub-timeline {
+  position: relative;
+  width: 100%;
+  padding-left: 24px;
+}
+
+.hub-timeline::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  bottom: 0;
+  width: 2px;
+  background: var(--hub-border);
+  border-radius: 2px;
+}
+
+.hub-timeline-item {
+  position: relative;
+  padding-left: 32px;
+  margin-bottom: 48px;
+}
+
+.hub-timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.hub-timeline-dot {
+  position: absolute;
+  left: -29px; /* Distance from left padding (32px) to the center of the 2px line (at 6px + 1px = 7px) => 32 - 7 = 25px offset + dot size offset */
+  /* Wait, absolute relative to item (left:0 is inner bound). Item has padding-left: 32px. Line is at left: 6px of container. Item is at left:0 of container. Line center is at 7px. Dot center should be at 7px. Dot is 12x12, so left should be 7px - 6px = 1px relative to container. Since item is at container edge (margin 0), item's left:0 is container's left:0. So dot should be at left: 1px. */
+  left: 1px;
+  top: 6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--hub-accent);
+  box-shadow: 0 0 10px var(--hub-accent-2);
+  z-index: 2;
+}
+
+.hub-timeline-date {
+  display: inline-block;
+  font-family: var(--hub-mono);
+  font-size: 0.8rem;
+  color: var(--hub-accent);
+  margin-bottom: 8px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.hub-timeline-title {
+  font-family: var(--hub-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--hub-text);
+  margin: 0 0 4px 0;
+}
+
+.hub-timeline-company {
+  font-family: var(--hub-font);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--hub-muted);
+  margin: 0 0 16px 0;
+}
+
+.hub-timeline-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.hub-timeline-list li {
+  position: relative;
+  padding-left: 18px;
+  margin-bottom: 10px;
+  font-family: var(--hub-font);
+  font-size: 0.95rem;
+  color: var(--hub-text);
+  line-height: 1.6;
+}
+
+.hub-timeline-list li:last-child {
+  margin-bottom: 0;
+}
+
+.hub-timeline-list li::before {
+  content: "▹";
+  position: absolute;
+  left: 0;
+  top: -1px;
+  color: var(--hub-accent);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* ============================================================
    PORTFOLIO AI ASSISTANT WIDGET
    ============================================================ */
 
