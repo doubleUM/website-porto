@@ -4,93 +4,93 @@
 <!-- Hero Section -->
 <section class="hero">
     <div class="container">
-        <h1 class="hero-title">Premium Car Spare Parts</h1>
-        <p class="hero-subtitle">Quality automotive components for all makes and models. Fast shipping, expert support.
-        </p>
-        <div class="flex-center gap-3">
-            <a href="{{ url_for('products') }}" class="btn btn-primary btn-lg">Shop Now</a>
-            <a href="{{ url_for('products') }}" class="btn btn-outline btn-lg">Browse Catalog</a>
-        </div>
-    </div>
-</section>
-
-<!-- Trust Indicators -->
-<section style="background: var(--bg-secondary); padding: var(--space-lg) 0;">
-    <div class="container">
-        <div class="grid grid-4">
-            <div class="flex-center gap-2">
-                <span style="font-size: var(--text-3xl);">🚚</span>
-                <div>
-                    <h4 style="margin-bottom: 0;">Free Shipping</h4>
-                    <p style="margin: 0; font-size: var(--text-sm);">On orders over $100</p>
-                </div>
-            </div>
-            <div class="flex-center gap-2">
-                <span style="font-size: var(--text-3xl);">✅</span>
-                <div>
-                    <h4 style="margin-bottom: 0;">Quality Guarantee</h4>
-                    <p style="margin: 0; font-size: var(--text-sm);">100% authentic parts</p>
-                </div>
-            </div>
-            <div class="flex-center gap-2">
-                <span style="font-size: var(--text-3xl);">🔧</span>
-                <div>
-                    <h4 style="margin-bottom: 0;">Expert Support</h4>
-                    <p style="margin: 0; font-size: var(--text-sm);">Technical assistance</p>
-                </div>
-            </div>
-            <div class="flex-center gap-2">
-                <span style="font-size: var(--text-3xl);">🔄</span>
-                <div>
-                    <h4 style="margin-bottom: 0;">Easy Returns</h4>
-                    <p style="margin: 0; font-size: var(--text-sm);">30-day return policy</p>
-                </div>
+        <div class="hero-content-box">
+            <h1 class="hero-title">High-Performance Parts</h1>
+            <p class="hero-subtitle">Premium automotive components engineered for maximum reliability and power. Fast shipping, expert support.</p>
+            <div class="flex-center gap-3">
+                <a href="{{ url_for('products') }}" class="btn btn-primary btn-lg">Shop Now</a>
+                <a href="{{ url_for('products') }}" class="btn btn-outline btn-lg">Browse Catalog</a>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Featured Categories -->
-<section>
+<!-- Floating Trust Indicators -->
+<div class="container trust-bar">
+    <div class="trust-bar-inner">
+        <div class="trust-item">
+            <span class="trust-icon">🚚</span>
+            <div>
+                <h4 style="margin-bottom: 2px;">Free Shipping</h4>
+                <p style="margin: 0; font-size: var(--text-sm); color: var(--text-secondary);">On orders over $100</p>
+            </div>
+        </div>
+        <div class="trust-item">
+            <span class="trust-icon" style="font-weight: 900;">✔</span>
+            <div>
+                <h4 style="margin-bottom: 2px;">Quality Guarantee</h4>
+                <p style="margin: 0; font-size: var(--text-sm); color: var(--text-secondary);">100% authentic parts</p>
+            </div>
+        </div>
+        <div class="trust-item">
+            <span class="trust-icon">🔧</span>
+            <div>
+                <h4 style="margin-bottom: 2px;">Expert Support</h4>
+                <p style="margin: 0; font-size: var(--text-sm); color: var(--text-secondary);">Technical assistance</p>
+            </div>
+        </div>
+        <div class="trust-item">
+            <span class="trust-icon" style="font-weight: 900; font-size: 2.2rem; transform: translateY(-2px);">⟳</span>
+            <div>
+                <h4 style="margin-bottom: 2px;">Easy Returns</h4>
+                <p style="margin: 0; font-size: var(--text-sm); color: var(--text-secondary);">30-day return policy</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Categories (Bento Grid) -->
+<section class="section-categories">
     <div class="container">
         <h2 class="section-title">Shop by Category</h2>
-        <div class="grid grid-3">
+        <div class="bento-grid">
             {% for category in categories %}
-            <a href="{{ url_for('products', category=category.id) }}" style="text-decoration: none;">
-                <div class="card">
-                    <div style="font-size: var(--text-5xl); text-align: center; margin-bottom: var(--space-md);">
-                        {{ category.icon }}
+                {% set bg_img = 'category_electrical.jpg' %}
+                {% if category.name == 'Engine Parts' %} {% set bg_img = 'category_engine.jpg' %}
+                {% elif category.name == 'Brake Systems' %} {% set bg_img = 'category_brakes.jpg' %}
+                {% elif category.name == 'Suspension' %} {% set bg_img = 'category_suspension.jpg' %}
+                {% elif category.name == 'Filters' %} {% set bg_img = 'category_filters.jpg' %}
+                {% elif category.name == 'Lighting' %} {% set bg_img = 'category_lighting.jpg' %}
+                {% endif %}
+                <a href="{{ url_for('products', category=category.id) }}" 
+                   class="bento-item {% if loop.index0 == 0 %}bento-span-2 bento-span-row-2{% elif loop.index0 == 3 %}bento-span-2{% endif %}"
+                   style="background-image: linear-gradient(to top, rgba(10,14,39,0.95) 0%, rgba(10,14,39,0.2) 100%), url('/static/images/{{ bg_img }}'); background-size: cover; background-position: center;">
+                    <div class="bento-content">
+                        <h3 class="bento-title">{{ category.name }}</h3>
+                        <p class="bento-desc">{{ category.description }}</p>
                     </div>
-                    <h3 class="card-title text-center">{{ category.name }}</h3>
-                    <p class="card-text text-center">{{ category.description }}</p>
-                    <div class="text-center">
-                        <span class="btn btn-outline btn-sm">Browse {{ category.name }}</span>
-                    </div>
-                </div>
-            </a>
+                </a>
             {% endfor %}
         </div>
     </div>
 </section>
 
 <!-- Featured Products -->
-<section style="background: var(--bg-secondary);">
+<section class="section-featured">
     <div class="container">
         <h2 class="section-title">Featured Products</h2>
         <div class="grid grid-3">
             {% for product in featured_products %}
             <div class="card">
-                <div
-                    style="background: var(--bg-tertiary); height: 200px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-md); overflow: hidden;">
+                <div style="height: 200px; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: var(--space-md); border-radius: var(--radius-md);">
                     <img src="{{ product.image_url or '/static/images/products/air-filter.png' }}"
-                        alt="{{ product.name }}"
-                        style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 10px;">
+                        alt="{{ product.name }}" class="card-img" style="object-fit: contain; padding: 10px;">
                 </div>
-                <span class="badge badge-success">In Stock</span>
+                <span class="badge badge-success" style="position:absolute; top:var(--space-md); right:var(--space-md); z-index:10;">In Stock</span>
                 <h3 class="card-title">{{ product.name }}</h3>
                 <p class="card-text">{{ product.description[:80] }}...</p>
 
-                <div class="flex-between" style="margin-top: auto;">
+                <div class="flex-between" style="margin-top: auto; border-top: 1px solid var(--glass-border); padding-top: var(--space-md);">
                     <span class="card-price">${{ "%.2f"|format(product.price) }}</span>
                     <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="{{ product.id }}">
                         Add to Cart
@@ -99,35 +99,8 @@
             </div>
             {% endfor %}
         </div>
-        <div class="text-center mt-4">
+        <div class="text-center" style="margin-top: var(--space-xl);">
             <a href="{{ url_for('products') }}" class="btn btn-secondary btn-lg">View All Products</a>
-        </div>
-    </div>
-</section>
-
-<!-- Why Choose Us -->
-<section>
-    <div class="container">
-        <h2 class="section-title">Why Choose AutoParts Pro?</h2>
-        <div class="grid grid-3">
-            <div class="card">
-                <div style="font-size: var(--text-5xl); text-align: center; margin-bottom: var(--space-md);">🏆</div>
-                <h3 class="card-title text-center">Premium Quality</h3>
-                <p class="card-text text-center">All parts are sourced from trusted manufacturers and undergo rigorous
-                    quality checks.</p>
-            </div>
-            <div class="card">
-                <div style="font-size: var(--text-5xl); text-align: center; margin-bottom: var(--space-md);">💰</div>
-                <h3 class="card-title text-center">Best Prices</h3>
-                <p class="card-text text-center">Competitive pricing with regular discounts and special offers for loyal
-                    customers.</p>
-            </div>
-            <div class="card">
-                <div style="font-size: var(--text-5xl); text-align: center; margin-bottom: var(--space-md);">⚡</div>
-                <h3 class="card-title text-center">Fast Delivery</h3>
-                <p class="card-text text-center">Quick processing and reliable shipping to get your parts to you as soon
-                    as possible.</p>
-            </div>
         </div>
     </div>
 </section>
