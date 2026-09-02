@@ -10,8 +10,7 @@
     <title>{% block title %}AutoParts Pro - Premium Car Spare Parts{% endblock %}</title>
 
     <!-- Favicon -->
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}">
 
     <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -31,7 +30,10 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="container">
-            <a href="{{ url_for('store_home') }}" class="navbar-brand">🚗 AutoParts Pro</a>
+            <a href="{{ url_for('store_home') }}" class="navbar-brand" style="display: flex; align-items: center; gap: 8px;">
+                <img src="{{ url_for('static', filename='images/favicon_cropped.png') }}" alt="AutoParts Pro Logo" style="height: 32px; width: auto;">
+                <span>AutoParts Pro</span>
+            </a>
 
             <ul class="navbar-nav">
                 <li><a href="{{ url_for('portfolio_home') }}" class="nav-link">Portfolio</a></li>
