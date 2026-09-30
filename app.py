@@ -879,10 +879,14 @@ def ai_process():
     return jsonify({'success': True, 'result': result})
 
 # ============================================================================
+# INITIALIZATION (Runs on import for WSGI like Gunicorn)
+# ============================================================================
+init_db()
+ml_engine.init_models()
+
+# ============================================================================
 # MAIN
 # ============================================================================
 
 if __name__ == '__main__':
-    init_db()
-    ml_engine.init_models()
     app.run(debug=True, port=8000)
