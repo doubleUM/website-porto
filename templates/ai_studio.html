@@ -29,7 +29,8 @@
                 <button type="button" class="tf-mode" data-mode="document">Doc Q&A</button>
                 <button type="button" class="tf-mode" data-mode="ticket">Triage</button>
             </div>
-            <div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span id="engine-label" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--tf-muted);">Using: TF-IDF</span>
                 <button type="button" class="tf-mode" id="use-ai-btn" style="margin-right: 0;">Gemini AI: OFF</button>
             </div>
         </div>
@@ -136,6 +137,24 @@
 
         let currentMode = 'summarize';
         let processingHistory = JSON.parse(localStorage.getItem('tf-history') || '[]');
+        
+        const engineLabel = document.getElementById('engine-label');
+        function updateEngineLabel() {
+            if (useAiEnabled) {
+                engineLabel.style.display = 'none';
+            } else {
+                engineLabel.style.display = 'inline';
+                let engine = '';
+                switch (currentMode) {
+                    case 'summarize': engine = 'TF-IDF'; break;
+                    case 'translate': engine = 'MyMemory API'; break;
+                    case 'tone': engine = 'TextBlob'; break;
+                    case 'document': engine = 'Okapi BM25'; break;
+                    case 'ticket': engine = 'Naive Bayes'; break;
+                }
+                engineLabel.textContent = `Using: ${engine}`;
+            }
+        }
 
         modes.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -149,6 +168,8 @@
                 outputText.innerHTML = '<div class="tf-placeholder">Result appears here after you run.</div>';
                 copyBtn.style.display = 'none';
                 downloadBtn.style.display = 'none';
+                
+                updateEngineLabel();
             });
         });
 
@@ -167,6 +188,7 @@
                 useAiBtn.style.color = '';
                 useAiBtn.style.borderColor = '';
             }
+            updateEngineLabel();
         });
 
         inputText.addEventListener('input', updateStats);
@@ -310,6 +332,9 @@
                 updateStats();
             }
         } catch (e) { /* ignore */ }
+        
+        // Set the initial label on page load
+        updateEngineLabel();
     </script>
 </body>
 
