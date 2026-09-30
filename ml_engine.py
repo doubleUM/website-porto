@@ -337,7 +337,7 @@ def call_gemini(prompt, is_json=False):
     try:
         client = genai.Client(api_key=os.environ.get('GEMINI_API_KEY'))
         response = client.models.generate_content(
-            model='gemini-3-flash-preview',
+            model='gemini-3.5-flash-lite',
             contents=prompt
         )
         res = response.text.replace('```json', '').replace('```', '').strip()

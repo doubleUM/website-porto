@@ -807,7 +807,7 @@ def ai_process():
         if mode == 'summarize':
             if use_ai:
                 summary = ml_engine.summarize_text_gemini(text, num_sentences=max(2, len(text.split('.')) // 3))
-                result = f"📝 Extractive Summary (Gemini 3 Flash):\n\n{summary}"
+                result = f"📝 Extractive Summary (Gemini 3.5 Flash Lite):\n\n{summary}"
             else:
                 summary = ml_engine.summarize_text(text, num_sentences=max(2, len(text.split('.')) // 3))
                 result = f"📝 Extractive Summary (TF-IDF):\n\n{summary}"
@@ -817,7 +817,7 @@ def ai_process():
             if use_ai:
                 prompt = f"Translate the following text to {target_lang}. Return only the translation.\n\nText: {text}"
                 translated_text = ml_engine.call_gemini(prompt)
-                result = f"🌍 Translation (Powered by Gemini 3 Flash):\n\n{translated_text}"
+                result = f"🌍 Translation (Powered by Gemini 3.5 Flash Lite):\n\n{translated_text}"
             else:
                 try:
                     mymemory_map = {
@@ -856,7 +856,7 @@ def ai_process():
             if use_ai:
                 sent_info = ml_engine.analyze_sentiment_gemini(text)
                 tone_desc = sent_info.get('tone', 'Neutral')
-                result = f"🎭 AI Sentiment Analysis (Gemini 3 Flash):\n\nPrimary Tone: {tone_desc}\n\nRaw Metrics:\n- Polarity: {sent_info.get('polarity', 0)}\n- Subjectivity: {sent_info.get('subjectivity', 0)}"
+                result = f"🎭 AI Sentiment Analysis (Gemini 3.5 Flash Lite):\n\nPrimary Tone: {tone_desc}\n\nRaw Metrics:\n- Polarity: {sent_info.get('polarity', 0)}\n- Subjectivity: {sent_info.get('subjectivity', 0)}"
             else:
                 sent_info = ml_engine.analyze_sentiment(text)
                 tone_desc = ""
@@ -882,7 +882,7 @@ def ai_process():
             else:
                 if use_ai:
                     rag_results = ml_engine.chat_with_document_gemini(text, query)
-                    result = f"🔍 Document Q&A (Gemini 3 Flash):\n\nQuery: {query}\n\n"
+                    result = f"🔍 Document Q&A (Gemini 3.5 Flash Lite):\n\nQuery: {query}\n\n"
                     for i, r in enumerate(rag_results, 1):
                         result += f"Match {i} (Confidence {r['score']}%):\n> {r['text']}\n\n"
                 else:
@@ -894,7 +894,7 @@ def ai_process():
         elif mode == 'ticket':
             if use_ai:
                 res = ml_engine.categorize_ticket_gemini(text)
-                result = f"🎫 AI Support Desk Triage (Gemini 3 Flash):\n\nPredicted Category: {res['category']}\nConfidence Score: {res['confidence']}%\n\n> This mode uses a Zero-Shot prompt sent to the Gemini API to categorize tickets."
+                result = f"🎫 AI Support Desk Triage (Gemini 3.5 Flash Lite):\n\nPredicted Category: {res['category']}\nConfidence Score: {res['confidence']}%\n\n> This mode uses a Zero-Shot prompt sent to the Gemini API to categorize tickets."
             else:
                 res = ml_engine.categorize_ticket_classic(text)
                 result = f"🎫 AI Support Desk Triage (Naive Bayes):\n\nPredicted Category: {res['category']}\nConfidence Score: {res['confidence']}%\n\n> This mode uses a MultinomialNB classifier trained on an internal support dataset."
