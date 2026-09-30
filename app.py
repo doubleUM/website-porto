@@ -9,7 +9,9 @@ from datetime import datetime, timezone
 import uuid
 
 import ml_engine
-from deep_translator import GoogleTranslator
+from deep_translator import MyMemoryTranslator
+import textwrap
+from langdetect import detect
 
 load_dotenv()
 
@@ -818,8 +820,33 @@ def ai_process():
                 result = f"🌍 Translation (Powered by Gemini 3 Flash):\n\n{translated_text}"
             else:
                 try:
-                    translated_text = GoogleTranslator(source='auto', target=target_lang).translate(text)
-                    result = f"🌍 Translation (Powered by Google Translate API):\n\n{translated_text}"
+                    mymemory_map = {
+                        'id': 'id-ID', 'es': 'es-ES', 'fr': 'fr-FR', 'de': 'de-DE',
+                        'ja': 'ja-JP', 'ko': 'ko-KR', 'zh-CN': 'zh-CN', 'ar': 'ar-SA',
+                        'ru': 'ru-RU', 'pt': 'pt-PT', 'it': 'it-IT', 'hi': 'hi-IN',
+                        'nl': 'nl-NL', 'tr': 'tr-TR', 'vi': 'vi-VN', 'th': 'th-TH', 'en': 'en-GB'
+                    }
+                    my_mem_lang = mymemory_map.get(target_lang, target_lang)
+                    
+                    # Detect the source language
+                    try:
+                        detected_code = detect(text)
+                        # Map to MyMemory format if possible, otherwise use the raw code
+                        source_lang = mymemory_map.get(detected_code, detected_code)
+                    except:
+                        source_lang = 'en-GB' # Fallback
+                    
+                    # MyMemory API has a 500 character limit per request.
+                    # We split the text into chunks of 450 characters (preserving word boundaries).
+                    chunks = textwrap.wrap(text, width=450, replace_whitespace=False)
+                    translated_chunks = []
+                    
+                    translator = MyMemoryTranslator(source=source_lang, target=my_mem_lang)
+                    for chunk in chunks:
+                        translated_chunks.append(translator.translate(chunk))
+                        
+                    translated_text = " ".join(translated_chunks)
+                    result = f"🌍 Translation (Powered by MyMemory API):\n\n{translated_text}"
                 except Exception as t_err:
                     print(f"Translation sub-error: {t_err}")
                     result = "🌍 Translation failed. Please try again later."
