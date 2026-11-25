@@ -19,9 +19,9 @@
             <div>
                 <div
                     style="background: var(--bg-tertiary); border-radius: var(--radius-lg); height: 500px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-lg); overflow: hidden;">
-                    <img src="{{ product.image_url or '/static/images/products/air-filter.png' }}"
+                    <img src="{{ product.image_url or '/static/images/products/air-filter.webp' }}"
                         alt="{{ product.name }}"
-                        style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 30px;">
+                        style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 30px;" decoding="async">
                 </div>
             </div>
 
@@ -134,9 +134,9 @@
                 <div class="card">
                     <div
                         style="background: var(--bg-tertiary); height: 150px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-md); overflow: hidden;">
-                        <img src="{{ rel_product.image_url or '/static/images/products/air-filter.png' }}"
+                        <img src="{{ rel_product.image_url or '/static/images/products/air-filter.webp' }}"
                             alt="{{ rel_product.name }}"
-                            style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 10px;">
+                            style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 10px;" loading="lazy" decoding="async">
                     </div>
                     <h4 class="card-title">{{ rel_product.name }}</h4>
                     <div class="flex-between" style="margin-top: auto;">

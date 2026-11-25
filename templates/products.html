@@ -6,7 +6,7 @@
         <h1 class="hero-title" style="font-size: var(--text-4xl); margin-bottom: var(--space-xl);">Car Spare Parts
             Catalog</h1>
 
-        <div style="display: grid; grid-template-columns: 280px 1fr; gap: var(--space-xl);">
+        <div class="catalog-layout">
             <!-- Filter Sidebar -->
             <aside class="filter-sidebar fade-in">
                 <h3 class="filter-title">Filters</h3>
@@ -40,12 +40,16 @@
                 <div class="filter-group">
                     <h4 class="filter-title">Sort By</h4>
                     <form action="{{ url_for('products') }}" method="get">
+                        {% if current_category %}
                         <input type="hidden" name="category" value="{{ current_category }}">
+                        {% endif %}
+                        {% if search_query %}
                         <input type="hidden" name="search" value="{{ search_query }}">
+                        {% endif %}
                         <select name="sort" class="form-control" onchange="this.form.submit()">
-                            <option value="name">Name (A-Z)</option>
-                            <option value="price_asc">Price (Low to High)</option>
-                            <option value="price_desc">Price (High to Low)</option>
+                            <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Name (A-Z)</option>
+                            <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Price (Low to High)</option>
+                            <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Price (High to Low)</option>
                         </select>
                     </form>
                 </div>
@@ -64,9 +68,9 @@
                     <div class="card fade-in" style="animation-delay: {{ loop.index0 * 0.05 }}s; animation-fill-mode: backwards;">
                         <div
                             style="background: var(--bg-tertiary); height: 200px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-md); overflow: hidden;">
-                            <img src="{{ product.image_url or '/static/images/products/air-filter.png' }}"
+                            <img src="{{ product.image_url or '/static/images/products/air-filter.webp' }}"
                                 alt="{{ product.name }}"
-                                style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 10px;">
+                                style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 10px;" loading="lazy" decoding="async" width="400" height="400">
                         </div>
 
                         {% if product.stock > 0 %}

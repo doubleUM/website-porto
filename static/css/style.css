@@ -511,7 +511,7 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-image: url('../images/hero-engine-bg.jpg');
+  background-image: url('../images/hero-engine-bg.webp');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -704,7 +704,7 @@ a:hover {
   background-color: var(--bg-primary);
   background-image: 
     linear-gradient(to bottom, rgba(10, 14, 39, 0.75), rgba(10, 14, 39, 0.75)),
-    url('/static/images/dark-garage-bg.jpg');
+    url('/static/images/dark-garage-bg.webp');
   background-size: cover;
   background-position: center center;
   background-attachment: fixed;
@@ -714,7 +714,7 @@ a:hover {
   background-color: var(--bg-primary);
   background-image: 
     linear-gradient(to bottom, rgba(10, 14, 39, 0.75), rgba(10, 14, 39, 0.75)),
-    url('/static/images/dark-garage-bg.jpg');
+    url('/static/images/dark-garage-bg.webp');
   background-size: cover;
   background-position: center center;
   background-attachment: fixed;
@@ -725,7 +725,7 @@ a:hover {
 [data-theme='light'] .section-featured {
   background-image: 
     linear-gradient(to bottom, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75)),
-    url('/static/images/dark-garage-bg.jpg');
+    url('/static/images/dark-garage-bg.webp');
   border-top-color: rgba(0, 0, 0, 0.05);
 }
 
@@ -835,6 +835,25 @@ textarea.form-control {
 /* ============================================================================
    FILTERS & SIDEBAR
    ============================================================================ */
+
+.catalog-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--space-xl);
+}
+
+.checkout-layout {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: var(--space-xl);
+}
+
+@media (max-width: 900px) {
+  .catalog-layout,
+  .checkout-layout {
+    grid-template-columns: 1fr;
+  }
+}
 
 .filter-sidebar {
   background: var(--bg-card);

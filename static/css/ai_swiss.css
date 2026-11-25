@@ -147,7 +147,7 @@ body.tf-body {
 }
 
 .tf-top {
-  border-bottom: 1px solid var(--tf-shard-border);
+  border-bottom: 1px solid var(--tf-glass-border);
   background: var(--tf-nav-bg);
   backdrop-filter: blur(25px);
   -webkit-backdrop-filter: blur(25px);
@@ -242,7 +242,6 @@ body.tf-body {
 }
 
 .tf-nav-link.is-on {
-  color: var(--tf-ink);
   border-color: var(--tf-border);
   background: var(--tf-ink);
   color: #fff;

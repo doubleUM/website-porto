@@ -7,7 +7,10 @@
 
         <!-- Add Product Form -->
         <div class="card" style="margin-bottom: var(--space-xl);">
-            <h3 style="margin-bottom: var(--space-lg);">Add New Product</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-sm); margin-bottom: var(--space-lg);">
+                <h3 style="margin-bottom: 0;">Add New Product</h3>
+                <span class="badge badge-info" style="margin-bottom: 0;">🛡️ Demo Sandbox: Custom items are scoped to your session</span>
+            </div>
 
             <form id="add-product-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
                 <div class="form-group">
@@ -100,11 +103,15 @@
                                 {% endif %}
                             </td>
                             <td style="padding: var(--space-sm);">
-                                <div style="display: flex; gap: var(--space-xs);">
+                                <div style="display: flex; gap: var(--space-xs); align-items: center;">
                                     <button onclick="openProductModal({{ product.id }})"
                                         class="btn btn-outline btn-sm">View</button>
+                                    {% if product.is_seed or not product.session_id %}
+                                    <span class="badge" style="margin-bottom: 0; background: var(--bg-tertiary); color: var(--text-muted); border: 1px solid var(--glass-border);" title="Default catalog items are protected in the public demo">🔒 Protected</span>
+                                    {% else %}
                                     <button class="btn btn-sm" style="background: var(--danger); color: white;"
                                         onclick="deleteProduct({{ product.id }})">Delete</button>
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>
@@ -144,6 +151,8 @@
                 if (data.success) {
                     showNotification('Product added successfully!', 'success');
                     setTimeout(() => location.reload(), 1500);
+                } else {
+                    showNotification(data.message || 'Could not add product.', 'warning');
                 }
             })
             .catch(error => {
@@ -168,6 +177,8 @@
                 if (data.success) {
                     document.getElementById('product-row-' + productId).remove();
                     showNotification('Product deleted successfully!', 'success');
+                } else {
+                    showNotification(data.message || 'Default demo products are protected.', 'warning');
                 }
             })
             .catch(error => {

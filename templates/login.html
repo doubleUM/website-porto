@@ -10,7 +10,7 @@
         <!-- Logo / Heading -->
         <div style="text-align: center; margin-bottom: var(--space-xl);">
             <div style="margin-bottom: var(--space-sm);">
-                <img src="{{ url_for('static', filename='images/favicon_cropped.png') }}" alt="AutoParts Pro Logo" style="height: 64px; width: auto;">
+                <img src="{{ url_for('static', filename='images/favicon_cropped.webp') }}" alt="AutoParts Pro Logo" style="height: 64px; width: auto;" decoding="async">
             </div>
             <h1 style="font-size: var(--text-3xl); font-weight: 700; margin-bottom: var(--space-xs);">AutoParts Pro</h1>
             <p style="color: var(--text-muted);">Sign in to your account or create a new one</p>
@@ -159,7 +159,7 @@
 
         if (data.success) {
             showAlert(`Welcome back, ${data.name}! Redirecting...`, true);
-            setTimeout(() => window.location.href = '/', 1200);
+            setTimeout(() => window.location.href = "{{ url_for('store_home') }}", 1200);
         } else {
             showAlert(data.message, false);
         }
@@ -192,7 +192,7 @@
 
         if (data.success) {
             showAlert(`Account created! Welcome, ${data.name}! Redirecting...`, true);
-            setTimeout(() => window.location.href = '/', 1200);
+            setTimeout(() => window.location.href = "{{ url_for('store_home') }}", 1200);
         } else {
             showAlert(data.message, false);
         }

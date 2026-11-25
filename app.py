@@ -1,12 +1,18 @@
 import os
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+import re
+import time
+import threading
+from collections import defaultdict, deque
+from functools import wraps
+from datetime import datetime, timezone, timedelta
+import uuid
+
+from flask import Flask, Response, abort, render_template, request, jsonify, session, redirect, url_for
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_bcrypt import Bcrypt
 from pymongo import MongoClient
 from dotenv import load_dotenv
-from datetime import datetime, timezone
-import uuid
 
 import ml_engine
 from deep_translator import MyMemoryTranslator
@@ -65,25 +71,109 @@ chat_users = {}
 # Active sessions tracker (for Online count)
 online_users = {}
 
+# Base directory & cached "Last updated" timestamp (computed once at startup)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+def _compute_last_update_str():
+    ignored_dirs = {'venv', '.venv', '.git', '__pycache__', 'node_modules'}
+    max_mtime = 0
+    for root, dirs, files in os.walk(BASE_DIR):
+        dirs[:] = [d for d in dirs if d not in ignored_dirs]
+        for f in files:
+            if f.endswith('.pyc') or f == '.env':
+                continue
+            filepath = os.path.join(root, f)
+            try:
+                mtime = os.path.getmtime(filepath)
+                if mtime > max_mtime:
+                    max_mtime = mtime
+            except OSError:
+                pass
+    dt = datetime.fromtimestamp(max_mtime) if max_mtime > 0 else datetime.now()
+    return dt.strftime('%B %Y')
+
+
+LAST_UPDATE_STR = _compute_last_update_str()
+
 # ============================================================================
-# CONTEXT PROCESSOR — injects current_user into every template
+# RATE LIMITING (In-memory sliding window per client IP)
+# ============================================================================
+
+_rate_buckets = defaultdict(deque)
+_rate_lock = threading.Lock()
+
+
+def check_rate_limit(bucket_name, max_requests, window_seconds):
+    """Return (allowed: bool, retry_after_seconds: int) for the current client IP."""
+    client_ip = request.remote_addr or 'unknown'
+    key = f"{bucket_name}:{client_ip}"
+    now = time.monotonic()
+    cutoff = now - window_seconds
+
+    with _rate_lock:
+        dq = _rate_buckets[key]
+        while dq and dq[0] <= cutoff:
+            dq.popleft()
+        if len(dq) >= max_requests:
+            retry_after = max(1, int(dq[0] + window_seconds - now) + 1)
+            return False, retry_after
+        dq.append(now)
+        return True, 0
+
+
+def rate_limit_ai(bucket_name, per_minute=10, per_hour=60):
+    """Decorator enforcing per-minute and per-hour rate limits on AI endpoints."""
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            ok_min, retry_min = check_rate_limit(f"{bucket_name}:m", per_minute, 60)
+            if not ok_min:
+                resp = jsonify({
+                    'success': False,
+                    'message': f'Rate limit reached ({per_minute}/min). Please wait {retry_min}s before trying again.'
+                })
+                resp.status_code = 429
+                resp.headers['Retry-After'] = str(retry_min)
+                return resp
+
+            ok_hr, retry_hr = check_rate_limit(f"{bucket_name}:h", per_hour, 3600)
+            if not ok_hr:
+                resp = jsonify({
+                    'success': False,
+                    'message': 'Hourly AI request limit reached. Please try again later.'
+                })
+                resp.status_code = 429
+                resp.headers['Retry-After'] = str(retry_hr)
+                return resp
+
+            return fn(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
+# ============================================================================
+# CONTEXT PROCESSOR — injects current_user & cart_count only on store pages
 # ============================================================================
 
 @app.context_processor
 def inject_global_data():
+    if not request.path.startswith('/car-spareparts'):
+        return {'current_user': None, 'cart_count': 0}
+
     user_id = session.get('user_id')
-    
+
     # Get current user
     user = None
     if user_id:
         user = users_col.find_one({'_id': user_id}, {'password': 0})
-    
+
     # Calculate cart count using the shared filter logic
     cart_filter = get_cart_filter()
     pipeline = [{'$match': cart_filter}, {'$group': {'_id': None, 'total': {'$sum': '$quantity'}}}]
     cart_result = list(cart_items_col.aggregate(pipeline))
     cart_count = cart_result[0]['total'] if cart_result else 0
-    
+
     return {
         'current_user': user,
         'cart_count': cart_count
@@ -148,30 +238,141 @@ def docs_to_list(cursor):
     """Convert a MongoDB cursor to a list of dicts with 'id' fields."""
     return [doc_to_dict(doc) for doc in cursor]
 
+
+def get_demo_session_id():
+    """Return a persistent per-visitor session ID for sandboxing public demo edits."""
+    if 'demo_sid' not in session:
+        session['demo_sid'] = session.get('tracker_id') or str(uuid.uuid4())
+    return session['demo_sid']
+
+
+def get_store_visibility_filter():
+    """Show official seed products plus custom products added by the current visitor."""
+    sid = get_demo_session_id()
+    return {
+        '$or': [
+            {'is_seed': True},
+            {'session_id': {'$exists': False}},
+            {'session_id': sid},
+        ]
+    }
+
+
+def is_protected_seed_product(product_doc):
+    """True when a product belongs to the protected default demo catalog."""
+    if not product_doc:
+        return False
+    return bool(product_doc.get('is_seed') or not product_doc.get('session_id'))
+
+
+DEFAULT_KANBAN_SEED = [
+    {
+        'name': 'Benchmark Gemini vs Naive Bayes ticket routing',
+        'description': 'Compare latency and confidence calibration across 200 bilingual support tickets.',
+        'status': 'done',
+        'priority': 'high',
+        'color': '#15803d',
+        'due_date': None,
+        'subtasks': [
+            {'text': 'Curate English + Bahasa Indonesia test split', 'done': True},
+            {'text': 'Log latency & accuracy metrics', 'done': True},
+        ],
+    },
+    {
+        'name': 'Convert product catalog assets to WebP',
+        'description': 'Resize 2048x2048 PNG assets and add lazy-loading across store & portfolio views.',
+        'status': 'in-progress',
+        'priority': 'high',
+        'color': '#1d4ed8',
+        'due_date': None,
+        'subtasks': [
+            {'text': 'Generate optimized WebP assets', 'done': True},
+            {'text': 'Verify Lighthouse LCP score', 'done': False},
+        ],
+    },
+    {
+        'name': 'Add rate limiting & session sandboxing to public demos',
+        'description': 'Isolate visitor-created demo records per session so public catalog & board stay clean.',
+        'status': 'todo',
+        'priority': 'medium',
+        'color': '#b45309',
+        'due_date': None,
+        'subtasks': [],
+    },
+]
+
+
+def ensure_session_kanban_tasks(sid):
+    """Seed an isolated Kanban workspace per visitor session so public edits never collide."""
+    if session.get('kb_seeded') and kanban_col.count_documents({'session_id': sid}, limit=1) > 0:
+        return
+
+    # Opportunistically clean up abandoned visitor Kanban tasks older than 48h
+    cutoff_iso = (utcnow() - timedelta(hours=48)).isoformat()
+    kanban_col.delete_many({'session_id': {'$exists': True}, 'created_at': {'$lt': cutoff_iso}})
+
+    if kanban_col.count_documents({'session_id': sid}, limit=1) > 0:
+        session['kb_seeded'] = True
+        return
+
+    # Clone existing global template tasks (those without session_id), or fall back to DEFAULT_KANBAN_SEED
+    templates = list(kanban_col.find({'session_id': {'$exists': False}}).sort('created_at', 1).limit(10))
+    source_items = templates if templates else DEFAULT_KANBAN_SEED
+    now_iso = utcnow().isoformat()
+
+    new_docs = []
+    for item in source_items:
+        new_docs.append({
+            '_id': get_next_id('kanban_tasks', kanban_counters),
+            'session_id': sid,
+            'name': item.get('name', 'Sample Task'),
+            'description': item.get('description', ''),
+            'status': item.get('status', 'todo'),
+            'priority': item.get('priority', 'medium'),
+            'color': item.get('color', '#b45309'),
+            'due_date': item.get('due_date'),
+            'subtasks': item.get('subtasks', []),
+            'created_at': now_iso,
+        })
+    if new_docs:
+        kanban_col.insert_many(new_docs)
+    session['kb_seeded'] = True
+
+
+_BOT_UA_RE = re.compile(r'bot|spider|crawl|slurp|headless|lighthouse|facebookexternalhit|whatsapp|discordbot', re.I)
+_IGNORED_TRACK_PREFIXES = ('/static', '/api/', '/car-spareparts/api/', '/kanban/api/', '/ai-tool/api/')
+_IGNORED_TRACK_PATHS = {'/robots.txt', '/sitemap.xml', '/favicon.ico'}
+
+
 @app.before_request
 def track_analytics():
-    # Only track page views for GET requests to non-static routes
-    if request.method == 'GET' and not request.path.startswith('/static'):
-        # Track Unique Visitors vs Impressions
-        if 'tracker_id' not in session or 'unique_counted' not in session:
-            if 'tracker_id' not in session:
-                session['tracker_id'] = str(uuid.uuid4())
-            
-            # This is a new visitor (or first time being counted), increment unique visitors
-            stats_col.update_one({'_id': 'global_stats'}, {'$inc': {'unique_visitors': 1}}, upsert=True)
-            session['unique_counted'] = True
-        
-        # Increment Total Impressions on every page load
-        stats_col.update_one({'_id': 'global_stats'}, {'$inc': {'total_visits': 1}}, upsert=True)
-        
-        tracker_id = session['tracker_id']
-        online_users[tracker_id] = utcnow()
-        
-        # Cleanup old users (older than 5 mins)
-        now = utcnow()
-        expired = [tid for tid, last_seen in online_users.items() if (now - last_seen).total_seconds() > 300]
-        for tid in expired:
-            online_users.pop(tid, None)
+    # Only track real HTML page views (exclude static assets, JSON API calls, SEO files, and bots)
+    if request.method != 'GET':
+        return
+    path = request.path
+    if path in _IGNORED_TRACK_PATHS or path.startswith(_IGNORED_TRACK_PREFIXES):
+        return
+    ua = request.headers.get('User-Agent', '')
+    if _BOT_UA_RE.search(ua):
+        return
+
+    inc_fields = {'total_visits': 1}
+    if 'tracker_id' not in session or 'unique_counted' not in session:
+        if 'tracker_id' not in session:
+            session['tracker_id'] = str(uuid.uuid4())
+        inc_fields['unique_visitors'] = 1
+        session['unique_counted'] = True
+
+    stats_col.update_one({'_id': 'global_stats'}, {'$inc': inc_fields}, upsert=True)
+
+    tracker_id = session['tracker_id']
+    now = utcnow()
+    online_users[tracker_id] = now
+
+    # Cleanup old users (older than 5 mins)
+    expired = [tid for tid, last_seen in online_users.items() if (now - last_seen).total_seconds() > 300]
+    for tid in expired:
+        online_users.pop(tid, None)
 
 # ============================================================================
 # INITIALIZE DATABASE WITH SAMPLE DATA
@@ -197,100 +398,110 @@ def init_db():
             {'_id': get_next_id('products', spareparts_counters), 'name': 'Premium Oil Filter', 'description': 'High-efficiency oil filter for optimal engine protection',
              'price': 15.99, 'stock': 150, 'brand': 'AutoPro', 'part_number': 'OF-2024',
              'category_id': 1, 'compatible_cars': 'Toyota Camry, Honda Accord, Ford Focus',
-             'specifications': 'Thread size: 3/4-16, Height: 3.5 inches', 'featured': True,
-             'image_url': '/static/images/products/oil-filter.png', 'created_at': utcnow()},
+             'specifications': 'Thread size: 3/4-16, Height: 3.5 inches', 'featured': True, 'is_seed': True,
+             'image_url': '/static/images/products/oil-filter.webp', 'created_at': utcnow()},
 
             {'_id': get_next_id('products', spareparts_counters), 'name': 'Spark Plug Set (4pc)', 'description': 'Iridium spark plugs for improved performance',
              'price': 45.99, 'stock': 80, 'brand': 'NGK', 'part_number': 'SP-IR-401',
              'category_id': 1, 'compatible_cars': 'Most 4-cylinder engines',
-             'specifications': 'Gap: 0.044", Thread: 14mm', 'featured': True,
-             'image_url': '/static/images/products/spark-plugs.png', 'created_at': utcnow()},
+             'specifications': 'Gap: 0.044", Thread: 14mm', 'featured': True, 'is_seed': True,
+             'image_url': '/static/images/products/spark-plugs.webp', 'created_at': utcnow()},
 
             {'_id': get_next_id('products', spareparts_counters), 'name': 'Air Filter', 'description': 'High-flow air filter for better engine breathing',
              'price': 24.99, 'stock': 120, 'brand': 'K&N', 'part_number': 'AF-3320',
              'category_id': 5, 'compatible_cars': 'Universal fit for most sedans',
-             'specifications': 'Washable and reusable', 'featured': False,
-             'image_url': '/static/images/products/air-filter.png', 'created_at': utcnow()},
+             'specifications': 'Washable and reusable', 'featured': False, 'is_seed': True,
+             'image_url': '/static/images/products/air-filter.webp', 'created_at': utcnow()},
 
             # Brake Systems
             {'_id': get_next_id('products', spareparts_counters), 'name': 'Ceramic Brake Pads', 'description': 'Low-dust ceramic brake pads for quiet stopping',
              'price': 89.99, 'stock': 60, 'brand': 'Brembo', 'part_number': 'BP-CER-500',
              'category_id': 2, 'compatible_cars': 'Honda Civic, Toyota Corolla',
-             'specifications': 'Front axle, includes shims', 'featured': True,
-             'image_url': '/static/images/products/brake-pads.png', 'created_at': utcnow()},
+             'specifications': 'Front axle, includes shims', 'featured': True, 'is_seed': True,
+             'image_url': '/static/images/products/brake-pads.webp', 'created_at': utcnow()},
 
             {'_id': get_next_id('products', spareparts_counters), 'name': 'Brake Rotors (Pair)', 'description': 'Slotted and drilled performance rotors',
              'price': 159.99, 'stock': 40, 'brand': 'PowerStop', 'part_number': 'BR-SP-250',
              'category_id': 2, 'compatible_cars': 'Ford Mustang, Chevrolet Camaro',
-             'specifications': 'Front, 12.6" diameter', 'featured': False,
-             'image_url': '/static/images/products/brake-rotors.png', 'created_at': utcnow()},
+             'specifications': 'Front, 12.6" diameter', 'featured': False, 'is_seed': True,
+             'image_url': '/static/images/products/brake-rotors.webp', 'created_at': utcnow()},
 
             {'_id': get_next_id('products', spareparts_counters), 'name': 'Brake Fluid DOT 4', 'description': 'Premium synthetic brake fluid',
              'price': 12.99, 'stock': 200, 'brand': 'Castrol', 'part_number': 'BF-DOT4-500',
              'category_id': 2, 'compatible_cars': 'Universal',
-             'specifications': '500ml bottle, high boiling point', 'featured': False,
-             'image_url': '/static/images/products/brake-fluid.png', 'created_at': utcnow()},
+             'specifications': '500ml bottle, high boiling point', 'featured': False, 'is_seed': True,
+             'image_url': '/static/images/products/brake-fluid.webp', 'created_at': utcnow()},
 
             # Electrical
             {'_id': get_next_id('products', spareparts_counters), 'name': 'Car Battery 12V', 'description': 'Maintenance-free AGM battery',
              'price': 189.99, 'stock': 35, 'brand': 'Optima', 'part_number': 'BAT-AGM-75',
              'category_id': 3, 'compatible_cars': 'Most sedans and trucks',
-             'specifications': '750 CCA, 75 Ah, 3-year warranty', 'featured': True,
-             'image_url': '/static/images/products/car-battery.png', 'created_at': utcnow()},
+             'specifications': '750 CCA, 75 Ah, 3-year warranty', 'featured': True, 'is_seed': True,
+             'image_url': '/static/images/products/car-battery.webp', 'created_at': utcnow()},
 
             {'_id': get_next_id('products', spareparts_counters), 'name': 'Alternator', 'description': 'High-output alternator for reliable charging',
              'price': 249.99, 'stock': 25, 'brand': 'Bosch', 'part_number': 'ALT-150A',
              'category_id': 3, 'compatible_cars': 'Toyota Tacoma, 4Runner',
-             'specifications': '150 Amp output', 'featured': False,
-             'image_url': '/static/images/products/alternator.png', 'created_at': utcnow()},
+             'specifications': '150 Amp output', 'featured': False, 'is_seed': True,
+             'image_url': '/static/images/products/alternator.webp', 'created_at': utcnow()},
 
             # Suspension
             {'_id': get_next_id('products', spareparts_counters), 'name': 'Shock Absorber Set', 'description': 'Gas-charged shock absorbers for smooth ride',
              'price': 199.99, 'stock': 30, 'brand': 'Monroe', 'part_number': 'SH-GAS-400',
              'category_id': 4, 'compatible_cars': 'Nissan Altima, Mazda 6',
-             'specifications': 'Rear pair, gas-charged', 'featured': True,
-             'image_url': '/static/images/products/shock-absorbers.png', 'created_at': utcnow()},
+             'specifications': 'Rear pair, gas-charged', 'featured': True, 'is_seed': True,
+             'image_url': '/static/images/products/shock-absorbers.webp', 'created_at': utcnow()},
 
             {'_id': get_next_id('products', spareparts_counters), 'name': 'Coil Spring Set', 'description': 'Heavy-duty coil springs',
              'price': 139.99, 'stock': 45, 'brand': 'Eibach', 'part_number': 'CS-HD-300',
              'category_id': 4, 'compatible_cars': 'Jeep Wrangler, Cherokee',
-             'specifications': 'Front pair, +2" lift', 'featured': False,
-             'image_url': '/static/images/products/coil-springs.png', 'created_at': utcnow()},
+             'specifications': 'Front pair, +2" lift', 'featured': False, 'is_seed': True,
+             'image_url': '/static/images/products/coil-springs.webp', 'created_at': utcnow()},
 
             # Filters
             {'_id': get_next_id('products', spareparts_counters), 'name': 'Fuel Filter', 'description': 'High-pressure fuel filter',
              'price': 19.99, 'stock': 100, 'brand': 'Wix', 'part_number': 'FF-HP-200',
              'category_id': 5, 'compatible_cars': 'Most fuel-injected vehicles',
-             'specifications': 'In-line mount, 10 micron', 'featured': False,
-             'image_url': '/static/images/products/fuel-filter.png', 'created_at': utcnow()},
+             'specifications': 'In-line mount, 10 micron', 'featured': False, 'is_seed': True,
+             'image_url': '/static/images/products/fuel-filter.webp', 'created_at': utcnow()},
 
             {'_id': get_next_id('products', spareparts_counters), 'name': 'Cabin Air Filter', 'description': 'Activated carbon cabin filter',
              'price': 16.99, 'stock': 110, 'brand': 'Mann', 'part_number': 'CAF-AC-150',
              'category_id': 5, 'compatible_cars': 'BMW 3-Series, Mercedes C-Class',
-             'specifications': 'HEPA filtration, odor elimination', 'featured': False,
-             'image_url': '/static/images/products/cabin-filter.png', 'created_at': utcnow()},
+             'specifications': 'HEPA filtration, odor elimination', 'featured': False, 'is_seed': True,
+             'image_url': '/static/images/products/cabin-filter.webp', 'created_at': utcnow()},
 
             # Lighting
             {'_id': get_next_id('products', spareparts_counters), 'name': 'LED Headlight Bulbs', 'description': 'Super bright LED conversion kit',
              'price': 79.99, 'stock': 70, 'brand': 'Osram', 'part_number': 'LED-H7-6K',
              'category_id': 6, 'compatible_cars': 'H7 socket (most European cars)',
-             'specifications': '6000K white, 12000 lumens', 'featured': True,
-             'image_url': '/static/images/products/led-headlights.png', 'created_at': utcnow()},
+             'specifications': '6000K white, 12000 lumens', 'featured': True, 'is_seed': True,
+             'image_url': '/static/images/products/led-headlights.webp', 'created_at': utcnow()},
 
             {'_id': get_next_id('products', spareparts_counters), 'name': 'Fog Light Assembly', 'description': 'Complete fog light kit',
              'price': 129.99, 'stock': 50, 'brand': 'Hella', 'part_number': 'FL-KIT-500',
              'category_id': 6, 'compatible_cars': 'Universal with custom brackets',
-             'specifications': 'Includes wiring harness and switch', 'featured': False,
-             'image_url': '/static/images/products/fog-light.png', 'created_at': utcnow()},
+             'specifications': 'Includes wiring harness and switch', 'featured': False, 'is_seed': True,
+             'image_url': '/static/images/products/fog-light.webp', 'created_at': utcnow()},
 
             {'_id': get_next_id('products', spareparts_counters), 'name': 'Halogen Light Bulb', 'description': 'Classic halogen headlight bulb with warm white light',
              'price': 29.99, 'stock': 90, 'brand': 'Philips', 'part_number': 'HL-H4-3200K',
              'category_id': 6, 'compatible_cars': 'H4 socket (most Japanese and Korean cars)',
-             'specifications': '3200K warm white, 1500 lumens, 55W', 'featured': False,
-             'image_url': '/static/images/products/halogen-headlight.png', 'created_at': utcnow()},
+             'specifications': '3200K warm white, 1500 lumens, 55W', 'featured': False, 'is_seed': True,
+             'image_url': '/static/images/products/halogen-headlight.webp', 'created_at': utcnow()},
         ]
         products_col.insert_many(products_data)
         print("Database initialized with sample data!")
+    else:
+        # Upgrade any existing MongoDB product image_url references from .png -> .webp
+        # and ensure default catalog items are marked as protected seed items.
+        for doc in products_col.find({'image_url': {'$regex': r'\.png$'}}):
+            new_url = re.sub(r'\.png$', '.webp', doc.get('image_url', ''))
+            products_col.update_one({'_id': doc['_id']}, {'$set': {'image_url': new_url}})
+        products_col.update_many(
+            {'session_id': {'$exists': False}, 'is_seed': {'$exists': False}},
+            {'$set': {'is_seed': True}}
+        )
 
 # ============================================================================
 # AUTH ROUTES
@@ -348,8 +559,10 @@ def login():
 
 @app.route('/car-spareparts/api/auth/logout')
 def logout():
-    session.clear()
-    return redirect(url_for('portfolio_home'))
+    session.pop('user_id', None)
+    session.pop('user_name', None)
+    session.pop('cart_id', None)
+    return redirect(url_for('store_home'))
 
 # ============================================================================
 # ROUTES - PAGE VIEWS
@@ -357,57 +570,45 @@ def logout():
 
 @app.route('/')
 def portfolio_home():
-    ignored_dirs = {'venv', '.git', '__pycache__'}
-    max_mtime = 0
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    for root, dirs, files in os.walk(base_dir):
-        dirs[:] = [d for d in dirs if d not in ignored_dirs]
-        for f in files:
-            if f.endswith('.pyc') or f == '.env': 
-                continue
-            filepath = os.path.join(root, f)
-            try:
-                mtime = os.path.getmtime(filepath)
-                if mtime > max_mtime:
-                    max_mtime = mtime
-            except Exception:
-                pass
-    last_update = datetime.fromtimestamp(max_mtime) if max_mtime > 0 else datetime.now()
-    last_update_str = last_update.strftime('%B %Y')
-
     # Only surface the CV button once the file is actually there, so the link
     # can never 404. Drop the PDF at static/RESUME_FILENAME to switch it on.
-    resume_path = os.path.join(base_dir, 'static', RESUME_FILENAME)
+    resume_path = os.path.join(BASE_DIR, 'static', RESUME_FILENAME)
     resume_url = url_for('static', filename=RESUME_FILENAME) if os.path.isfile(resume_path) else None
 
     return render_template('portfolio_home.html',
-                           last_update=last_update_str,
+                           last_update=LAST_UPDATE_STR,
                            resume_url=resume_url)
 
 
 @app.route('/car-spareparts')
 def store_home():
-    featured_products = docs_to_list(products_col.find({'featured': True}).limit(6))
+    visibility = get_store_visibility_filter()
+    featured_products = docs_to_list(products_col.find({**visibility, 'featured': True}).limit(6))
     categories = docs_to_list(categories_col.find())
     return render_template('index.html', featured_products=featured_products, categories=categories)
 
 @app.route('/car-spareparts/products')
 def products():
     category_id = request.args.get('category', type=int)
-    search_query = request.args.get('search', '')
+    search_query = request.args.get('search', '').strip()
     sort_by = request.args.get('sort', 'name')
 
-    query_filter = {}
+    conditions = [get_store_visibility_filter()]
 
     if category_id:
-        query_filter['category_id'] = category_id
+        conditions.append({'category_id': category_id})
 
     if search_query:
-        query_filter['$or'] = [
-            {'name': {'$regex': search_query, '$options': 'i'}},
-            {'description': {'$regex': search_query, '$options': 'i'}},
-            {'brand': {'$regex': search_query, '$options': 'i'}},
-        ]
+        safe_pattern = re.escape(search_query[:100])
+        conditions.append({
+            '$or': [
+                {'name': {'$regex': safe_pattern, '$options': 'i'}},
+                {'description': {'$regex': safe_pattern, '$options': 'i'}},
+                {'brand': {'$regex': safe_pattern, '$options': 'i'}},
+            ]
+        })
+
+    query_filter = conditions[0] if len(conditions) == 1 else {'$and': conditions}
 
     # Sorting
     sort_field = 'name'
@@ -423,25 +624,30 @@ def products():
     categories = docs_to_list(categories_col.find())
 
     return render_template('products.html', products=products_list, categories=categories,
-                         current_category=category_id, search_query=search_query)
+                         current_category=category_id, search_query=search_query, current_sort=sort_by)
 
 @app.route('/car-spareparts/product/<int:product_id>')
 def product_detail(product_id):
-    product_doc = products_col.find_one({'_id': product_id})
+    product_doc = products_col.find_one({'$and': [{'_id': product_id}, get_store_visibility_filter()]})
     if not product_doc:
-        return "Product not found", 404
+        abort(404)
     product = doc_to_dict(product_doc)
     # Attach category for template compatibility (product.category.name)
     category_doc = categories_col.find_one({'_id': product['category_id']})
     product['category'] = doc_to_dict(category_doc) if category_doc else {'name': 'Unknown'}
     related_products = docs_to_list(
-        products_col.find({'category_id': product['category_id'], '_id': {'$ne': product_id}}).limit(4)
+        products_col.find({
+            '$and': [
+                get_store_visibility_filter(),
+                {'category_id': product['category_id'], '_id': {'$ne': product_id}}
+            ]
+        }).limit(4)
     )
     return render_template('product_detail.html', product=product, related_products=related_products)
 
 @app.route('/car-spareparts/api/product/<int:product_id>')
 def api_product_detail(product_id):
-    product_doc = products_col.find_one({'_id': product_id})
+    product_doc = products_col.find_one({'$and': [{'_id': product_id}, get_store_visibility_filter()]})
     if not product_doc:
         return jsonify({'error': 'Product not found'}), 404
     product = doc_to_dict(product_doc)
@@ -457,6 +663,9 @@ def cart():
     for item_doc in cart_items_col.find(get_cart_filter()):
         item = doc_to_dict(item_doc)
         product = doc_to_dict(products_col.find_one({'_id': item['product_id']}))
+        if not product:
+            cart_items_col.delete_one({'_id': item['id']})
+            continue
         item['product'] = product
         total += product['price'] * item['quantity']
         cart_items.append(item)
@@ -469,6 +678,8 @@ def checkout():
     for item_doc in cart_items_col.find(get_cart_filter()):
         item = doc_to_dict(item_doc)
         product = doc_to_dict(products_col.find_one({'_id': item['product_id']}))
+        if not product:
+            continue
         item['product'] = product
         total += product['price'] * item['quantity']
         cart_items.append(item)
@@ -476,7 +687,11 @@ def checkout():
 
 @app.route('/car-spareparts/admin')
 def admin():
-    products_list = docs_to_list(products_col.find())
+    # Clean up expired custom demo products older than 24h
+    cutoff = utcnow() - timedelta(hours=24)
+    products_col.delete_many({'is_seed': False, 'session_id': {'$exists': True}, 'created_at': {'$lt': cutoff}})
+
+    products_list = docs_to_list(products_col.find(get_store_visibility_filter()))
     categories = docs_to_list(categories_col.find())
     # Build a category lookup for template compatibility (product.category.name)
     cat_lookup = {cat['id']: cat for cat in categories}
@@ -560,6 +775,8 @@ def create_order():
     items_list = []
     for item in cart_items:
         product = products_col.find_one({'_id': item['product_id']})
+        if not product:
+            continue
         total += product['price'] * item['quantity']
         items_list.append({
             'product': product['name'],
@@ -567,13 +784,16 @@ def create_order():
             'price': product['price']
         })
 
+    if not items_list:
+        return jsonify({'success': False, 'message': 'No valid items in cart'}), 400
+
     order_id = get_next_id('orders', spareparts_counters)
     order = {
         '_id': order_id,
-        'customer_name': data.get('name'),
-        'email': data.get('email'),
-        'phone': data.get('phone'),
-        'address': data.get('address'),
+        'customer_name': str(data.get('name') or '')[:120],
+        'email': str(data.get('email') or '')[:120],
+        'phone': str(data.get('phone') or '')[:40],
+        'address': str(data.get('address') or '')[:400],
         'total_amount': total,
         'status': 'pending',
         'created_at': utcnow(),
@@ -588,21 +808,39 @@ def create_order():
 
 @app.route('/car-spareparts/api/products', methods=['POST'])
 def create_product():
-    data = request.get_json()
+    data = request.get_json() or {}
+    sid = get_demo_session_id()
+
+    if products_col.count_documents({'session_id': sid}) >= 15:
+        return jsonify({'success': False, 'message': 'Demo limit reached (max 15 custom products per session).'}), 400
+
+    name = str(data.get('name') or '').strip()[:120]
+    brand = str(data.get('brand') or '').strip()[:80]
+    if not name or not brand:
+        return jsonify({'success': False, 'message': 'Product name and brand are required.'}), 400
+
+    try:
+        price = max(0.0, min(99999.99, float(data.get('price', 0))))
+        stock = max(0, min(99999, int(data.get('stock', 0))))
+        category_id = int(data.get('category_id', 1))
+    except (TypeError, ValueError):
+        return jsonify({'success': False, 'message': 'Invalid price, stock, or category.'}), 400
 
     product = {
         '_id': get_next_id('products', spareparts_counters),
-        'name': data.get('name'),
-        'description': data.get('description'),
-        'price': data.get('price'),
-        'stock': data.get('stock'),
-        'brand': data.get('brand'),
-        'part_number': data.get('part_number'),
-        'category_id': data.get('category_id'),
-        'compatible_cars': data.get('compatible_cars'),
-        'specifications': data.get('specifications'),
+        'session_id': sid,
+        'is_seed': False,
+        'name': name,
+        'description': str(data.get('description') or '')[:600],
+        'price': price,
+        'stock': stock,
+        'brand': brand,
+        'part_number': str(data.get('part_number') or '')[:60],
+        'category_id': category_id,
+        'compatible_cars': str(data.get('compatible_cars') or '')[:300],
+        'specifications': str(data.get('specifications') or '')[:400],
         'featured': False,
-        'image_url': '',
+        'image_url': '/static/images/products/air-filter.webp',
         'created_at': utcnow()
     }
 
@@ -613,9 +851,13 @@ def create_product():
 def update_product(product_id):
     product = products_col.find_one({'_id': product_id})
     if not product:
-        return jsonify({'success': False}), 404
+        return jsonify({'success': False, 'message': 'Product not found.'}), 404
+    if is_protected_seed_product(product):
+        return jsonify({'success': False, 'message': 'Default demo products are protected and cannot be modified.'}), 403
+    if product.get('session_id') != get_demo_session_id():
+        return jsonify({'success': False, 'message': 'Not authorized to edit this demo item.'}), 403
 
-    data = request.get_json()
+    data = request.get_json() or {}
     update_fields = {}
     for field in ['name', 'description', 'price', 'stock', 'brand', 'part_number',
                   'category_id', 'compatible_cars', 'specifications']:
@@ -629,7 +871,15 @@ def update_product(product_id):
 
 @app.route('/car-spareparts/api/products/<int:product_id>', methods=['DELETE'])
 def delete_product(product_id):
-    result = products_col.delete_one({'_id': product_id})
+    product = products_col.find_one({'_id': product_id})
+    if not product:
+        return jsonify({'success': False, 'message': 'Product not found.'}), 404
+    if is_protected_seed_product(product):
+        return jsonify({'success': False, 'message': 'Default demo products are protected. Add a custom product above to test deletion!'}), 403
+    if product.get('session_id') != get_demo_session_id():
+        return jsonify({'success': False, 'message': 'Not authorized to delete this demo item.'}), 403
+
+    result = products_col.delete_one({'_id': product_id, 'session_id': get_demo_session_id()})
     if result.deleted_count > 0:
         return jsonify({'success': True})
     return jsonify({'success': False}), 404
@@ -667,21 +917,42 @@ def kanban_rules():
 
 @app.route('/kanban/api/tasks')
 def kanban_list():
-    tasks = docs_to_list(kanban_col.find().sort('created_at', -1))
+    sid = get_demo_session_id()
+    ensure_session_kanban_tasks(sid)
+    tasks = docs_to_list(kanban_col.find({'session_id': sid}).sort('created_at', -1))
     return jsonify({'tasks': tasks})
 
 @app.route('/kanban/api/add', methods=['POST'])
 def kanban_add():
-    data = request.get_json()
+    sid = get_demo_session_id()
+    ensure_session_kanban_tasks(sid)
+    if kanban_col.count_documents({'session_id': sid}) >= 40:
+        return jsonify({'success': False, 'message': 'Demo board limit reached (max 40 tasks per session).'}), 400
+
+    data = request.get_json() or {}
+    subtasks_raw = data.get('subtasks', [])
+    subtasks = [
+        {'text': str(s.get('text', ''))[:200], 'done': bool(s.get('done', False))}
+        for s in (subtasks_raw[:20] if isinstance(subtasks_raw, list) else [])
+        if isinstance(s, dict) and str(s.get('text', '')).strip()
+    ]
+    status = data.get('status', 'todo')
+    if status not in ('todo', 'in-progress', 'done'):
+        status = 'todo'
+    priority = data.get('priority', 'medium')
+    if priority not in ('low', 'medium', 'high'):
+        priority = 'medium'
+
     task = {
         '_id': get_next_id('kanban_tasks', kanban_counters),
-        'name': data.get('name', ''),
-        'description': data.get('description', ''),
-        'status': data.get('status', 'todo'),
-        'priority': data.get('priority', 'medium'),
-        'color': data.get('color', '#f59e0b'),
-        'due_date': data.get('due_date'),
-        'subtasks': data.get('subtasks', []),
+        'session_id': sid,
+        'name': str(data.get('name', ''))[:160],
+        'description': str(data.get('description', ''))[:1200],
+        'status': status,
+        'priority': priority,
+        'color': str(data.get('color', '#f59e0b'))[:20],
+        'due_date': str(data.get('due_date'))[:10] if data.get('due_date') else None,
+        'subtasks': subtasks,
         'created_at': utcnow().isoformat()
     }
     kanban_col.insert_one(task)
@@ -689,32 +960,55 @@ def kanban_add():
 
 @app.route('/kanban/api/update', methods=['POST'])
 def kanban_update():
-    data = request.get_json()
+    sid = get_demo_session_id()
+    data = request.get_json() or {}
     task_id = data.get('task_id')
     update = {}
-    for f in ['name', 'description', 'status', 'priority', 'color', 'due_date', 'subtasks']:
-        if f in data:
-            update[f] = data[f]
-    kanban_col.update_one({'_id': task_id}, {'$set': update})
+    if 'name' in data:
+        update['name'] = str(data['name'])[:160]
+    if 'description' in data:
+        update['description'] = str(data['description'])[:1200]
+    if 'status' in data and data['status'] in ('todo', 'in-progress', 'done'):
+        update['status'] = data['status']
+    if 'priority' in data and data['priority'] in ('low', 'medium', 'high'):
+        update['priority'] = data['priority']
+    if 'color' in data:
+        update['color'] = str(data['color'])[:20]
+    if 'due_date' in data:
+        update['due_date'] = str(data['due_date'])[:10] if data['due_date'] else None
+    if 'subtasks' in data and isinstance(data['subtasks'], list):
+        update['subtasks'] = [
+            {'text': str(s.get('text', ''))[:200], 'done': bool(s.get('done', False))}
+            for s in data['subtasks'][:20]
+            if isinstance(s, dict) and str(s.get('text', '')).strip()
+        ]
+    if update:
+        kanban_col.update_one({'_id': task_id, 'session_id': sid}, {'$set': update})
     return jsonify({'success': True})
 
 @app.route('/kanban/api/move', methods=['POST'])
 def kanban_move():
-    data = request.get_json()
-    kanban_col.update_one({'_id': data['task_id']}, {'$set': {'status': data['status']}})
+    sid = get_demo_session_id()
+    data = request.get_json() or {}
+    status = data.get('status')
+    if status not in ('todo', 'in-progress', 'done'):
+        return jsonify({'success': False}), 400
+    kanban_col.update_one({'_id': data.get('task_id'), 'session_id': sid}, {'$set': {'status': status}})
     return jsonify({'success': True})
 
 @app.route('/kanban/api/delete', methods=['POST'])
 def kanban_delete():
-    data = request.get_json()
-    kanban_col.delete_one({'_id': data['task_id']})
+    sid = get_demo_session_id()
+    data = request.get_json() or {}
+    kanban_col.delete_one({'_id': data.get('task_id'), 'session_id': sid})
     return jsonify({'success': True})
 
 @app.route('/kanban/api/predict', methods=['POST'])
+@rate_limit_ai('kanban_predict', per_minute=15, per_hour=80)
 def kanban_predict():
-    data = request.get_json()
-    description = data.get('description', '')
-    priority = data.get('priority', 'medium')
+    data = request.get_json() or {}
+    description = str(data.get('description', ''))[:1000]
+    priority = str(data.get('priority', 'medium'))[:20]
     try:
         estimated_days = ml_engine.predict_task_duration(description, priority)
         return jsonify({'success': True, 'estimated_days': estimated_days})
@@ -727,16 +1021,17 @@ def kanban_predict():
 # ============================================================================
 
 @app.route('/car-spareparts/api/ask', methods=['POST'])
+@rate_limit_ai('store_chat', per_minute=10, per_hour=60)
 def chat_api_ask():
-    data = request.get_json()
-    user_message = data.get('message', '').strip()
-    chat_history = data.get('history', '')
+    data = request.get_json() or {}
+    user_message = str(data.get('message', '')).strip()[:500]
+    chat_history = str(data.get('history', ''))[-4000:]
     
     if not user_message:
         return jsonify({'success': False, 'message': 'No message provided.'}), 400
         
-    # Get inventory context
-    products = list(products_col.find())
+    # Get inventory context (official catalog + visitor's session items)
+    products = list(products_col.find(get_store_visibility_filter()))
     inventory_context = "Available Products:\n"
     for p in products:
         inventory_context += f"- {p.get('name')} (Brand: {p.get('brand')}, Price: ${p.get('price')}): {p.get('description')}. Compatible with: {p.get('compatible_cars')}.\n"
@@ -750,10 +1045,11 @@ def chat_api_ask():
         return jsonify({'success': False, 'message': 'Error processing your request.'}), 500
 
 @app.route('/api/portfolio/chat', methods=['POST'])
+@rate_limit_ai('portfolio_chat', per_minute=10, per_hour=60)
 def portfolio_chat():
     data = request.get_json() or {}
-    user_message = data.get('message', '').strip()
-    chat_history = data.get('history', '')
+    user_message = str(data.get('message', '')).strip()[:500]
+    chat_history = str(data.get('history', ''))[-4000:]
 
     if not user_message:
         return jsonify({'success': False, 'message': 'Please provide a message.'}), 400
@@ -791,16 +1087,34 @@ def ai_tool_docs():
 
 @app.route('/ai-tool/api/process', methods=['POST'])
 def ai_process():
-    data = request.get_json()
-    text = data.get('text', '').strip()
+    data = request.get_json() or {}
+    text = str(data.get('text', '')).strip()[:5000]
     mode = data.get('mode', 'summarize')
-    use_ai = data.get('use_ai', False)
+    use_ai = bool(data.get('use_ai', False))
 
     if not text:
         return jsonify({'success': False, 'message': 'Please provide some text.'}), 400
 
-    import time
-    time.sleep(1)  # Simulate processing delay
+    # Apply strict rate limit when calling Gemini API, and a generous limit for local ML
+    if use_ai:
+        ok_min, retry_min = check_rate_limit('textforge_gemini:m', 10, 60)
+        ok_hr, retry_hr = check_rate_limit('textforge_gemini:h', 60, 3600) if ok_min else (True, 0)
+        if not ok_min or not ok_hr:
+            retry = retry_min if not ok_min else retry_hr
+            resp = jsonify({
+                'success': False,
+                'message': f'Gemini AI rate limit reached. Please wait {retry}s or switch Gemini AI OFF to use local ML.'
+            })
+            resp.status_code = 429
+            resp.headers['Retry-After'] = str(retry)
+            return resp
+    else:
+        ok_local, retry_local = check_rate_limit('textforge_local:m', 30, 60)
+        if not ok_local:
+            resp = jsonify({'success': False, 'message': f'Too many requests. Please wait {retry_local}s.'})
+            resp.status_code = 429
+            resp.headers['Retry-After'] = str(retry_local)
+            return resp
 
     result = ''
     try:
@@ -904,6 +1218,84 @@ def ai_process():
         return jsonify({'success': False, 'message': 'Machine learning inference failed.'}), 500
 
     return jsonify({'success': True, 'result': result})
+
+
+# ============================================================================
+# SEO ROUTES (robots.txt & sitemap.xml) + THEMED ERROR PAGES
+# ============================================================================
+
+@app.route('/robots.txt')
+def robots_txt():
+    sitemap_url = url_for('sitemap_xml', _external=True)
+    lines = [
+        'User-agent: *',
+        'Allow: /',
+        'Disallow: /api/',
+        'Disallow: /car-spareparts/api/',
+        'Disallow: /car-spareparts/admin',
+        'Disallow: /car-spareparts/cart',
+        'Disallow: /car-spareparts/checkout',
+        'Disallow: /kanban/api/',
+        'Disallow: /ai-tool/api/',
+        f'Sitemap: {sitemap_url}',
+    ]
+    return Response('\n'.join(lines) + '\n', mimetype='text/plain')
+
+
+@app.route('/sitemap.xml')
+def sitemap_xml():
+    pages = [
+        ('portfolio_home', '1.0', 'weekly'),
+        ('site_insights', '0.6', 'weekly'),
+        ('store_home', '0.8', 'monthly'),
+        ('products', '0.7', 'monthly'),
+        ('kanban_page', '0.8', 'monthly'),
+        ('kanban_board', '0.7', 'monthly'),
+        ('kanban_timeline', '0.6', 'monthly'),
+        ('kanban_rules', '0.6', 'monthly'),
+        ('ai_tool_page', '0.8', 'monthly'),
+        ('ai_tool_studio', '0.8', 'monthly'),
+        ('ai_tool_presets', '0.6', 'monthly'),
+        ('ai_tool_docs', '0.6', 'monthly'),
+    ]
+    today = utcnow().strftime('%Y-%m-%d')
+    xml_lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ]
+    for endpoint, priority, changefreq in pages:
+        loc = url_for(endpoint, _external=True)
+        xml_lines.append(
+            f'  <url><loc>{loc}</loc><lastmod>{today}</lastmod>'
+            f'<changefreq>{changefreq}</changefreq><priority>{priority}</priority></url>'
+        )
+    xml_lines.append('</urlset>')
+    return Response('\n'.join(xml_lines), mimetype='application/xml')
+
+
+@app.errorhandler(404)
+def handle_404(err):
+    if '/api/' in request.path or request.path.startswith('/api/'):
+        return jsonify({'success': False, 'error': 'Not found'}), 404
+    return render_template(
+        'error.html',
+        error_code=404,
+        error_title='Page Not Found',
+        error_message="The page you're looking for doesn't exist or may have moved. Head back to the Portfolio Hub to explore live projects."
+    ), 404
+
+
+@app.errorhandler(500)
+def handle_500(err):
+    if '/api/' in request.path or request.path.startswith('/api/'):
+        return jsonify({'success': False, 'error': 'Internal server error'}), 500
+    return render_template(
+        'error.html',
+        error_code=500,
+        error_title='Something Went Wrong',
+        error_message='An unexpected server error occurred while loading this page. Please try again in a moment.'
+    ), 500
+
 
 # ============================================================================
 # INITIALIZATION (Runs on import for WSGI like Gunicorn)

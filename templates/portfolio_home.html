@@ -36,6 +36,12 @@
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/portfolio.css') }}">
+    <script>
+        (function () {
+            const theme = localStorage.getItem('hub-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
     <style>
         [data-theme="dark"] .theme-img-light {
             display: none;
@@ -128,6 +134,36 @@
             object-fit: cover;
         }
     </style>
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Wilson Manuel",
+        "jobTitle": "AI/ML Engineer & Full-Stack Developer",
+        "url": {{ url_for('portfolio_home', _external=True) | tojson }},
+        "image": {{ url_for('static', filename='images/picture-of-me.jpg', _external=True) | tojson }},
+        "email": "mailto:wilsonmanuel111@gmail.com",
+        "worksFor": {
+            "@type": "Organization",
+            "name": "Sinar Mas Land"
+        },
+        "alumniOf": {
+            "@type": "CollegeOrUniversity",
+            "name": "Universitas Multimedia Nusantara"
+        },
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Jakarta",
+            "addressCountry": "ID"
+        },
+        "sameAs": [
+            "https://github.com/doubleUM",
+            "https://www.linkedin.com/in/wilson-manuel-1249b820b/"
+        ]
+    }
+    </script>
 </head>
 
 <body>
@@ -180,12 +216,14 @@
             <a href="{{ url_for('portfolio_home') }}" class="hub-brand">
                 <span class="hub-brand-long">Wilson Manuel's</span>
                 <span class="hub-brand-short">W. Manuel</span>
+                <span class="hub-brand-xs">WM</span>
             </a>
             <div class="hub-nav-links">
+                <a href="#about" class="hub-link">About</a>
                 <a href="#skills" class="hub-link">Skills</a>
+                <a href="#journey" class="hub-link">Journey</a>
                 <a href="#projects" class="hub-link">Projects</a>
                 <a href="#contact" class="hub-link">Contact</a>
-                <a href="#about" class="hub-link">About</a>
                 <a href="{{ url_for('site_insights') }}" class="hub-link">Insights</a>
                 <button class="hub-theme-toggle" id="theme-toggle" aria-label="Toggle dark/light mode">
                     <span class="theme-icon-dark">🌙</span>
@@ -215,40 +253,37 @@
                     <div class="hub-hero-card-body">
                         <div class="hub-browser-body hero-slider">
                             <!-- Dark Theme Slides -->
-                            <img src="{{ url_for('static', filename='images/spareparts-dark.png') }}"
-                                class="theme-img-dark slide-1" alt="AutoParts">
-                            <img src="{{ url_for('static', filename='images/kanban-dark.png') }}"
-                                class="theme-img-dark slide-2" alt="Kanban">
-
-                            <img src="{{ url_for('static', filename='images/ai-tool-dark.png') }}"
-                                class="theme-img-dark slide-3" alt="AI Tool">
-                            <img src="{{ url_for('static', filename='images/financial-planning-dark-final.png') }}"
-                                class="theme-img-dark slide-4" alt="Financial Planning">
-                            <img src="{{ url_for('static', filename='images/retail-stock-dark.png') }}"
-                                class="theme-img-dark slide-5" alt="Retail Stock Tracker">
-                            <img src="{{ url_for('static', filename='images/rag-chat-dark.png') }}"
-                                class="theme-img-dark slide-6" alt="RAG Chat">
+                            <img src="{{ url_for('static', filename='images/spareparts-dark.webp') }}"
+                                class="theme-img-dark slide-1" alt="AutoParts" width="1280" height="800" fetchpriority="high" decoding="async">
+                            <img src="{{ url_for('static', filename='images/kanban-dark.webp') }}"
+                                class="theme-img-dark slide-2" alt="Kanban" width="1280" height="800" loading="lazy" decoding="async">
+                            <img src="{{ url_for('static', filename='images/ai-tool-dark.webp') }}"
+                                class="theme-img-dark slide-3" alt="AI Tool" width="1280" height="800" loading="lazy" decoding="async">
+                            <img src="{{ url_for('static', filename='images/financial-planning-dark-final.webp') }}"
+                                class="theme-img-dark slide-4" alt="Financial Planning" width="1280" height="800" loading="lazy" decoding="async">
+                            <img src="{{ url_for('static', filename='images/retail-stock-dark.webp') }}"
+                                class="theme-img-dark slide-5" alt="Retail Stock Tracker" width="1280" height="800" loading="lazy" decoding="async">
+                            <img src="{{ url_for('static', filename='images/rag-chat-dark.webp') }}"
+                                class="theme-img-dark slide-6" alt="RAG Chat" width="1280" height="800" loading="lazy" decoding="async">
                             <!-- Light Theme Slides -->
-                            <img src="{{ url_for('static', filename='images/spareparts-light.png') }}"
-                                class="theme-img-light slide-1" alt="AutoParts">
-                            <img src="{{ url_for('static', filename='images/kanban-light.png') }}"
-                                class="theme-img-light slide-2" alt="Kanban">
-
-                            <img src="{{ url_for('static', filename='images/ai-tool-light.png') }}"
-                                class="theme-img-light slide-3" alt="AI Tool">
-                            <img src="{{ url_for('static', filename='images/financial-planning-light-final.png') }}"
-                                class="theme-img-light slide-4" alt="Financial Planning">
-                            <img src="{{ url_for('static', filename='images/retail-stock-light.png') }}"
-                                class="theme-img-light slide-5" alt="Retail Stock Tracker">
-                            <img src="{{ url_for('static', filename='images/rag-chat-light.png') }}"
-                                class="theme-img-light slide-6" alt="RAG Chat">
+                            <img src="{{ url_for('static', filename='images/spareparts-light.webp') }}"
+                                class="theme-img-light slide-1" alt="AutoParts" width="1280" height="800" decoding="async">
+                            <img src="{{ url_for('static', filename='images/kanban-light.webp') }}"
+                                class="theme-img-light slide-2" alt="Kanban" width="1280" height="800" loading="lazy" decoding="async">
+                            <img src="{{ url_for('static', filename='images/ai-tool-light.webp') }}"
+                                class="theme-img-light slide-3" alt="AI Tool" width="1280" height="800" loading="lazy" decoding="async">
+                            <img src="{{ url_for('static', filename='images/financial-planning-light-final.webp') }}"
+                                class="theme-img-light slide-4" alt="Financial Planning" width="1280" height="800" loading="lazy" decoding="async">
+                            <img src="{{ url_for('static', filename='images/retail-stock-light.webp') }}"
+                                class="theme-img-light slide-5" alt="Retail Stock Tracker" width="1280" height="800" loading="lazy" decoding="async">
+                            <img src="{{ url_for('static', filename='images/rag-chat-light.webp') }}"
+                                class="theme-img-light slide-6" alt="RAG Chat" width="1280" height="800" loading="lazy" decoding="async">
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    </header>
 
     <main>
         <!-- Bento Dashboard (About Me Section) -->
@@ -434,8 +469,8 @@
             <div class="hub-container">
                 <div class="hub-section-head anim-fade" data-anim>
                     <div>
+                        <p class="hub-kicker">Experience &amp; Education</p>
                         <h2 class="hub-h2">My Journey</h2>
-                        <p class="hub-sub">Experience &amp; Education</p>
                     </div>
                 </div>
 
@@ -538,23 +573,24 @@
             <div class="hub-container">
                 <div class="hub-section-head anim-fade" data-anim>
                     <div>
+                        <p class="hub-kicker">Selected Work</p>
                         <h2 class="hub-h2">Projects</h2>
                     </div>
-                    <div class="hub-filter-bar">
+                    <div class="hub-filter-bar" role="tablist" aria-label="Filter projects by category">
                         <button class="hub-filter-btn is-active" data-filter="all">All</button>
-                        <button class="hub-filter-btn" data-filter="live">Live</button>
-                        <button class="hub-filter-btn" data-filter="coming-soon">Coming Soon</button>
+                        <button class="hub-filter-btn" data-filter="ai">AI &amp; ML</button>
+                        <button class="hub-filter-btn" data-filter="fullstack">Full-Stack</button>
                     </div>
                 </div>
 
                 <div class="hub-grid">
-                    <a class="hub-project anim-fade" data-anim data-status="live" href="{{ url_for('store_home') }}">
+                    <a class="hub-project anim-fade" data-anim data-category="ai fullstack" href="{{ url_for('store_home') }}">
                         <div class="hub-project-spotlight"></div>
                         <div class="hub-project-thumb">
-                            <img src="{{ url_for('static', filename='images/spareparts-dark.png') }}"
-                                alt="Car Spareparts Store preview (Dark)" class="hub-thumb-img theme-img-dark">
-                            <img src="{{ url_for('static', filename='images/spareparts-light.png') }}"
-                                alt="Car Spareparts Store preview (Light)" class="hub-thumb-img theme-img-light">
+                            <img src="{{ url_for('static', filename='images/spareparts-dark.webp') }}"
+                                alt="Car Spareparts Store preview (Dark)" class="hub-thumb-img theme-img-dark" loading="lazy" decoding="async" width="1280" height="800">
+                            <img src="{{ url_for('static', filename='images/spareparts-light.webp') }}"
+                                alt="Car Spareparts Store preview (Light)" class="hub-thumb-img theme-img-light" loading="lazy" decoding="async" width="1280" height="800">
                         </div>
                         <div class="hub-project-body">
                             <div class="hub-project-top">
@@ -569,18 +605,19 @@
                                 <span class="hub-tech-tag">Gemini AI</span>
                             </div>
                             <div class="hub-project-meta">
-                                <span>Route: <code>/car-spareparts</code></span>
+                                <span>Interactive Demo · Full-Stack + AI</span>
                                 <span class="hub-arrow">→</span>
                             </div>
                         </div>
                     </a>
 
-                    <a class="hub-project anim-fade" data-anim data-status="live" href="{{ url_for('kanban_page') }}">
+                    <a class="hub-project anim-fade" data-anim data-category="ai fullstack" href="{{ url_for('kanban_page') }}">
+                        <div class="hub-project-spotlight"></div>
                         <div class="hub-project-thumb">
-                            <img src="{{ url_for('static', filename='images/kanban-dark.png') }}"
-                                alt="TaskFlow preview (Dark)" class="hub-thumb-img theme-img-dark">
-                            <img src="{{ url_for('static', filename='images/kanban-light.png') }}"
-                                alt="TaskFlow preview (Light)" class="hub-thumb-img theme-img-light">
+                            <img src="{{ url_for('static', filename='images/kanban-dark.webp') }}"
+                                alt="TaskFlow preview (Dark)" class="hub-thumb-img theme-img-dark" loading="lazy" decoding="async" width="1280" height="800">
+                            <img src="{{ url_for('static', filename='images/kanban-light.webp') }}"
+                                alt="TaskFlow preview (Light)" class="hub-thumb-img theme-img-light" loading="lazy" decoding="async" width="1280" height="800">
                         </div>
                         <div class="hub-project-body">
                             <div class="hub-project-top">
@@ -588,27 +625,26 @@
                                 <span class="hub-pill hub-pill-live">Live</span>
                             </div>
                             <p class="hub-project-text">Editorial “paper” workspace: overview, drag-and-drop board, week
-                                timeline, and automation toggles.</p>
+                                timeline, AI task estimator, and automation toggles.</p>
                             <div class="hub-project-tags">
                                 <span class="hub-tech-tag">Flask</span>
                                 <span class="hub-tech-tag">MongoDB</span>
-                                <span class="hub-tech-tag">Multi-page</span>
+                                <span class="hub-tech-tag">Gemini AI</span>
                             </div>
                             <div class="hub-project-meta">
-                                <span>Routes: <code>/kanban</code> · <code>/kanban/board</code></span>
+                                <span>Interactive Demo · Productivity Suite</span>
                                 <span class="hub-arrow">→</span>
                             </div>
                         </div>
                     </a>
 
-
-
-                    <a class="hub-project anim-fade" data-anim data-status="live" href="{{ url_for('ai_tool_page') }}">
+                    <a class="hub-project anim-fade" data-anim data-category="ai" href="{{ url_for('ai_tool_page') }}">
+                        <div class="hub-project-spotlight"></div>
                         <div class="hub-project-thumb">
-                            <img src="{{ url_for('static', filename='images/ai-tool-dark.png') }}"
-                                alt="TextForge preview (Dark)" class="hub-thumb-img theme-img-dark">
-                            <img src="{{ url_for('static', filename='images/ai-tool-light.png') }}"
-                                alt="TextForge preview (Light)" class="hub-thumb-img theme-img-light">
+                            <img src="{{ url_for('static', filename='images/ai-tool-dark.webp') }}"
+                                alt="TextForge preview (Dark)" class="hub-thumb-img theme-img-dark" loading="lazy" decoding="async" width="1280" height="800">
+                            <img src="{{ url_for('static', filename='images/ai-tool-light.webp') }}"
+                                alt="TextForge preview (Light)" class="hub-thumb-img theme-img-light" loading="lazy" decoding="async" width="1280" height="800">
                         </div>
                         <div class="hub-project-body">
                             <div class="hub-project-top">
@@ -619,24 +655,25 @@
                                 TextBlob, Naive Bayes) against modern LLMs (Gemini) across various text processing tasks.
                             </p>
                             <div class="hub-project-tags">
-                                <span class="hub-tech-tag">Flask</span>
-                                <span class="hub-tech-tag">REST</span>
-                                <span class="hub-tech-tag">localStorage</span>
+                                <span class="hub-tech-tag">scikit-learn</span>
+                                <span class="hub-tech-tag">BM25 / NLP</span>
+                                <span class="hub-tech-tag">Gemini AI</span>
                             </div>
                             <div class="hub-project-meta">
-                                <span>Routes: <code>/ai-tool</code> · <code>/ai-tool/studio</code></span>
+                                <span>Interactive Demo · NLP vs. LLM Lab</span>
                                 <span class="hub-arrow">→</span>
                             </div>
                         </div>
                     </a>
 
-                    <a class="hub-project anim-fade" data-anim data-status="live"
+                    <a class="hub-project anim-fade" data-anim data-category="fullstack"
                         href="https://financial-planning-steel.vercel.app/" target="_blank" rel="noopener noreferrer">
+                        <div class="hub-project-spotlight"></div>
                         <div class="hub-project-thumb">
-                            <img src="{{ url_for('static', filename='images/financial-planning-dark-final.png') }}"
-                                alt="Financial Planning preview (Dark)" class="hub-thumb-img theme-img-dark">
-                            <img src="{{ url_for('static', filename='images/financial-planning-light-final.png') }}"
-                                alt="Financial Planning preview (Light)" class="hub-thumb-img theme-img-light">
+                            <img src="{{ url_for('static', filename='images/financial-planning-dark-final.webp') }}"
+                                alt="Financial Planning preview (Dark)" class="hub-thumb-img theme-img-dark" loading="lazy" decoding="async" width="1280" height="800">
+                            <img src="{{ url_for('static', filename='images/financial-planning-light-final.webp') }}"
+                                alt="Financial Planning preview (Light)" class="hub-thumb-img theme-img-light" loading="lazy" decoding="async" width="1280" height="800">
                         </div>
                         <div class="hub-project-body">
                             <div class="hub-project-top">
@@ -651,19 +688,20 @@
                                 <span class="hub-tech-tag">Vercel</span>
                             </div>
                             <div class="hub-project-meta">
-                                <span>External Link: <code>https://financial-planning-steel.vercel.app</code></span>
+                                <span>Live Web App · Vercel</span>
                                 <span class="hub-arrow">↗</span>
                             </div>
                         </div>
                     </a>
 
-                    <a class="hub-project anim-fade" data-anim data-status="live"
+                    <a class="hub-project anim-fade" data-anim data-category="fullstack"
                         href="https://retail-stock-tracker.vercel.app/" target="_blank" rel="noopener noreferrer">
+                        <div class="hub-project-spotlight"></div>
                         <div class="hub-project-thumb">
-                            <img src="{{ url_for('static', filename='images/retail-stock-dark.png') }}"
-                                alt="Retail Stock Tracker preview (Dark)" class="hub-thumb-img theme-img-dark">
-                            <img src="{{ url_for('static', filename='images/retail-stock-light.png') }}"
-                                alt="Retail Stock Tracker preview (Light)" class="hub-thumb-img theme-img-light">
+                            <img src="{{ url_for('static', filename='images/retail-stock-dark.webp') }}"
+                                alt="Retail Stock Tracker preview (Dark)" class="hub-thumb-img theme-img-dark" loading="lazy" decoding="async" width="1280" height="800">
+                            <img src="{{ url_for('static', filename='images/retail-stock-light.webp') }}"
+                                alt="Retail Stock Tracker preview (Light)" class="hub-thumb-img theme-img-light" loading="lazy" decoding="async" width="1280" height="800">
                         </div>
                         <div class="hub-project-body">
                             <div class="hub-project-top">
@@ -677,19 +715,20 @@
                                 <span class="hub-tech-tag">Vercel</span>
                             </div>
                             <div class="hub-project-meta">
-                                <span>External Link: <code>https://retail-stock-tracker.vercel.app</code></span>
+                                <span>Live Web App · Vercel</span>
                                 <span class="hub-arrow">↗</span>
                             </div>
                         </div>
                     </a>
 
-                    <a class="hub-project anim-fade" data-anim data-status="live"
+                    <a class="hub-project anim-fade" data-anim data-category="ai"
                         href="https://rag-chat-doubleum.streamlit.app/" target="_blank" rel="noopener noreferrer">
+                        <div class="hub-project-spotlight"></div>
                         <div class="hub-project-thumb">
-                            <img src="{{ url_for('static', filename='images/rag-chat-dark.png') }}"
-                                alt="RAG Chat preview (Dark)" class="hub-thumb-img theme-img-dark">
-                            <img src="{{ url_for('static', filename='images/rag-chat-light.png') }}"
-                                alt="RAG Chat preview (Light)" class="hub-thumb-img theme-img-light">
+                            <img src="{{ url_for('static', filename='images/rag-chat-dark.webp') }}"
+                                alt="RAG Chat preview (Dark)" class="hub-thumb-img theme-img-dark" loading="lazy" decoding="async" width="1280" height="800">
+                            <img src="{{ url_for('static', filename='images/rag-chat-light.webp') }}"
+                                alt="RAG Chat preview (Light)" class="hub-thumb-img theme-img-light" loading="lazy" decoding="async" width="1280" height="800">
                         </div>
                         <div class="hub-project-body">
                             <div class="hub-project-top">
@@ -704,7 +743,7 @@
                                 <span class="hub-tech-tag">Python</span>
                             </div>
                             <div class="hub-project-meta">
-                                <span>External Link: <code>https://rag-chat-doubleum.streamlit.app</code></span>
+                                <span>Live Web App · Streamlit Cloud</span>
                                 <span class="hub-arrow">↗</span>
                             </div>
                         </div>
@@ -793,9 +832,10 @@
             </div>
 
             <nav class="hub-footer-nav" aria-label="Footer">
-                <a href="#skills">Skills</a>
-                <a href="#projects">Projects</a>
                 <a href="#about">About</a>
+                <a href="#skills">Skills</a>
+                <a href="#journey">Journey</a>
+                <a href="#projects">Projects</a>
                 <a href="#contact">Contact</a>
                 <a href="{{ url_for('site_insights') }}">Insights</a>
             </nav>
@@ -834,15 +874,23 @@
         // ELITE INTERACTION SUITE
         // =========================================================================
 
-        // 1. 3D Spatial Tilt (Hero Card)
+        // 1. 3D Spatial Tilt (Hero Card — active only while hovering over the slideshow)
         const heroCard = document.getElementById('hero-tilt-card');
-        if (heroCard) {
-            document.addEventListener('mousemove', (e) => {
-                const { clientX, clientY } = e;
-                const { innerWidth, innerHeight } = window;
-                const rotateY = ((clientX / innerWidth) - 0.5) * 15;
-                const rotateX = ((clientY / innerHeight) - 0.5) * -15;
+        const heroStage = heroCard ? heroCard.parentElement : null;
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        if (heroCard && heroStage) {
+            heroStage.addEventListener('mousemove', (e) => {
+                if (reduceMotion.matches) return;
+                const rect = heroStage.getBoundingClientRect();
+                const normX = ((e.clientX - rect.left) / rect.width) - 0.5;
+                const normY = ((e.clientY - rect.top) / rect.height) - 0.5;
+                const rotateY = normX * 14;
+                const rotateX = normY * -14;
                 heroCard.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+
+            heroStage.addEventListener('mouseleave', () => {
+                heroCard.style.transform = 'rotateX(0deg) rotateY(0deg)';
             });
         }
 
@@ -895,7 +943,7 @@
             }
         });
 
-        // 7. Project Status Filter
+        // 7. Project Category Filter
         const filterBtns = document.querySelectorAll('.hub-filter-btn');
         const projects = document.querySelectorAll('.hub-project');
 
@@ -906,7 +954,8 @@
                 const filter = btn.dataset.filter;
 
                 projects.forEach(p => {
-                    if (filter === 'all' || p.dataset.status === filter) {
+                    const categories = (p.dataset.category || '').split(/\s+/);
+                    if (filter === 'all' || categories.includes(filter)) {
                         p.style.display = '';
                         setTimeout(() => p.classList.add('is-visible'), 50);
                     } else {
@@ -917,11 +966,9 @@
             });
         });
 
-        // 8. Theme Toggle
+        // 8. Theme Toggle (initial theme is applied synchronously in <head>)
         const themeBtn = document.getElementById('theme-toggle');
         const root = document.documentElement;
-        const savedTheme = localStorage.getItem('hub-theme') || 'dark';
-        root.setAttribute('data-theme', savedTheme);
 
         themeBtn.addEventListener('click', () => {
             const currentTheme = root.getAttribute('data-theme');

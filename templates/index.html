@@ -55,12 +55,12 @@
         <h2 class="section-title">Shop by Category</h2>
         <div class="bento-grid">
             {% for category in categories %}
-                {% set bg_img = 'category_electrical.jpg' %}
-                {% if category.name == 'Engine Parts' %} {% set bg_img = 'category_engine.jpg' %}
-                {% elif category.name == 'Brake Systems' %} {% set bg_img = 'category_brakes.jpg' %}
-                {% elif category.name == 'Suspension' %} {% set bg_img = 'category_suspension.jpg' %}
-                {% elif category.name == 'Filters' %} {% set bg_img = 'category_filters.jpg' %}
-                {% elif category.name == 'Lighting' %} {% set bg_img = 'category_lighting.jpg' %}
+                {% set bg_img = 'category_electrical.webp' %}
+                {% if category.name == 'Engine Parts' %} {% set bg_img = 'category_engine.webp' %}
+                {% elif category.name == 'Brake Systems' %} {% set bg_img = 'category_brakes.webp' %}
+                {% elif category.name == 'Suspension' %} {% set bg_img = 'category_suspension.webp' %}
+                {% elif category.name == 'Filters' %} {% set bg_img = 'category_filters.webp' %}
+                {% elif category.name == 'Lighting' %} {% set bg_img = 'category_lighting.webp' %}
                 {% endif %}
                 <a href="{{ url_for('products', category=category.id) }}" 
                    class="bento-item {% if loop.index0 == 0 %}bento-span-2 bento-span-row-2{% elif loop.index0 == 3 %}bento-span-2{% endif %}"
@@ -83,8 +83,8 @@
             {% for product in featured_products %}
             <div class="card">
                 <div style="height: 200px; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: var(--space-md); border-radius: var(--radius-md);">
-                    <img src="{{ product.image_url or '/static/images/products/air-filter.png' }}"
-                        alt="{{ product.name }}" class="card-img" style="object-fit: contain; padding: 10px;">
+                    <img src="{{ product.image_url or '/static/images/products/air-filter.webp' }}"
+                        alt="{{ product.name }}" class="card-img" style="object-fit: contain; padding: 10px;" loading="lazy" decoding="async" width="400" height="400">
                 </div>
                 <span class="badge badge-success" style="position:absolute; top:var(--space-md); right:var(--space-md); z-index:10;">In Stock</span>
                 <h3 class="card-title">{{ product.name }}</h3>

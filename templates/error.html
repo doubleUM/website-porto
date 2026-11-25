@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>{{ error_code }} — {{ error_title }} | Wilson Manuel</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/portfolio.css') }}">
+    <script>
+        (function () {
+            const theme = localStorage.getItem('hub-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <style>
+        .err-wrap {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            z-index: 1;
+        }
+
+        .err-main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 130px 24px 64px;
+        }
+
+        .err-card {
+            max-width: 560px;
+            width: 100%;
+            text-align: center;
+            padding: 48px 36px;
+            border-radius: var(--hub-radius);
+            background: var(--hub-card-bg);
+            border: 1px solid var(--hub-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: var(--hub-shadow);
+        }
+
+        .err-code {
+            font-family: var(--hub-heading);
+            font-size: clamp(64px, 12vw, 108px);
+            font-weight: 800;
+            line-height: 0.95;
+            letter-spacing: -0.05em;
+            margin: 0 0 16px;
+            background: linear-gradient(135deg, var(--hub-text) 0%, var(--hub-accent) 55%, var(--hub-accent-2) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .err-title {
+            font-family: var(--hub-heading);
+            font-size: clamp(22px, 3.5vw, 28px);
+            font-weight: 700;
+            margin: 0 0 12px;
+            color: var(--hub-text);
+            letter-spacing: -0.02em;
+        }
+
+        .err-desc {
+            color: var(--hub-muted);
+            font-size: 14.5px;
+            line-height: 1.7;
+            margin: 0 auto 28px;
+            max-width: 44ch;
+        }
+
+        .err-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="hub-tech-bg" aria-hidden="true">
+        <div class="hub-tech-grid"></div>
+        <div class="hub-tech-scanline"></div>
+    </div>
+
+    <div class="err-wrap">
+        <header class="hub-header">
+            <nav class="hub-nav">
+                <a href="{{ url_for('portfolio_home') }}" class="hub-brand">
+                    <span class="hub-brand-long">Wilson Manuel's</span>
+                    <span class="hub-brand-short">W. Manuel</span>
+                    <span class="hub-brand-xs">WM</span>
+                </a>
+                <div class="hub-nav-links">
+                    <a href="{{ url_for('portfolio_home') }}" class="hub-link">Portfolio Hub</a>
+                    <a href="{{ url_for('portfolio_home') }}#projects" class="hub-link">Projects</a>
+                    <a href="{{ url_for('portfolio_home') }}#contact" class="hub-link">Contact</a>
+                    <button type="button" class="hub-theme-toggle" id="theme-toggle" aria-label="Toggle dark/light mode">
+                        <span class="theme-icon-dark">🌙</span>
+                        <span class="theme-icon-light">☀️</span>
+                    </button>
+                </div>
+            </nav>
+        </header>
+
+        <main class="err-main">
+            <div class="err-card">
+                <p class="hub-kicker">System Status · HTTP {{ error_code }}</p>
+                <div class="err-code">{{ error_code }}</div>
+                <h1 class="err-title">{{ error_title }}</h1>
+                <p class="err-desc">{{ error_message }}</p>
+                <div class="err-actions">
+                    <a href="{{ url_for('portfolio_home') }}" class="hub-btn hub-btn-primary">&larr; Back to Portfolio Hub</a>
+                    <a href="{{ url_for('portfolio_home') }}#projects" class="hub-btn hub-btn-ghost">Explore Projects</a>
+                </div>
+            </div>
+        </main>
+
+        <footer class="hub-footer">
+            <div class="hub-container hub-footer-inner">
+                <div class="hub-footer-left">
+                    <div class="hub-footer-brand">Wilson Manuel</div>
+                    <div class="hub-footer-note">AI Developer · Jakarta, Indonesia</div>
+                </div>
+                <div class="hub-last-updated">Portfolio Ecosystem</div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', next);
+                localStorage.setItem('hub-theme', next);
+            });
+        }
+    </script>
+</body>
+
+</html>

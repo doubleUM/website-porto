@@ -2,7 +2,6 @@ import numpy as np
 from textblob import TextBlob
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.linear_model import LinearRegression
 from nltk.tokenize import sent_tokenize, word_tokenize
 import nltk
 from rank_bm25 import BM25Okapi
@@ -18,11 +17,10 @@ load_dotenv()
 # Global models
 ticket_vectorizer = None
 ticket_classifier = None
-task_duration_model = None
 
 def init_models():
     """Build and train models on synthetic datasets during app startup."""
-    global ticket_vectorizer, ticket_classifier, task_duration_model
+    global ticket_vectorizer, ticket_classifier
     print("Initializing Machine Learning Models...")
 
     # Ensure basic NLTK tokenizers are available safely
@@ -273,23 +271,6 @@ def init_models():
     
     ticket_classifier = MultinomialNB()
     ticket_classifier.fit(X, labels)
-    
-    # ---------------------------------------------------------
-    # 2. TaskPulse Kanban Predictor (Regression)
-    # ---------------------------------------------------------
-    # Predicting Days to Completion based on (word_count, priority_level)
-    # Priority scaling: Low=1, Medium=2, High=3
-    # Synthetic logic: days = ~1.5 + (words * 0.05) + (priority * 0.8) + noise
-    
-    X_tasks = np.array([
-        [10, 1], [30, 2], [150, 3], [5, 1], [80, 2],
-        [200, 3], [50, 1], [10, 3], [60, 2], [110, 2]
-    ])
-    # Target: Days (rounded)
-    y_days = np.array([2, 5, 11, 1, 7, 14, 4, 4, 6, 8])
-
-    task_duration_model = LinearRegression()
-    task_duration_model.fit(X_tasks, y_days)
 
     print("ML Models Initialized Successfully.")
 
@@ -400,12 +381,13 @@ User Ticket: "{text}"
 
 def predict_task_duration(description, priority):
     """Predicts how many days a task will take using Gemini."""
-    prompt = f"Estimate how many days this software task will take to complete. Return ONLY an integer between 1 and 30.\nDescription: {description}\nPriority: {priority}"
+    clean_desc = (description or "")[:1000]
+    prompt = f"Estimate how many days this software task will take to complete. Return ONLY an integer between 1 and 30.\nDescription: {clean_desc}\nPriority: {priority}"
     try:
         days_str = call_gemini(prompt)
         days = int(days_str)
         return max(1, min(30, days))
-    except:
+    except Exception:
         return 5
 
 # ============================================================================
@@ -494,47 +476,71 @@ def ask_portfolio_assistant(user_message, chat_history=""):
     knowledge_base = """
 About Wilson Manuel:
 - Name: Wilson Manuel
-- Role: AI Developer & Full-Stack Engineer
+- Role: AI/ML Engineer & AI Developer (Full-Stack)
+- Current Company: Sinar Mas Land (AI/ML Engineer, 2025 - Present)
 - Location: Jakarta, Indonesia
-- Availability: Open to full-time roles, contract work, and freelance projects in AI integration and full-stack development.
+- Availability: Open to full-time roles, contract work, and freelance projects in AI integration, applied ML, and full-stack development.
 - Email: wilsonmanuel111@gmail.com
 - GitHub: https://github.com/doubleUM
 - LinkedIn: https://www.linkedin.com/in/wilson-manuel-1249b820b/
-- CV: Downloadable directly from the portfolio header/contact section.
+- CV: Downloadable directly from the portfolio Contact section.
+
+Work Experience:
+1. AI/ML Engineer — Sinar Mas Land (2025 – Current):
+   - Optimized an automated ticket-tagging application, reducing processing time by 55% (from 22 seconds down to 10 seconds).
+   - Refined ticket recommendation prompt engineering, increasing prediction accuracy from 80% to 96%.
+   - Developed AI-generated root-cause analysis categorization from user complaints.
+   - Engineered an AI-powered OCR system to automate data extraction from tax billing documents.
+   - Resolved cross-functional technical requests (custom data extraction, output reformatting, critical bug fixes) and maintained web service uptime through daily monitoring.
+2. AI Development Tester Intern — Sinar Mas Land (2023 – 2025):
+   - Built automated PDF page tagging to classify document pages based on content.
+   - Generated text embeddings from internal datasets for text classification pipelines.
+   - Built user interface websites for ongoing internal AI projects.
+3. Website Developer Intern — Tribun Network (2022):
+   - Developed "U-Tapis", an internal CRM web application for news editors and reporters that detects errors and improper Indonesian language usage in news articles.
+   - Built with Python Flask, JavaScript, and MongoDB.
+
+Education & Training:
+1. Universitas Multimedia Nusantara (UMN) — B.Sc. in Information Systems, GPA 3.85 / 4.00 (2019 – 2023):
+   - Final Thesis: Built and deployed a machine learning web application to predict user sentiment toward fintech apps using Google Play Store reviews of the Bibit app. Evaluated 4 algorithms (SVM, Random Forest, Decision Tree, Naive Bayes) and selected SVM based on benchmark performance.
+2. Digitalent Fresh Graduate Academy — IT Support Specialist (2023):
+   - Trained in troubleshooting, computer networking, Linux/Windows CLI administration, operating systems, and cloud security.
+3. Bangkit Academy — Cloud Computing Cohort (2022):
+   - Trained in Google Cloud Platform (GCP) infrastructure, cloud networking, application deployment, MVP planning, startup pitch/valuation, and professional communication.
 
 Core Philosophy & Focus:
 - "Building ideas into real products" — focusing on high-utility organizational tools.
-- AI Integration: LLM-backed features (Gemini API, RAG, prompt engineering, agentic systems) built into practical products.
-- Applied Machine Learning: Practical categorization, sentiment analysis, and regression models designed for measurable business outcomes.
-- Full-Stack Delivery: End-to-end development from database design to responsive frontend.
-- Data Analysis & Testing: Verifying what ships and turning raw data into actionable insights.
+- AI Integration: LLM-backed features (Gemini API, OCR, RAG, prompt engineering) built into products people actually use.
+- Applied Machine Learning: Practical categorization, embeddings, and sentiment analysis models aimed at measurable business outcomes.
+- Full-Stack Delivery: End-to-end ownership from data model to deployed responsive UI.
+- Data Analysis & Testing: Verifying what ships and turning raw data into decisions.
 
 Technical Skills:
 - Languages: Python, JavaScript, HTML5, CSS3
-- Frontend: React, Next.js, Vite, Streamlit, Jinja2, Responsive UI / Tailwind & Modern CSS
+- Frontend: React, Next.js, Vite, Streamlit, Jinja2, Responsive UI
 - Backend & APIs: Flask, REST APIs, Session Auth, Bcrypt, PyMongo
-- AI / ML: Google Gemini API, scikit-learn, NLTK, TextBlob, NumPy, TF-IDF, Naive Bayes, Linear Regression, RAG / BM25, Google Translate API
+- AI / ML: Google Gemini API, OCR & Document AI, Embeddings, scikit-learn, NLTK, TextBlob, NumPy, TF-IDF, SVM, Naive Bayes, RAG / Okapi BM25, MyMemory Translation API
 - Data & Storage: MongoDB, PyMongo, Data Analysis
-- Tools & Deployment: Git, GitHub, Render, Vercel, Streamlit Cloud
+- Cloud & Deployment: Google Cloud (GCP), Git, GitHub, Render, Vercel, Streamlit Cloud
 
-Featured Projects:
+Featured Live Projects:
 1. Car Spareparts Store (/car-spareparts):
-   - E-commerce demo for automotive parts with shopping cart, checkout, admin dashboard, and an integrated Gemini AI Shopping Assistant.
+   - Full-stack e-commerce demo for automotive parts with product catalog, search/filtering, cart, checkout, admin dashboard, and an integrated Gemini AI Shopping Assistant.
    - Stack: Flask, MongoDB, Gemini AI API.
 2. TaskFlow — Kanban Board (/kanban):
-   - Editorial/paper aesthetic productivity suite with overview, drag-and-drop board, week timeline, automation toggles, and ML-powered task duration prediction.
-   - Stack: Flask, MongoDB, Scikit-learn/Gemini.
+   - Neo-brutalist / editorial productivity workspace with sprint health overview, drag-and-drop board, week timeline, automation toggles, and AI-powered task duration estimation.
+   - Stack: Flask, MongoDB, Gemini AI.
 3. TextForge — AI Tool (/ai-tool):
-   - AI workbench and comparison playground comparing traditional NLP techniques (TF-IDF, TextBlob sentiment, Naive Bayes categorization) with modern LLMs (Gemini) across text processing tasks.
-   - Stack: Flask, Scikit-learn, Gemini API, REST APIs, localStorage.
+   - Side-by-side NLP vs. LLM workbench comparing classical ML (TF-IDF summarization, TextBlob sentiment, Okapi BM25 document Q&A, Multinomial Naive Bayes ticket triage, MyMemory translation) against Google Gemini.
+   - Stack: Flask, scikit-learn, NLTK, BM25, Gemini API, REST, localStorage.
 4. Financial Planning App (https://financial-planning-steel.vercel.app/):
    - Modern wealth and budget tracking web application.
    - Stack: Next.js, React, Vercel.
 5. Retail Stock Tracker (https://retail-stock-tracker.vercel.app/):
-   - Real-time platform to manage retail stock, inventory, and supply operations.
+   - Modern platform to manage retail stock and inventory operations.
    - Stack: React, Vite, Vercel.
 6. RAG Chat System (https://rag-chat-doubleum.streamlit.app/):
-   - Retrieval-Augmented Generation chatbot system allowing users to chat with custom documents using BM25 and LLM reasoning.
+   - Retrieval-Augmented Generation chatbot built with Python and Streamlit for querying custom documents.
    - Stack: Python, Streamlit, RAG.
 """
 

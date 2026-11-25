@@ -31,7 +31,7 @@
     <nav class="navbar">
         <div class="container">
             <a href="{{ url_for('store_home') }}" class="navbar-brand" style="display: flex; align-items: center; gap: 8px;">
-                <img src="{{ url_for('static', filename='images/favicon_cropped.png') }}" alt="AutoParts Pro Logo" style="height: 32px; width: auto;">
+                <img src="{{ url_for('static', filename='images/favicon_cropped.webp') }}" alt="AutoParts Pro Logo" style="height: 32px; width: auto;" decoding="async">
                 <span>AutoParts Pro</span>
             </a>
 
@@ -255,6 +255,12 @@
         let modalStock = 0;
         let modalProductId = null;
 
+        function escModalHtml(str) {
+            const d = document.createElement('div');
+            d.textContent = str == null ? '' : String(str);
+            return d.innerHTML;
+        }
+
         function openProductModal(productId) {
             const modal = document.getElementById('product-modal');
             const body = document.getElementById('pd-body');
@@ -269,50 +275,51 @@
                 .then(p => {
                     modalStock = p.stock || 0;
                     const inStock = modalStock > 0;
+                    const imgUrl = (p.image_url && p.image_url.startsWith('/static/')) ? escModalHtml(p.image_url) : '/static/images/products/air-filter.webp';
                     body.innerHTML = `
                         <div class="pd-img-wrap">
-                            <img src="${p.image_url || '/static/images/products/air-filter.png'}" alt="${p.name}">
+                            <img src="${imgUrl}" alt="${escModalHtml(p.name)}" decoding="async">
                         </div>
                         <div class="pd-content">
                             <div class="pd-badges">
                                 ${inStock
-                                    ? `<span class="badge badge-success">In Stock (${modalStock})</span>`
+                                    ? `<span class="badge badge-success">In Stock (${Number(modalStock)})</span>`
                                     : `<span class="badge badge-danger">Out of Stock</span>`}
                                 ${p.featured ? '<span class="badge badge-warning">⭐ Featured</span>' : ''}
-                                <span class="badge" style="background:var(--bg-tertiary);border:1px solid var(--glass-border);color:var(--text-secondary);">${p.category_icon || ''} ${p.category_name || ''}</span>
+                                <span class="badge" style="background:var(--bg-tertiary);border:1px solid var(--glass-border);color:var(--text-secondary);">${escModalHtml(p.category_icon || '')} ${escModalHtml(p.category_name || '')}</span>
                             </div>
-                            <h2 class="pd-name">${p.name}</h2>
-                            <div class="pd-price">$${parseFloat(p.price).toFixed(2)}</div>
-                            <p class="pd-desc">${p.description || 'No description available.'}</p>
+                            <h2 class="pd-name">${escModalHtml(p.name)}</h2>
+                            <div class="pd-price">$${parseFloat(p.price || 0).toFixed(2)}</div>
+                            <p class="pd-desc">${escModalHtml(p.description || 'No description available.')}</p>
 
                             <div class="pd-specs">
                                 <div class="pd-spec">
                                     <div class="pd-spec-label">Brand</div>
-                                    <div class="pd-spec-value">${p.brand || '—'}</div>
+                                    <div class="pd-spec-value">${escModalHtml(p.brand || '—')}</div>
                                 </div>
                                 <div class="pd-spec">
                                     <div class="pd-spec-label">Part Number</div>
-                                    <div class="pd-spec-value">${p.part_number || '—'}</div>
+                                    <div class="pd-spec-value">${escModalHtml(p.part_number || '—')}</div>
                                 </div>
                                 <div class="pd-spec">
                                     <div class="pd-spec-label">Category</div>
-                                    <div class="pd-spec-value">${p.category_name || '—'}</div>
+                                    <div class="pd-spec-value">${escModalHtml(p.category_name || '—')}</div>
                                 </div>
                                 <div class="pd-spec">
                                     <div class="pd-spec-label">Stock</div>
-                                    <div class="pd-spec-value">${modalStock} units</div>
+                                    <div class="pd-spec-value">${Number(modalStock)} units</div>
                                 </div>
                                 ${p.specifications ? `
                                 <div class="pd-spec" style="grid-column: 1 / -1;">
                                     <div class="pd-spec-label">Specifications</div>
-                                    <div class="pd-spec-value">${p.specifications}</div>
+                                    <div class="pd-spec-value">${escModalHtml(p.specifications)}</div>
                                 </div>` : ''}
                             </div>
 
                             ${p.compatible_cars ? `
                             <div class="pd-compat">
                                 <div class="pd-compat-title">🚗 Compatible Vehicles</div>
-                                <p class="pd-compat-text">${p.compatible_cars}</p>
+                                <p class="pd-compat-text">${escModalHtml(p.compatible_cars)}</p>
                             </div>` : ''}
 
                             <div class="pd-actions">
@@ -681,7 +688,7 @@
                         addMessage(data.response, false);
                         chatHistory += `AI: ${data.response}\n`;
                     } else {
-                        addMessage('Sorry, I encountered an error.', false);
+                        addMessage(data.message || 'Sorry, I encountered an error.', false);
                     }
                 } catch (e) {
                     removeTypingIndicator();

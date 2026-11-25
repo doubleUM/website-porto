@@ -5,7 +5,7 @@
     <div class="container">
         <h1 class="hero-title" style="font-size: var(--text-4xl); margin-bottom: var(--space-xl);">Shopping Cart</h1>
 
-        <div style="display: grid; grid-template-columns: 1fr 400px; gap: var(--space-xl);">
+        <div class="checkout-layout">
             <!-- Cart Items -->
             <div>
                 {% if cart_items %}
@@ -13,7 +13,7 @@
                 <div class="cart-item fade-in" id="cart-item-{{ item.id }}" data-price="{{ item.product.price }}" style="animation-delay: {{ loop.index0 * 0.1 }}s; animation-fill-mode: backwards;">
                     <div
                         style="background: var(--bg-tertiary); max-width: 100px; min-width: 100px; height: 100px; border-radius: var(--radius-sm); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                        <img src="{{ item.product.image_url or '/static/images/products/air-filter.png' }}" alt="{{ item.product.name }}" style="max-height: 80%; max-width: 80%; object-fit: contain;">
+                        <img src="{{ item.product.image_url or '/static/images/products/air-filter.webp' }}" alt="{{ item.product.name }}" style="max-height: 80%; max-width: 80%; object-fit: contain;" loading="lazy" decoding="async">
                     </div>
 
                     <div class="cart-item-details">
