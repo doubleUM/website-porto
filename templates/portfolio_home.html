@@ -248,7 +248,17 @@
             <div class="hub-hero-right anim-fade" data-anim style="transition-delay: 200ms;">
                 <div class="hub-hero-card" id="hero-tilt-card">
                     <div class="hub-hero-card-top">
-                        <span class="hub-dot"></span><span class="hub-dot"></span><span class="hub-dot"></span>
+                        <div class="hub-hero-dots" aria-hidden="true">
+                            <span class="hub-dot"></span><span class="hub-dot"></span><span class="hub-dot"></span>
+                        </div>
+                        <div class="hub-hero-address" aria-hidden="true">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <span>wilsonmanuel.dev/showcase</span>
+                        </div>
+                        <div class="hub-hero-spacer" aria-hidden="true"></div>
                     </div>
                     <div class="hub-hero-card-body">
                         <div class="hub-browser-body hero-slider">
@@ -359,10 +369,25 @@
 
                     <!-- Location Tile -->
                     <div class="hub-bento-card bento-location anim-fade" data-anim style="transition-delay: 200ms;">
-                        <p class="hub-kicker">Status</p>
-                        <div class="location-content">
-                            <div class="location-time" id="local-time">-- : --</div>
-                            <div class="location-city">Jakarta, Indonesia</div>
+                        <div class="location-top">
+                            <p class="hub-kicker">Status</p>
+                            <div class="location-content">
+                                <div class="location-time-row">
+                                    <div class="location-time" id="local-time">-- : --</div>
+                                    <span class="location-tz">WIB · UTC+7</span>
+                                </div>
+                                <div class="location-city">Jakarta, Indonesia</div>
+                            </div>
+                        </div>
+                        <div class="location-meta">
+                            <div class="location-meta-item">
+                                <span class="location-meta-label">Currently</span>
+                                <span class="location-meta-value">AI/ML Engineer · Sinar Mas Land</span>
+                            </div>
+                            <div class="location-meta-item">
+                                <span class="location-meta-label">Open To</span>
+                                <span class="location-meta-value">Full-Time, Contract &amp; Freelance</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -477,7 +502,7 @@
                 <div class="hub-timeline-grid">
                     <!-- Column 1: Work Experience -->
                     <div>
-                        <h3 class="hub-h2" style="font-size: 1.5rem; margin-bottom: 30px;">Work Experience</h3>
+                        <h3 class="hub-timeline-col-title">Work Experience</h3>
                         <div class="hub-timeline">
                             <!-- Sinar Mas Land (Current) -->
                             <div class="hub-timeline-item anim-fade" data-anim style="transition-delay: 50ms;">
@@ -525,7 +550,7 @@
 
                     <!-- Column 2: Education -->
                     <div>
-                        <h3 class="hub-h2" style="font-size: 1.5rem; margin-bottom: 30px;">Education &amp; Training</h3>
+                        <h3 class="hub-timeline-col-title">Education &amp; Training</h3>
                         <div class="hub-timeline">
                             <!-- Universitas Multimedia Nusantara -->
                             <div class="hub-timeline-item anim-fade" data-anim style="transition-delay: 100ms;">
@@ -790,7 +815,7 @@
 
                 <div class="hub-contact-actions">
                     {% if resume_url %}
-                    <a class="hub-btn hub-btn-ghost" href="{{ resume_url }}" download>
+                    <a class="hub-btn hub-btn-primary" href="{{ resume_url }}" download>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M12 3v12" />
@@ -933,15 +958,50 @@
 
         document.querySelectorAll('.anim-fade, [data-anim]').forEach(el => revealObserver.observe(el));
 
-        // 6. Island Nav Scale & Scroll Logic
+        // 6. Island Nav Scale & Scrollspy Logic
         const nav = document.querySelector('.hub-nav');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 100) {
+        const spyLinks = Array.from(document.querySelectorAll('.hub-nav-links .hub-link[href^="#"]'));
+        const spySections = spyLinks
+            .map(link => document.querySelector(link.getAttribute('href')))
+            .filter(Boolean);
+
+        let scrollTicking = false;
+        function onScrollUpdate() {
+            const y = window.scrollY;
+            if (y > 100) {
                 nav.classList.add('is-scrolled');
             } else {
                 nav.classList.remove('is-scrolled');
             }
-        });
+
+            let activeId = '';
+            if (y >= 180) {
+                const atBottom = (window.innerHeight + y) >= (document.documentElement.scrollHeight - 40);
+                if (atBottom && spySections.length) {
+                    activeId = spySections[spySections.length - 1].id;
+                } else {
+                    const triggerLine = window.innerHeight * 0.35;
+                    for (const sec of spySections) {
+                        if (sec.getBoundingClientRect().top <= triggerLine) {
+                            activeId = sec.id;
+                        }
+                    }
+                }
+            }
+
+            spyLinks.forEach(link => {
+                link.classList.toggle('is-active', link.getAttribute('href') === `#${activeId}`);
+            });
+            scrollTicking = false;
+        }
+
+        window.addEventListener('scroll', () => {
+            if (!scrollTicking) {
+                window.requestAnimationFrame(onScrollUpdate);
+                scrollTicking = true;
+            }
+        }, { passive: true });
+        onScrollUpdate();
 
         // 7. Project Category Filter
         const filterBtns = document.querySelectorAll('.hub-filter-btn');
