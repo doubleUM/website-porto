@@ -153,13 +153,103 @@ def rate_limit_ai(bucket_name, per_minute=10, per_hour=60):
 
 
 # ============================================================================
+# GARAGE FITMENT PROFILES (Shared across Store UI, Catalog Filter & AI Mechanic)
+# ============================================================================
+
+GARAGE_VEHICLES = [
+    {
+        'id': 'honda-civic',
+        'name': 'Honda Civic',
+        'trim': 'Type R / Si · FL5',
+        'year': '2022–2026',
+        'exact_terms': ['honda civic'],
+        'universal_terms': ['universal', 'most sedans', 'most 4-cylinder', 'most fuel-injected', 'japanese'],
+    },
+    {
+        'id': 'toyota-camry',
+        'name': 'Toyota Camry',
+        'trim': 'TRD / XSE · XV70',
+        'year': '2020–2026',
+        'exact_terms': ['toyota camry'],
+        'universal_terms': ['universal', 'most sedans', 'most 4-cylinder', 'most fuel-injected', 'japanese'],
+    },
+    {
+        'id': 'bmw-3-series',
+        'name': 'BMW 3-Series',
+        'trim': '330i / M340i · G20',
+        'year': '2019–2026',
+        'exact_terms': ['bmw 3-series'],
+        'universal_terms': ['universal', 'most sedans', 'most 4-cylinder', 'most fuel-injected', 'european'],
+    },
+    {
+        'id': 'ford-mustang',
+        'name': 'Ford Mustang',
+        'trim': 'GT 5.0 V8 · S650',
+        'year': '2021–2026',
+        'exact_terms': ['ford mustang'],
+        'universal_terms': ['universal', 'most fuel-injected'],
+    },
+    {
+        'id': 'toyota-tacoma',
+        'name': 'Toyota Tacoma',
+        'trim': 'TRD Pro 4x4 · N400',
+        'year': '2020–2026',
+        'exact_terms': ['toyota tacoma', '4runner'],
+        'universal_terms': ['universal', 'trucks', 'most fuel-injected', 'japanese'],
+    },
+    {
+        'id': 'jeep-wrangler',
+        'name': 'Jeep Wrangler',
+        'trim': 'Rubicon · JL',
+        'year': '2018–2026',
+        'exact_terms': ['jeep wrangler', 'cherokee'],
+        'universal_terms': ['universal', 'trucks', 'most fuel-injected'],
+    },
+    {
+        'id': 'mercedes-c-class',
+        'name': 'Mercedes C-Class',
+        'trim': 'C300 AMG Line · W206',
+        'year': '2021–2026',
+        'exact_terms': ['mercedes c-class'],
+        'universal_terms': ['universal', 'most sedans', 'most 4-cylinder', 'most fuel-injected', 'european'],
+    },
+    {
+        'id': 'honda-accord',
+        'name': 'Honda Accord',
+        'trim': 'Sport 2.0T · CY2',
+        'year': '2020–2026',
+        'exact_terms': ['honda accord'],
+        'universal_terms': ['universal', 'most sedans', 'most 4-cylinder', 'most fuel-injected', 'japanese'],
+    },
+    {
+        'id': 'nissan-altima',
+        'name': 'Nissan Altima',
+        'trim': 'SR VC-Turbo · L34',
+        'year': '2019–2026',
+        'exact_terms': ['nissan altima'],
+        'universal_terms': ['universal', 'most sedans', 'most 4-cylinder', 'most fuel-injected', 'japanese'],
+    },
+    {
+        'id': 'chevy-camaro',
+        'name': 'Chevrolet Camaro',
+        'trim': 'SS 1LE · Alpha',
+        'year': '2019–2024',
+        'exact_terms': ['chevrolet camaro'],
+        'universal_terms': ['universal', 'most fuel-injected'],
+    },
+]
+
+GARAGE_VEHICLE_MAP = {v['id']: v for v in GARAGE_VEHICLES}
+
+
+# ============================================================================
 # CONTEXT PROCESSOR — injects current_user & cart_count only on store pages
 # ============================================================================
 
 @app.context_processor
 def inject_global_data():
     if not request.path.startswith('/car-spareparts'):
-        return {'current_user': None, 'cart_count': 0}
+        return {'current_user': None, 'cart_count': 0, 'garage_vehicles': []}
 
     user_id = session.get('user_id')
 
@@ -176,7 +266,8 @@ def inject_global_data():
 
     return {
         'current_user': user,
-        'cart_count': cart_count
+        'cart_count': cart_count,
+        'garage_vehicles': GARAGE_VEHICLES,
     }
 
 # ============================================================================
@@ -583,17 +674,41 @@ def portfolio_home():
 @app.route('/car-spareparts')
 def store_home():
     visibility = get_store_visibility_filter()
-    featured_products = docs_to_list(products_col.find({**visibility, 'featured': True}).limit(6))
+    all_visible = docs_to_list(products_col.find(visibility))
     categories = docs_to_list(categories_col.find())
-    return render_template('index.html', featured_products=featured_products, categories=categories)
+    cat_lookup = {c['id']: c for c in categories}
+
+    # Count SKUs per category and attach category info to products
+    cat_counts = defaultdict(int)
+    for p in all_visible:
+        cat_counts[p.get('category_id')] += 1
+        p['category'] = cat_lookup.get(p.get('category_id'), {'name': 'Component', 'icon': ''})
+
+    for c in categories:
+        c['product_count'] = cat_counts.get(c['id'], 0)
+
+    featured_products = [p for p in all_visible if p.get('featured')][:6]
+    catalog_compat = [
+        {'id': p['id'], 'compatible_cars': p.get('compatible_cars', '')}
+        for p in all_visible
+    ]
+    return render_template(
+        'index.html',
+        featured_products=featured_products,
+        categories=categories,
+        total_skus=len(all_visible),
+        catalog_compat=catalog_compat,
+    )
 
 @app.route('/car-spareparts/products')
 def products():
     category_id = request.args.get('category', type=int)
     search_query = request.args.get('search', '').strip()
+    vehicle_id = request.args.get('vehicle', '').strip()
     sort_by = request.args.get('sort', 'name')
 
-    conditions = [get_store_visibility_filter()]
+    visibility = get_store_visibility_filter()
+    conditions = [visibility]
 
     if category_id:
         conditions.append({'category_id': category_id})
@@ -605,26 +720,58 @@ def products():
                 {'name': {'$regex': safe_pattern, '$options': 'i'}},
                 {'description': {'$regex': safe_pattern, '$options': 'i'}},
                 {'brand': {'$regex': safe_pattern, '$options': 'i'}},
+                {'part_number': {'$regex': safe_pattern, '$options': 'i'}},
+                {'compatible_cars': {'$regex': safe_pattern, '$options': 'i'}},
             ]
         })
+
+    active_vehicle = None
+    if vehicle_id:
+        active_vehicle = GARAGE_VEHICLE_MAP.get(vehicle_id)
+        if active_vehicle:
+            terms = active_vehicle['exact_terms'] + active_vehicle['universal_terms']
+            pattern = '|'.join(re.escape(t) for t in terms)
+            conditions.append({'compatible_cars': {'$regex': pattern, '$options': 'i'}})
+        else:
+            safe_veh = re.escape(vehicle_id[:80])
+            conditions.append({'compatible_cars': {'$regex': f"{safe_veh}|universal", '$options': 'i'}})
 
     query_filter = conditions[0] if len(conditions) == 1 else {'$and': conditions}
 
     # Sorting
-    sort_field = 'name'
-    sort_direction = 1  # ascending
+    sort_spec = [('name', 1)]
     if sort_by == 'price_asc':
-        sort_field = 'price'
-        sort_direction = 1
+        sort_spec = [('price', 1)]
     elif sort_by == 'price_desc':
-        sort_field = 'price'
-        sort_direction = -1
+        sort_spec = [('price', -1)]
+    elif sort_by == 'featured':
+        sort_spec = [('featured', -1), ('name', 1)]
 
-    products_list = docs_to_list(products_col.find(query_filter).sort(sort_field, sort_direction))
+    products_list = docs_to_list(products_col.find(query_filter).sort(sort_spec))
     categories = docs_to_list(categories_col.find())
+    cat_lookup = {c['id']: c for c in categories}
 
-    return render_template('products.html', products=products_list, categories=categories,
-                         current_category=category_id, search_query=search_query, current_sort=sort_by)
+    # Compute overall category SKU counts within current session visibility
+    cat_counts = defaultdict(int)
+    for doc in products_col.find(visibility, {'category_id': 1}):
+        cat_counts[doc.get('category_id')] += 1
+    for c in categories:
+        c['product_count'] = cat_counts.get(c['id'], 0)
+
+    for p in products_list:
+        p['category'] = cat_lookup.get(p.get('category_id'), {'name': 'Component', 'icon': ''})
+
+    return render_template(
+        'products.html',
+        products=products_list,
+        categories=categories,
+        current_category=category_id,
+        search_query=search_query,
+        current_sort=sort_by,
+        current_vehicle=vehicle_id,
+        active_vehicle=active_vehicle,
+        total_catalog_count=sum(cat_counts.values()),
+    )
 
 @app.route('/car-spareparts/product/<int:product_id>')
 def product_detail(product_id):
@@ -717,11 +864,67 @@ def site_insights():
 # API ROUTES
 # ============================================================================
 
+FREE_SHIPPING_THRESHOLD = 100.0
+
+
+def build_cart_snapshot():
+    """Return full itemized cart payload + totals for the live slide-out cart drawer."""
+    cart_filter = get_cart_filter()
+    items = []
+    subtotal = 0.0
+    total_qty = 0
+
+    for item_doc in cart_items_col.find(cart_filter):
+        item = doc_to_dict(item_doc)
+        product = doc_to_dict(products_col.find_one({'_id': item['product_id']}))
+        if not product:
+            cart_items_col.delete_one({'_id': item['id']})
+            continue
+        qty = int(item.get('quantity', 1))
+        price = float(product.get('price', 0))
+        line_total = round(price * qty, 2)
+        subtotal += line_total
+        total_qty += qty
+        items.append({
+            'id': item['id'],
+            'product_id': product['id'],
+            'quantity': qty,
+            'stock': int(product.get('stock', 0)),
+            'name': product.get('name', 'Component'),
+            'brand': product.get('brand', ''),
+            'part_number': product.get('part_number', ''),
+            'price': price,
+            'image_url': product.get('image_url') or '/static/images/products/air-filter.webp',
+            'line_total': line_total,
+        })
+
+    subtotal = round(subtotal, 2)
+    tax = round(subtotal * 0.10, 2)
+    total = round(subtotal + tax, 2)
+    remaining = max(0.0, round(FREE_SHIPPING_THRESHOLD - subtotal, 2))
+
+    return {
+        'items': items,
+        'cart_count': total_qty,
+        'subtotal': subtotal,
+        'tax': tax,
+        'total': total,
+        'free_shipping_threshold': FREE_SHIPPING_THRESHOLD,
+        'free_shipping_unlocked': subtotal >= FREE_SHIPPING_THRESHOLD,
+        'amount_to_free_shipping': remaining,
+    }
+
+
+@app.route('/car-spareparts/api/cart')
+def api_cart_snapshot():
+    return jsonify({'success': True, **build_cart_snapshot()})
+
+
 @app.route('/car-spareparts/api/cart/add', methods=['POST'])
 def add_to_cart():
-    data = request.get_json()
+    data = request.get_json() or {}
     product_id = data.get('product_id')
-    quantity = data.get('quantity', 1)
+    quantity = max(1, int(data.get('quantity', 1)))
 
     cart_filter = get_cart_filter()
     existing = cart_items_col.find_one({**cart_filter, 'product_id': product_id})
@@ -731,18 +934,14 @@ def add_to_cart():
     else:
         cart_items_col.insert_one({**cart_filter, '_id': get_next_id('cart_items', spareparts_counters), 'product_id': product_id, 'quantity': quantity})
 
-    # Count only this user's cart
-    pipeline = [{'$match': cart_filter}, {'$group': {'_id': None, 'total': {'$sum': '$quantity'}}}]
-    result = list(cart_items_col.aggregate(pipeline))
-    cart_count = result[0]['total'] if result else 0
-
-    return jsonify({'success': True, 'cart_count': cart_count})
+    snapshot = build_cart_snapshot()
+    return jsonify({'success': True, 'cart_count': snapshot['cart_count'], 'cart': snapshot})
 
 @app.route('/car-spareparts/api/cart/update', methods=['POST'])
 def update_cart():
-    data = request.get_json()
+    data = request.get_json() or {}
     item_id = data.get('item_id')
-    quantity = data.get('quantity')
+    quantity = int(data.get('quantity', 0))
 
     cart_filter = get_cart_filter()
     cart_item = cart_items_col.find_one({**cart_filter, '_id': item_id})
@@ -751,7 +950,8 @@ def update_cart():
             cart_items_col.update_one({'_id': item_id}, {'$set': {'quantity': quantity}})
         else:
             cart_items_col.delete_one({'_id': item_id})
-        return jsonify({'success': True})
+        snapshot = build_cart_snapshot()
+        return jsonify({'success': True, 'cart_count': snapshot['cart_count'], 'cart': snapshot})
     return jsonify({'success': False}), 404
 
 @app.route('/car-spareparts/api/cart/remove/<int:item_id>', methods=['DELETE'])
@@ -759,7 +959,8 @@ def remove_from_cart(item_id):
     cart_filter = get_cart_filter()
     result = cart_items_col.delete_one({**cart_filter, '_id': item_id})
     if result.deleted_count > 0:
-        return jsonify({'success': True})
+        snapshot = build_cart_snapshot()
+        return jsonify({'success': True, 'cart_count': snapshot['cart_count'], 'cart': snapshot})
     return jsonify({'success': False}), 404
 
 @app.route('/car-spareparts/api/order', methods=['POST'])
@@ -1026,6 +1227,7 @@ def chat_api_ask():
     data = request.get_json() or {}
     user_message = str(data.get('message', '')).strip()[:500]
     chat_history = str(data.get('history', ''))[-4000:]
+    garage_vehicle = str(data.get('garage_vehicle', '')).strip()[:100]
     
     if not user_message:
         return jsonify({'success': False, 'message': 'No message provided.'}), 400
@@ -1034,7 +1236,13 @@ def chat_api_ask():
     products = list(products_col.find(get_store_visibility_filter()))
     inventory_context = "Available Products:\n"
     for p in products:
-        inventory_context += f"- {p.get('name')} (Brand: {p.get('brand')}, Price: ${p.get('price')}): {p.get('description')}. Compatible with: {p.get('compatible_cars')}.\n"
+        inventory_context += (
+            f"- {p.get('name')} (SKU: {p.get('part_number', 'N/A')}, Brand: {p.get('brand')}, "
+            f"Price: ${p.get('price')}, Stock: {p.get('stock')}): {p.get('description')}. "
+            f"Specs: {p.get('specifications', '')}. Compatible with: {p.get('compatible_cars')}.\n"
+        )
+    if garage_vehicle:
+        inventory_context += f"\nCustomer's Active Garage Vehicle: {garage_vehicle} (prioritize compatible & universal parts for this vehicle when relevant).\n"
         
     # Query AI
     try:

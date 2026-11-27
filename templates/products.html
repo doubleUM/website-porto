@@ -1,109 +1,276 @@
 {% extends 'base.html' %}
 
+{% block title %}Parts Catalog // AutoParts Pro Telemetry{% endblock %}
+
 {% block content %}
-<section style="padding-top: var(--space-xl);">
+<!-- Catalog Command Header -->
+<div class="ap-page-header">
     <div class="container">
-        <h1 class="hero-title" style="font-size: var(--text-4xl); margin-bottom: var(--space-xl);">Car Spare Parts
-            Catalog</h1>
+        <nav class="ap-breadcrumb" aria-label="Breadcrumb">
+            <a href="{{ url_for('store_home') }}">Storefront</a>
+            <span>/</span>
+            <span>Catalog</span>
+            {% if active_vehicle %}
+            <span>/</span>
+            <span style="color: var(--accent);">{{ active_vehicle.name }}</span>
+            {% endif %}
+        </nav>
 
+        <div class="flex-between" style="flex-wrap: wrap;">
+            <div>
+                <h1 style="font-size: clamp(1.85rem, 3.5vw, 2.6rem); text-transform: uppercase; margin-bottom: 0.25rem;">
+                    {% if active_vehicle %}
+                        Parts For {{ active_vehicle.name }}
+                    {% elif current_category %}
+                        {% for c in categories %}{% if c.id == current_category %}{{ c.name }}{% endif %}{% endfor %}
+                    {% else %}
+                        Performance Parts Catalog
+                    {% endif %}
+                </h1>
+                <p style="font-size: 0.92rem; margin: 0;">
+                    Showing <strong style="color: var(--text-primary);">{{ products|length }}</strong> of {{ total_catalog_count }} engineered components
+                </p>
+            </div>
+
+            <button type="button" class="btn btn-outline btn-sm" onclick="openGarageModal()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                Configure My Garage
+            </button>
+        </div>
+    </div>
+</div>
+
+<section style="padding-top: 2rem;">
+    <div class="container">
         <div class="catalog-layout">
-            <!-- Filter Sidebar -->
-            <aside class="filter-sidebar fade-in">
-                <h3 class="filter-title">Filters</h3>
-
-                <!-- Search -->
+            <!-- Precision Telemetry Sidebar -->
+            <aside class="filter-sidebar">
+                <!-- 01: Keyword / SKU Lookup -->
                 <div class="filter-group">
+                    <div class="filter-title">01 // Search Name, Brand or SKU</div>
                     <form action="{{ url_for('products') }}" method="get">
-                        <div class="form-group">
-                            <input type="text" name="search" class="form-control" placeholder="Search products..."
-                                value="{{ search_query }}">
+                        {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+                        {% if current_vehicle %}<input type="hidden" name="vehicle" value="{{ current_vehicle }}">{% endif %}
+                        {% if current_sort %}<input type="hidden" name="sort" value="{{ current_sort }}">{% endif %}
+                        <div style="display: flex; gap: 0.4rem;">
+                            <input type="text" name="search" class="form-control" placeholder="e.g. Brembo, BP-CER-500..." value="{{ search_query }}" style="padding: 0.58rem 0.75rem;">
+                            <button type="submit" class="btn btn-primary btn-sm" aria-label="Search">Go</button>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">Search</button>
                     </form>
                 </div>
 
-                <!-- Categories -->
+                <!-- 02: My Garage Chassis Filter -->
                 <div class="filter-group">
-                    <h4 class="filter-title">Categories</h4>
-                    <a href="{{ url_for('products') }}" class="filter-option">
-                        All Categories
+                    <div class="filter-title">02 // Vehicle Fitment Filter</div>
+                    <form action="{{ url_for('products') }}" method="get" id="catalog-vehicle-form">
+                        {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+                        {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
+                        {% if current_sort %}<input type="hidden" name="sort" value="{{ current_sort }}">{% endif %}
+                        <select name="vehicle" id="catalog-vehicle-select" class="form-control" onchange="onCatalogVehicleChange(this)">
+                            <option value="" data-title="All Vehicles" data-meta="UNFILTERED">All Vehicles (Unfiltered)</option>
+                            {% for v in garage_vehicles %}
+                            <option value="{{ v.id }}" data-title="{{ v.name }}" data-meta="{{ v.trim.split('·')[-1].strip() }}" {% if current_vehicle == v.id %}selected{% endif %}>
+                                {{ v.name }} ({{ v.trim.split('·')[-1].strip() }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                    <div id="catalog-garage-quick-sync" style="display: none; margin-top: 0.55rem;">
+                        <button type="button" class="btn btn-outline btn-sm" style="width: 100%; font-size: 0.72rem;" id="catalog-apply-saved-garage">
+                            Filter by Parked Garage Ride
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 03: Mechanical Subsystems -->
+                <div class="filter-group">
+                    <div class="filter-title">03 // Vehicle Subsystems</div>
+                    <a href="{{ url_for('products', vehicle=current_vehicle or None, search=search_query or None, sort=current_sort if current_sort != 'name' else None) }}"
+                       class="filter-option {% if not current_category %}is-active{% endif %}">
+                        <span>All Subsystems</span>
+                        <span class="filter-count">{{ total_catalog_count }}</span>
                     </a>
                     {% for category in categories %}
-                    <a href="{{ url_for('products', category=category.id) }}" class="filter-option" {% if
-                        current_category==category.id %}style="color: var(--primary);" {% endif %}>
-                        {{ category.icon }} {{ category.name }}
+                    <a href="{{ url_for('products', category=category.id, vehicle=current_vehicle or None, search=search_query or None, sort=current_sort if current_sort != 'name' else None) }}"
+                       class="filter-option {% if current_category == category.id %}is-active{% endif %}">
+                        <span>{{ category.name }}</span>
+                        <span class="filter-count">{{ category.product_count or 0 }}</span>
                     </a>
                     {% endfor %}
                 </div>
 
-                <!-- Sort -->
+                <!-- 04: Sort & Availability -->
                 <div class="filter-group">
-                    <h4 class="filter-title">Sort By</h4>
+                    <div class="filter-title">04 // Sort Telemetry</div>
                     <form action="{{ url_for('products') }}" method="get">
-                        {% if current_category %}
-                        <input type="hidden" name="category" value="{{ current_category }}">
-                        {% endif %}
-                        {% if search_query %}
-                        <input type="hidden" name="search" value="{{ search_query }}">
-                        {% endif %}
+                        {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+                        {% if current_vehicle %}<input type="hidden" name="vehicle" value="{{ current_vehicle }}">{% endif %}
+                        {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
                         <select name="sort" class="form-control" onchange="this.form.submit()">
-                            <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Name (A-Z)</option>
-                            <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Price (Low to High)</option>
-                            <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Price (High to Low)</option>
+                            <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Alphabetical (A–Z)</option>
+                            <option value="featured" {% if current_sort == 'featured' %}selected{% endif %}>Track Featured First</option>
+                            <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Price: Low &rarr; High</option>
+                            <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Price: High &rarr; Low</option>
                         </select>
                     </form>
+
+                    <label style="display: flex; align-items: center; gap: 0.55rem; margin-top: 0.9rem; font-size: 0.84rem; color: var(--text-secondary); cursor: pointer;">
+                        <input type="checkbox" id="in-stock-toggle" onchange="toggleInStockOnly(this.checked)">
+                        <span>Show In-Stock Ready Only</span>
+                    </label>
                 </div>
             </aside>
 
-            <!-- Products Grid -->
+            <!-- Catalog Results Area -->
             <div>
-                <div class="fade-in"
-                    style="margin-bottom: var(--space-lg); display: flex; justify-content: space-between; align-items: center;">
-                    <p style="color: var(--text-secondary);">Showing {{ products|length }} products</p>
-                </div>
-
-                {% if products %}
-                <div class="grid grid-3">
-                    {% for product in products %}
-                    <div class="card fade-in" style="animation-delay: {{ loop.index0 * 0.05 }}s; animation-fill-mode: backwards;">
-                        <div
-                            style="background: var(--bg-tertiary); height: 200px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-md); overflow: hidden;">
-                            <img src="{{ product.image_url or '/static/images/products/air-filter.webp' }}"
-                                alt="{{ product.name }}"
-                                style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 10px;" loading="lazy" decoding="async" width="400" height="400">
-                        </div>
-
-                        {% if product.stock > 0 %}
-                        <span class="badge badge-success">In Stock ({{ product.stock }})</span>
-                        {% else %}
-                        <span class="badge badge-danger">Out of Stock</span>
+                {% if current_category or search_query or current_vehicle %}
+                <div class="ap-catalog-toolbar">
+                    <div class="ap-active-chips">
+                        <span class="mono" style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Active Filters:</span>
+                        {% if active_vehicle %}
+                        <span class="ap-filter-chip">
+                            Chassis: {{ active_vehicle.name }}
+                            <a href="{{ url_for('products', category=current_category, search=search_query or None, sort=current_sort if current_sort != 'name' else None) }}" onclick="localStorage.removeItem('ap-garage-vehicle')" title="Remove vehicle filter">&times;</a>
+                        </span>
+                        {% elif current_vehicle %}
+                        <span class="ap-filter-chip">
+                            Chassis: {{ current_vehicle }}
+                            <a href="{{ url_for('products', category=current_category, search=search_query or None, sort=current_sort if current_sort != 'name' else None) }}">&times;</a>
+                        </span>
                         {% endif %}
 
-                        <h3 class="card-title">{{ product.name }}</h3>
-                        <p class="card-text" style="min-height: 60px;">{{ product.description[:100] }}...</p>
+                        {% if current_category %}
+                        <span class="ap-filter-chip">
+                            {% for c in categories %}{% if c.id == current_category %}{{ c.name }}{% endif %}{% endfor %}
+                            <a href="{{ url_for('products', vehicle=current_vehicle or None, search=search_query or None, sort=current_sort if current_sort != 'name' else None) }}" title="Remove category filter">&times;</a>
+                        </span>
+                        {% endif %}
 
-                        <div style="margin-bottom: var(--space-sm);">
-                            <span style="font-size: var(--text-sm); color: var(--text-muted);">Brand:</span>
-                            <span style="font-weight: 600;">{{ product.brand }}</span>
-                        </div>
-
-                        <div class="flex-between" style="margin-top: auto;">
-                            <span class="card-price">${{ "%.2f"|format(product.price) }}</span>
-                            <button class="btn btn-outline btn-sm" onclick="openProductModal({{ product.id }})">Details</button>
-                        </div>
+                        {% if search_query %}
+                        <span class="ap-filter-chip">
+                            Query: "{{ search_query }}"
+                            <a href="{{ url_for('products', category=current_category, vehicle=current_vehicle or None, sort=current_sort if current_sort != 'name' else None) }}" title="Clear search">&times;</a>
+                        </span>
+                        {% endif %}
                     </div>
+
+                    <a href="{{ url_for('products') }}" class="mono" style="font-size: 0.72rem; color: var(--primary); text-transform: uppercase; font-weight: 700;">
+                        Reset All
+                    </a>
+                </div>
+                {% endif %}
+
+                {% if products %}
+                <div class="ap-product-grid" id="catalog-grid">
+                    {% for product in products %}
+                    <article class="ap-card fade-in"
+                             data-fitment-cars="{{ product.compatible_cars or '' }}"
+                             data-in-stock="{{ '1' if product.stock > 0 else '0' }}"
+                             style="animation-delay: {{ (loop.index0 % 9) * 0.03 }}s;">
+                        <div class="ap-card-topbar">
+                            <span class="ap-card-brand">{{ product.brand }}</span>
+                            <span class="ap-card-sku">SKU // {{ product.part_number or ('AP-0' ~ product.id) }}</span>
+                        </div>
+
+                        <div class="ap-card-stage">
+                            <div class="ap-stage-badges">
+                                {% if product.stock > 0 %}
+                                <span class="badge badge-success">IN STOCK · {{ product.stock }}</span>
+                                {% else %}
+                                <span class="badge badge-danger">OUT OF STOCK</span>
+                                {% endif %}
+                                <span class="ap-fit-badge"></span>
+                            </div>
+
+                            <button type="button" class="ap-quickview-btn" onclick="openProductModal({{ product.id }})" title="Quick Spec Modal">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+
+                            <a href="{{ url_for('product_detail', product_id=product.id) }}" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">
+                                <img src="{{ product.image_url or '/static/images/products/air-filter.webp' }}"
+                                     alt="{{ product.name }}" loading="lazy" decoding="async" width="360" height="360">
+                            </a>
+                        </div>
+
+                        <div class="ap-card-body">
+                            <div class="ap-card-cat">{{ product.category.name if product.category else 'Component' }}</div>
+                            <h3 class="ap-card-title">
+                                <a href="{{ url_for('product_detail', product_id=product.id) }}">{{ product.name }}</a>
+                            </h3>
+                            <p class="ap-card-desc">{{ product.description }}</p>
+
+                            {% if product.compatible_cars %}
+                            <div class="ap-card-compat" title="{{ product.compatible_cars }}">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:var(--primary);"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                                <span>{{ product.compatible_cars }}</span>
+                            </div>
+                            {% endif %}
+
+                            <div class="ap-card-footer">
+                                <div class="ap-price">${{ "%.2f"|format(product.price) }}</div>
+                                <div class="ap-card-actions">
+                                    <button type="button" class="btn btn-outline btn-sm" onclick="openProductModal({{ product.id }})">Specs</button>
+                                    {% if product.stock > 0 %}
+                                    <button type="button" class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="{{ product.id }}">+ Add</button>
+                                    {% else %}
+                                    <button type="button" class="btn btn-outline btn-sm" disabled>Out</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </article>
                     {% endfor %}
                 </div>
                 {% else %}
-                <div class="card text-center" style="padding: var(--space-2xl);">
-                    <div style="font-size: var(--text-5xl); margin-bottom: var(--space-md);">🔍</div>
-                    <h3>No products found</h3>
-                    <p>Try adjusting your search or filters</p>
-                    <a href="{{ url_for('products') }}" class="btn btn-primary">Clear Filters</a>
+                <div class="card text-center" style="padding: 3.5rem 2rem;">
+                    <div class="mono" style="font-size: 0.78rem; color: var(--primary); letter-spacing: 0.14em; margin-bottom: 0.5rem;">[ ZERO TELEMETRY MATCHES ]</div>
+                    <h3 style="font-size: 1.5rem; text-transform: uppercase; margin-bottom: 0.5rem;">No Matching Components Found</h3>
+                    <p style="max-width: 46ch; margin: 0 auto 1.5rem;">
+                        No SKUs matched your active combination of search terms, subsystem, or chassis filter. Reset filters or ask our AI Mechanic for an alternative fitment.
+                    </p>
+                    <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+                        <a href="{{ url_for('products') }}" class="btn btn-primary">Reset All Filters</a>
+                        <button type="button" class="btn btn-outline" onclick="openMechanicChat()">Ask AI Mechanic</button>
+                    </div>
                 </div>
                 {% endif %}
             </div>
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function onCatalogVehicleChange(sel) {
+        setGarageVehicle(sel.value);
+        sel.form.submit();
+    }
+
+    function toggleInStockOnly(onlyInStock) {
+        document.querySelectorAll('#catalog-grid .ap-card').forEach(card => {
+            const ok = card.getAttribute('data-in-stock') === '1';
+            card.style.display = (!onlyInStock || ok) ? '' : 'none';
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const currentUrlVehicle = "{{ current_vehicle or '' }}";
+        const parked = getSelectedGarageVehicle();
+        const syncWrap = document.getElementById('catalog-garage-quick-sync');
+        const syncBtn = document.getElementById('catalog-apply-saved-garage');
+
+        if (parked && !currentUrlVehicle && syncWrap && syncBtn) {
+            syncWrap.style.display = 'block';
+            syncBtn.textContent = `Filter Only ${parked.name} Parts →`;
+            syncBtn.onclick = () => {
+                const sel = document.getElementById('catalog-vehicle-select');
+                if (sel) {
+                    sel.value = parked.id;
+                    sel.form.submit();
+                }
+            };
+        }
+    });
+</script>
 {% endblock %}

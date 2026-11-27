@@ -1,110 +1,155 @@
 {% extends 'base.html' %}
 
+{% block title %}Pit-Box Cart // AutoParts Pro{% endblock %}
+
 {% block content %}
-<section style="padding-top: var(--space-xl);">
+<div class="ap-page-header">
     <div class="container">
-        <h1 class="hero-title" style="font-size: var(--text-4xl); margin-bottom: var(--space-xl);">Shopping Cart</h1>
+        <nav class="ap-breadcrumb" aria-label="Breadcrumb">
+            <a href="{{ url_for('store_home') }}">Storefront</a>
+            <span>/</span>
+            <span style="color: var(--text-primary);">Pit-Box Cart</span>
+        </nav>
 
+        <h1 style="font-size: clamp(1.85rem, 3.5vw, 2.5rem); text-transform: uppercase; margin-bottom: 0.2rem;">
+            Staged Order Manifest
+        </h1>
+
+        <div class="ap-steps">
+            <span class="ap-step is-active">01 // Pit-Box Cart</span>
+            <span class="mono" style="color: var(--text-muted);">&rarr;</span>
+            <span class="ap-step">02 // Dispatch &amp; Payment</span>
+            <span class="mono" style="color: var(--text-muted);">&rarr;</span>
+            <span class="ap-step">03 // Order Telemetry</span>
+        </div>
+    </div>
+</div>
+
+<section style="padding-top: 2rem;">
+    <div class="container">
+        {% if cart_items %}
         <div class="checkout-layout">
-            <!-- Cart Items -->
+            <!-- Left: Staged Cart Items -->
             <div>
-                {% if cart_items %}
-                {% for item in cart_items %}
-                <div class="cart-item fade-in" id="cart-item-{{ item.id }}" data-price="{{ item.product.price }}" style="animation-delay: {{ loop.index0 * 0.1 }}s; animation-fill-mode: backwards;">
-                    <div
-                        style="background: var(--bg-tertiary); max-width: 100px; min-width: 100px; height: 100px; border-radius: var(--radius-sm); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                        <img src="{{ item.product.image_url or '/static/images/products/air-filter.webp' }}" alt="{{ item.product.name }}" style="max-height: 80%; max-width: 80%; object-fit: contain;" loading="lazy" decoding="async">
+                {% set pct = ((total / 100.0) * 100) | round | int %}
+                {% if pct > 100 %}{% set pct = 100 %}{% endif %}
+                <div class="ap-ship-meter" id="cart-page-ship-meter">
+                    <div class="flex-between" style="font-size: 0.84rem;">
+                        <span id="cart-ship-label">
+                            {% if total >= 100 %}
+                            <strong style="color: var(--accent);">✓ Priority Track-Day Express Shipping Unlocked!</strong>
+                            {% else %}
+                            Add <strong>${{ "%.2f"|format(100 - total) }}</strong> more for Priority Track-Day Express Upgrade
+                            {% endif %}
+                        </span>
+                        <span class="mono" id="cart-ship-pct" style="font-size: 0.76rem; color: var(--accent);">{{ pct }}%</span>
                     </div>
+                    <div class="ap-ship-bar">
+                        <div class="ap-ship-fill" id="cart-ship-fill" style="width: {{ pct }}%;"></div>
+                    </div>
+                </div>
 
-                    <div class="cart-item-details">
-                        <h4>{{ item.product.name }}</h4>
-                        <p style="color: var(--text-muted); margin-bottom: var(--space-xs);">{{ item.product.brand }}
-                        </p>
-                        <p style="color: var(--primary); font-weight: 600;">${{ "%.2f"|format(item.product.price) }}</p>
+                {% for item in cart_items %}
+                <div class="cart-item fade-in"
+                     id="cart-item-{{ item.id }}"
+                     data-price="{{ item.product.price }}"
+                     style="animation-delay: {{ loop.index0 * 0.05 }}s;">
+                    <a href="{{ url_for('product_detail', product_id=item.product.id) }}"
+                       style="background: var(--bg-stage); width: 92px; height: 92px; border-radius: var(--radius-sm); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; padding: 10px; overflow: hidden;">
+                        <img src="{{ item.product.image_url or '/static/images/products/air-filter.webp' }}"
+                             alt="{{ item.product.name }}"
+                             style="max-height: 100%; max-width: 100%; object-fit: contain;"
+                             loading="lazy" decoding="async">
+                    </a>
+
+                    <div>
+                        <div class="mono" style="font-size: 0.68rem; color: var(--primary); text-transform: uppercase; margin-bottom: 2px;">
+                            {{ item.product.brand }} // {{ item.product.part_number or ('AP-0' ~ item.product.id) }}
+                        </div>
+                        <h4 style="font-size: 1.08rem; margin-bottom: 0.25rem;">
+                            <a href="{{ url_for('product_detail', product_id=item.product.id) }}">{{ item.product.name }}</a>
+                        </h4>
+                        <div class="mono" style="font-size: 0.84rem; color: var(--text-secondary);">
+                            Unit: ${{ "%.2f"|format(item.product.price) }}
+                        </div>
                     </div>
 
                     <div class="quantity-control">
-                        <button class="quantity-btn" onclick="updateQuantity({{ item.id }}, -1)">-</button>
+                        <button type="button" class="quantity-btn" onclick="updateQuantity({{ item.id }}, -1)">−</button>
                         <span class="quantity-value" id="quantity-{{ item.id }}">{{ item.quantity }}</span>
-                        <button class="quantity-btn" onclick="updateQuantity({{ item.id }}, 1)">+</button>
+                        <button type="button" class="quantity-btn" onclick="updateQuantity({{ item.id }}, 1)">+</button>
                     </div>
 
-                    <div style="text-align: right;">
-                        <p class="card-price" id="line-total-{{ item.id }}" style="margin-bottom: var(--space-md);">${{
-                            "%.2f"|format(item.product.price * item.quantity) }}</p>
-                        <button class="btn btn-outline btn-sm" onclick="removeItem({{ item.id }})"
-                            style="background: var(--danger); color: white; border: none;">
-                            🗑️ Remove
+                    <div style="text-align: right; min-width: 105px;">
+                        <div class="mono" id="line-total-{{ item.id }}" style="font-size: 1.12rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.45rem;">
+                            ${{ "%.2f"|format(item.product.price * item.quantity) }}
+                        </div>
+                        <button type="button" class="btn btn-danger btn-sm" style="padding: 0.3rem 0.65rem; font-size: 0.7rem;" onclick="removeItem({{ item.id }})">
+                            Remove
                         </button>
                     </div>
                 </div>
                 {% endfor %}
-                {% else %}
-                <div class="card text-center" style="padding: var(--space-2xl);">
-                    <div style="font-size: var(--text-5xl); margin-bottom: var(--space-md);">🛒</div>
-                    <h3>Your cart is empty</h3>
-                    <p>Start adding some premium car parts!</p>
-                    <a href="{{ url_for('products') }}" class="btn btn-primary">Shop Now</a>
-                </div>
-                {% endif %}
             </div>
 
-            <!-- Cart Summary -->
-            {% if cart_items %}
-            <div class="cart-summary fade-in" style="animation-delay: 0.2s; animation-fill-mode: backwards;">
-                <h3 style="margin-bottom: var(--space-lg);">Order Summary</h3>
+            <!-- Right: Sticky Order Summary -->
+            <div class="cart-summary fade-in">
+                <div class="mono" style="font-size: 0.68rem; letter-spacing: 0.12em; color: var(--primary); text-transform: uppercase; margin-bottom: 0.25rem;">
+                    COST BREAKDOWN
+                </div>
+                <h3 style="font-size: 1.35rem; text-transform: uppercase; margin-bottom: 1.15rem;">Order Summary</h3>
 
                 <div class="summary-row">
-                    <span>Subtotal:</span>
-                    <span id="subtotal">${{ "%.2f"|format(total) }}</span>
+                    <span style="color: var(--text-secondary);">Components Subtotal</span>
+                    <span class="mono" id="subtotal">${{ "%.2f"|format(total) }}</span>
                 </div>
 
                 <div class="summary-row">
-                    <span>Shipping:</span>
-                    <span style="color: var(--success);">FREE</span>
+                    <span style="color: var(--text-secondary);">Standard Pit Dispatch</span>
+                    <span class="mono" style="color: var(--accent); font-weight: 700;">FREE</span>
                 </div>
 
                 <div class="summary-row">
-                    <span>Tax (10%):</span>
-                    <span id="tax">${{ "%.2f"|format(total * 0.1) }}</span>
+                    <span style="color: var(--text-secondary);">Estimated Tax (10%)</span>
+                    <span class="mono" id="tax">${{ "%.2f"|format(total * 0.1) }}</span>
                 </div>
 
-                <div class="summary-row"
-                    style="border-top: 2px solid var(--primary); padding-top: var(--space-md); margin-top: var(--space-md);">
-                    <span style="font-size: var(--text-xl); font-weight: 700;">Total:</span>
+                <div class="summary-row" style="border-bottom: none; padding-top: 1rem; margin-top: 0.35rem; border-top: 2px solid var(--primary);">
+                    <span style="font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; text-transform: uppercase;">Total Due</span>
                     <span class="summary-total" id="total">${{ "%.2f"|format(total * 1.1) }}</span>
                 </div>
 
-                <a href="{{ url_for('checkout') }}" class="btn btn-primary btn-lg"
-                    style="width: 100%; margin-top: var(--space-lg);">
-                    Proceed to Checkout
+                <a href="{{ url_for('checkout') }}" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1.25rem;">
+                    Proceed to Dispatch &rarr;
                 </a>
 
-                <a href="{{ url_for('products') }}" class="btn btn-outline"
-                    style="width: 100%; margin-top: var(--space-sm);">
-                    Continue Shopping
+                <a href="{{ url_for('products') }}" class="btn btn-outline" style="width: 100%; margin-top: 0.6rem;">
+                    Continue Browsing Catalog
                 </a>
 
-                <!-- Trust Badges -->
-                <div
-                    style="margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--glass-border);">
-                    <div style="text-align: center; margin-bottom: var(--space-sm);">
-                        <span style="font-size: var(--text-2xl);">🔒</span>
-                        <p style="font-size: var(--text-sm); margin: 0;">Secure Checkout</p>
-                    </div>
-                    <div style="text-align: center;">
-                        <span style="font-size: var(--text-2xl);">✅</span>
-                        <p style="font-size: var(--text-sm); margin: 0;">30-Day Returns</p>
-                    </div>
+                <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--glass-border); display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted); text-align: center;">
+                    <div style="padding: 0.5rem; background: var(--bg-tertiary); border-radius: var(--radius-xs);">256-BIT TLS SECURE</div>
+                    <div style="padding: 0.5rem; background: var(--bg-tertiary); border-radius: var(--radius-xs);">30-DAY FIT GUARANTEE</div>
                 </div>
             </div>
-            {% endif %}
         </div>
+        {% else %}
+        <div class="card text-center" style="padding: 4rem 2rem; max-width: 620px; margin: 0 auto;">
+            <div class="mono" style="font-size: 0.75rem; color: var(--primary); letter-spacing: 0.14em; margin-bottom: 0.5rem;">[ PIT-BOX MANIFEST EMPTY ]</div>
+            <h2 style="font-size: 1.75rem; text-transform: uppercase; margin-bottom: 0.5rem;">Your Pit Cart Is Empty</h2>
+            <p style="margin-bottom: 1.5rem;">Select your vehicle in My Garage or browse our performance catalog to stage parts for dispatch.</p>
+            <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+                <a href="{{ url_for('products') }}" class="btn btn-primary">Explore Parts Catalog &rarr;</a>
+                <button type="button" class="btn btn-outline" onclick="openGarageModal()">Select Garage Vehicle</button>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </section>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-    // Read price from a data attribute on each cart row — avoids Jinja2-in-JS issues
     function getPrice(itemId) {
         const row = document.getElementById('cart-item-' + itemId);
         return row ? parseFloat(row.getAttribute('data-price')) : 0;
@@ -112,23 +157,44 @@
 
     function recalcTotals() {
         let subtotal = 0;
+        let totalQty = 0;
         document.querySelectorAll('[id^="quantity-"]').forEach(el => {
-            const id = parseInt(el.id.replace('quantity-', ''));
-            const qty = parseInt(el.textContent);
+            const id = parseInt(el.id.replace('quantity-', ''), 10);
+            const qty = parseInt(el.textContent, 10) || 0;
+            totalQty += qty;
             const price = getPrice(id);
             const lineTotal = price * qty;
             subtotal += lineTotal;
             const lineEl = document.getElementById('line-total-' + id);
             if (lineEl) lineEl.textContent = '$' + lineTotal.toFixed(2);
         });
-        document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
-        document.getElementById('tax').textContent = '$' + (subtotal * 0.1).toFixed(2);
-        document.getElementById('total').textContent = '$' + (subtotal * 1.1).toFixed(2);
+
+        const subEl = document.getElementById('subtotal');
+        const taxEl = document.getElementById('tax');
+        const totEl = document.getElementById('total');
+        if (subEl) subEl.textContent = '$' + subtotal.toFixed(2);
+        if (taxEl) taxEl.textContent = '$' + (subtotal * 0.1).toFixed(2);
+        if (totEl) totEl.textContent = '$' + (subtotal * 1.1).toFixed(2);
+
+        updateCartCount(totalQty);
+
+        const pct = Math.min(100, Math.round((subtotal / 100.0) * 100));
+        const fill = document.getElementById('cart-ship-fill');
+        const pctEl = document.getElementById('cart-ship-pct');
+        const lbl = document.getElementById('cart-ship-label');
+        if (fill) fill.style.width = pct + '%';
+        if (pctEl) pctEl.textContent = pct + '%';
+        if (lbl) {
+            lbl.innerHTML = subtotal >= 100
+                ? '<strong style="color:var(--accent);">✓ Priority Track-Day Express Shipping Unlocked!</strong>'
+                : `Add <strong>$${(100 - subtotal).toFixed(2)}</strong> more for Priority Track-Day Express Upgrade`;
+        }
     }
 
     function updateQuantity(itemId, change) {
         const quantityElem = document.getElementById('quantity-' + itemId);
-        let newQuantity = parseInt(quantityElem.textContent) + change;
+        if (!quantityElem) return;
+        const newQuantity = parseInt(quantityElem.textContent, 10) + change;
         if (newQuantity < 1) return;
 
         fetch('/car-spareparts/api/cart/update', {
@@ -141,15 +207,16 @@
                 if (data.success) {
                     quantityElem.textContent = newQuantity;
                     recalcTotals();
+                    if (data.cart) renderCartDrawer(data.cart);
                 }
             });
     }
 
     async function removeItem(itemId) {
-        const confirmed = await showConfirm('Are you sure you want to remove this item from your cart?', {
-            title: 'Remove Item',
-            confirmText: 'Yes, remove',
-            cancelText: 'Keep it',
+        const confirmed = await showConfirm('Remove this component from your staged order manifest?', {
+            title: 'Remove Component',
+            confirmText: 'Remove Item',
+            cancelText: 'Keep Item',
             type: 'danger'
         });
         if (!confirmed) return;
@@ -161,7 +228,7 @@
                     const row = document.getElementById('cart-item-' + itemId);
                     if (row) row.remove();
                     recalcTotals();
-                    // If no items left, reload to show empty state
+                    if (data.cart) renderCartDrawer(data.cart);
                     if (!document.querySelector('[id^="quantity-"]')) location.reload();
                 }
             });

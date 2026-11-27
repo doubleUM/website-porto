@@ -1,128 +1,136 @@
 {% extends 'base.html' %}
 
-{% block title %}Login - AutoParts Pro{% endblock %}
+{% block title %}Driver Portal Sign In // AutoParts Pro{% endblock %}
 
 {% block content %}
-<section
-    style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: var(--space-xl) 0;">
-    <div style="width: 100%; max-width: 460px; padding: 0 var(--space-md);">
+<section style="min-height: 78vh; display: flex; align-items: center; padding: 3rem 0;">
+    <div class="container">
+        <div class="ap-auth-shell fade-in">
+            <!-- Left: Motorsport Telemetry Brand Panel -->
+            <div class="ap-auth-aside">
+                <div>
+                    <div class="mono" style="font-size: 0.7rem; letter-spacing: 0.14em; color: #FF644D; text-transform: uppercase; margin-bottom: 0.75rem;">
+                        APEX // DRIVER CREDENTIALS
+                    </div>
+                    <h1 style="font-size: 2.2rem; text-transform: uppercase; color: #FFFFFF; margin-bottom: 0.85rem;">
+                        Pit-Wall Account Access
+                    </h1>
+                    <p style="color: rgba(244, 246, 250, 0.78); font-size: 0.95rem; line-height: 1.65;">
+                        Sign in or register to automatically merge your staged guest Pit Cart, pre-fill express dispatch details, and track workshop orders.
+                    </p>
+                </div>
 
-        <!-- Logo / Heading -->
-        <div style="text-align: center; margin-bottom: var(--space-xl);">
-            <div style="margin-bottom: var(--space-sm);">
-                <img src="{{ url_for('static', filename='images/favicon_cropped.webp') }}" alt="AutoParts Pro Logo" style="height: 64px; width: auto;" decoding="async">
+                <div style="display: grid; gap: 0.75rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.12);">
+                    <div style="display: flex; align-items: center; gap: 0.65rem; font-size: 0.85rem; color: #F4F6FA;">
+                        <span style="color: #00E5A3; font-family: var(--font-mono); font-weight: 700;">[01]</span>
+                        <span>Seamless Guest-to-Driver Cart Sync</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.65rem; font-size: 0.85rem; color: #F4F6FA;">
+                        <span style="color: #FFB800; font-family: var(--font-mono); font-weight: 700;">[02]</span>
+                        <span>Bcrypt-Hashed Credential Security</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.65rem; font-size: 0.85rem; color: #F4F6FA;">
+                        <span style="color: #FF644D; font-family: var(--font-mono); font-weight: 700;">[03]</span>
+                        <span>1-Click Express Dispatch Pre-Fill</span>
+                    </div>
+                </div>
             </div>
-            <h1 style="font-size: var(--text-3xl); font-weight: 700; margin-bottom: var(--space-xs);">AutoParts Pro</h1>
-            <p style="color: var(--text-muted);">Sign in to your account or create a new one</p>
+
+            <!-- Right: Login / Registration Forms -->
+            <div class="ap-auth-form-pane">
+                <!-- Segmented Switcher -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--bg-tertiary); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 1.5rem;">
+                    <button type="button" id="tab-login" onclick="switchTab('login')"
+                            style="padding: 0.6rem; border: none; border-radius: var(--radius-xs); font-family: var(--font-display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; background: var(--primary); color: #fff;">
+                        Sign In
+                    </button>
+                    <button type="button" id="tab-signup" onclick="switchTab('signup')"
+                            style="padding: 0.6rem; border: none; border-radius: var(--radius-xs); font-family: var(--font-display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; background: transparent; color: var(--text-muted);">
+                        Register
+                    </button>
+                </div>
+
+                <!-- Status Banner -->
+                <div id="auth-alert" style="display: none; padding: 0.75rem 0.95rem; border-radius: var(--radius-sm); margin-bottom: 1.25rem; font-size: 0.85rem; font-weight: 600;"></div>
+
+                <!-- LOGIN FORM -->
+                <form id="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="login-email">Email Address</label>
+                        <input type="email" id="login-email" class="form-control" placeholder="driver@apexgarage.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="login-password">Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="login-password" class="form-control" placeholder="••••••••" required style="padding-right: 3rem;">
+                            <button type="button" onclick="togglePassword('login-password', this)"
+                                    style="position: absolute; right: 0.65rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); font-family: var(--font-mono); font-size: 0.7rem;">SHOW</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 0.5rem;" id="login-btn">
+                        Sign In To Pit Wall &rarr;
+                    </button>
+                </form>
+
+                <!-- SIGNUP FORM -->
+                <form id="signup-form" style="display: none;" onsubmit="handleSignup(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="signup-name">Driver / Workshop Name</label>
+                        <input type="text" id="signup-name" class="form-control" placeholder="Alex Mercer" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="signup-email">Email Address</label>
+                        <input type="email" id="signup-email" class="form-control" placeholder="driver@apexgarage.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="signup-password">Password (Min. 6 Chars)</label>
+                        <div style="position: relative;">
+                            <input type="password" id="signup-password" class="form-control" placeholder="Min. 6 characters" required style="padding-right: 3rem;">
+                            <button type="button" onclick="togglePassword('signup-password', this)"
+                                    style="position: absolute; right: 0.65rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); font-family: var(--font-mono); font-size: 0.7rem;">SHOW</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="signup-confirm">Confirm Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="signup-confirm" class="form-control" placeholder="Repeat password" required style="padding-right: 3rem;">
+                            <button type="button" onclick="togglePassword('signup-confirm', this)"
+                                    style="position: absolute; right: 0.65rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); font-family: var(--font-mono); font-size: 0.7rem;">SHOW</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 0.5rem;" id="signup-btn">
+                        Create Driver Account &rarr;
+                    </button>
+                </form>
+            </div>
         </div>
-
-        <!-- Card -->
-        <div class="card" style="padding: var(--space-xl);">
-
-            <!-- Tabs -->
-            <div
-                style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--bg-tertiary); border-radius: var(--radius-md); padding: 4px; margin-bottom: var(--space-xl);">
-                <button id="tab-login" onclick="switchTab('login')"
-                    style="padding: var(--space-sm); border: none; border-radius: calc(var(--radius-md) - 2px); font-weight: 600; cursor: pointer; transition: all 0.2s; background: var(--primary); color: white;">
-                    Login
-                </button>
-                <button id="tab-signup" onclick="switchTab('signup')"
-                    style="padding: var(--space-sm); border: none; border-radius: calc(var(--radius-md) - 2px); font-weight: 600; cursor: pointer; transition: all 0.2s; background: transparent; color: var(--text-muted);">
-                    Sign Up
-                </button>
-            </div>
-
-            <!-- Alert message -->
-            <div id="auth-alert"
-                style="display: none; padding: var(--space-sm) var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-lg); font-size: var(--text-sm); font-weight: 500;">
-            </div>
-
-            <!-- LOGIN FORM -->
-            <form id="login-form" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label class="form-label">Email Address</label>
-                    <input type="email" id="login-email" class="form-control" placeholder="john@example.com" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <div style="position: relative;">
-                        <input type="password" id="login-password" class="form-control" placeholder="••••••••" required
-                            style="padding-right: 3rem;">
-                        <button type="button" onclick="togglePassword('login-password', this)"
-                            style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1.1rem;">👁</button>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: var(--space-md);"
-                    id="login-btn">
-                    Login
-                </button>
-            </form>
-
-            <!-- SIGNUP FORM -->
-            <form id="signup-form" style="display: none;" onsubmit="handleSignup(event)">
-                <div class="form-group">
-                    <label class="form-label">Full Name</label>
-                    <input type="text" id="signup-name" class="form-control" placeholder="John Doe" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Email Address</label>
-                    <input type="email" id="signup-email" class="form-control" placeholder="john@example.com" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <div style="position: relative;">
-                        <input type="password" id="signup-password" class="form-control" placeholder="Min. 6 characters"
-                            required style="padding-right: 3rem;">
-                        <button type="button" onclick="togglePassword('signup-password', this)"
-                            style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1.1rem;">👁</button>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Confirm Password</label>
-                    <div style="position: relative;">
-                        <input type="password" id="signup-confirm" class="form-control"
-                            placeholder="Repeat your password" required style="padding-right: 3rem;">
-                        <button type="button" onclick="togglePassword('signup-confirm', this)"
-                            style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1.1rem;">👁</button>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: var(--space-md);"
-                    id="signup-btn">
-                    Create Account
-                </button>
-            </form>
-
-        </div>
-
-        <!-- Footer note -->
-        <p
-            style="text-align: center; margin-top: var(--space-lg); color: var(--text-muted); font-size: var(--text-sm);">
-            🔒 Your information is secure and encrypted
-        </p>
     </div>
 </section>
+{% endblock %}
 
+{% block extra_js %}
 <script>
     function switchTab(tab) {
         const isLogin = tab === 'login';
         document.getElementById('login-form').style.display = isLogin ? 'block' : 'none';
         document.getElementById('signup-form').style.display = isLogin ? 'none' : 'block';
 
-        const activeStyle = 'background: var(--primary); color: white;';
-        const inactiveStyle = 'background: transparent; color: var(--text-muted);';
-        document.getElementById('tab-login').style.cssText += isLogin ? activeStyle : inactiveStyle;
-        document.getElementById('tab-signup').style.cssText += isLogin ? inactiveStyle : activeStyle;
-
+        const loginTab = document.getElementById('tab-login');
+        const signupTab = document.getElementById('tab-signup');
+        loginTab.style.background = isLogin ? 'var(--primary)' : 'transparent';
+        loginTab.style.color = isLogin ? '#fff' : 'var(--text-muted)';
+        signupTab.style.background = !isLogin ? 'var(--primary)' : 'transparent';
+        signupTab.style.color = !isLogin ? '#fff' : 'var(--text-muted)';
         hideAlert();
     }
 
     function showAlert(message, isSuccess) {
         const el = document.getElementById('auth-alert');
-        el.textContent = (isSuccess ? '✅ ' : '❌ ') + message;
+        el.textContent = message;
         el.style.display = 'block';
-        el.style.background = isSuccess ? 'rgba(46, 213, 115, 0.15)' : 'rgba(255, 71, 87, 0.15)';
-        el.style.color = isSuccess ? 'var(--success)' : 'var(--danger)';
-        el.style.border = `1px solid ${isSuccess ? 'rgba(46,213,115,0.3)' : 'rgba(255,71,87,0.3)'}`;
+        el.style.background = isSuccess ? 'var(--accent-soft)' : 'rgba(255, 59, 92, 0.14)';
+        el.style.color = isSuccess ? 'var(--accent)' : 'var(--danger)';
+        el.style.border = `1px solid ${isSuccess ? 'var(--accent)' : 'var(--danger)'}`;
     }
 
     function hideAlert() {
@@ -132,13 +140,13 @@
     function setLoading(btnId, loading) {
         const btn = document.getElementById(btnId);
         btn.disabled = loading;
-        btn.textContent = loading ? 'Please wait...' : (btnId === 'login-btn' ? 'Login' : 'Create Account');
+        btn.textContent = loading ? 'AUTHENTICATING...' : (btnId === 'login-btn' ? 'Sign In To Pit Wall →' : 'Create Driver Account →');
     }
 
     function togglePassword(inputId, btn) {
         const input = document.getElementById(inputId);
         input.type = input.type === 'password' ? 'text' : 'password';
-        btn.textContent = input.type === 'password' ? '👁' : '🙈';
+        btn.textContent = input.type === 'password' ? 'SHOW' : 'HIDE';
     }
 
     async function handleLogin(e) {
@@ -158,10 +166,10 @@
         setLoading('login-btn', false);
 
         if (data.success) {
-            showAlert(`Welcome back, ${data.name}! Redirecting...`, true);
-            setTimeout(() => window.location.href = "{{ url_for('store_home') }}", 1200);
+            showAlert(`Welcome back, ${data.name}. Syncing Pit Cart...`, true);
+            setTimeout(() => window.location.href = "{{ url_for('store_home') }}", 1000);
         } else {
-            showAlert(data.message, false);
+            showAlert(data.message || 'Invalid credentials.', false);
         }
     }
 
@@ -172,12 +180,11 @@
         const password = document.getElementById('signup-password').value;
         const confirm = document.getElementById('signup-confirm').value;
         if (password !== confirm) {
-            showAlert('Passwords do not match.', false);
+            showAlert('Password confirmation does not match.', false);
             return;
         }
 
         setLoading('signup-btn', true);
-
         const res = await fetch('/car-spareparts/api/auth/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -191,10 +198,10 @@
         setLoading('signup-btn', false);
 
         if (data.success) {
-            showAlert(`Account created! Welcome, ${data.name}! Redirecting...`, true);
-            setTimeout(() => window.location.href = "{{ url_for('store_home') }}", 1200);
+            showAlert(`Account registered! Welcome, ${data.name}. Redirecting...`, true);
+            setTimeout(() => window.location.href = "{{ url_for('store_home') }}", 1000);
         } else {
-            showAlert(data.message, false);
+            showAlert(data.message || 'Registration failed.', false);
         }
     }
 </script>

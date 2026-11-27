@@ -5,707 +5,394 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="Premium car spare parts - High-quality automotive components for all makes and models">
-    <meta name="keywords" content="car parts, spare parts, automotive, engine parts, brake systems">
-    <title>{% block title %}AutoParts Pro - Premium Car Spare Parts{% endblock %}</title>
+        content="AutoParts Pro — Precision OEM & Track-Grade Automotive Components with Live Vehicle Fitment & AI Diagnostics">
+    <meta name="keywords" content="car parts, spare parts, automotive, engine parts, brake systems, OEM performance">
+    <title>{% block title %}AutoParts Pro // Precision OEM &amp; Performance Telemetry{% endblock %}</title>
 
     <!-- Favicon -->
     <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}">
 
-    <!-- CSS -->
+    <!-- Motorsport Telemetry Design System -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
     {% block extra_css %}{% endblock %}
 
-    <!-- Theme Initialization Script -->
+    <!-- Unified Portfolio Theme Initialization -->
     <script>
         (function () {
             const theme = localStorage.getItem('hub-theme') || 'dark';
             document.documentElement.setAttribute('data-theme', theme);
         })();
+        window.AP_GARAGE_VEHICLES = {{ (garage_vehicles or []) | tojson }};
     </script>
 </head>
 
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="container">
-            <a href="{{ url_for('store_home') }}" class="navbar-brand" style="display: flex; align-items: center; gap: 8px;">
-                <img src="{{ url_for('static', filename='images/favicon_cropped.webp') }}" alt="AutoParts Pro Logo" style="height: 32px; width: auto;" decoding="async">
-                <span>AutoParts Pro</span>
-            </a>
-
-            <ul class="navbar-nav">
-                <li><a href="{{ url_for('portfolio_home') }}" class="nav-link">Portfolio</a></li>
-                <li><a href="{{ url_for('store_home') }}" class="nav-link">Home</a></li>
-                <li><a href="{{ url_for('products') }}" class="nav-link">Products</a></li>
-                <li><a href="{{ url_for('admin') }}" class="nav-link">Admin</a></li>
-                <li>
-                    <a href="{{ url_for('cart') }}" class="nav-link cart-icon">
-                        🛒
-                        <span class="cart-badge" id="cart-count" {% if cart_count == 0 %}style="display: none;"{% endif %}>{{ cart_count }}</span>
-                    </a>
-                </li>
-                <li>
-                    <button type="button" class="theme-toggle-btn" id="theme-toggle" title="Toggle Theme">
-                        <span class="theme-icon-dark">🌙</span>
-                        <span class="theme-icon-light">☀️</span>
-                    </button>
-                </li>
-                {% if current_user %}
-                <li style="display: flex; align-items: center; gap: var(--space-sm);">
-                    <span style="color: var(--text-muted); font-size: var(--text-sm);">👤 {{ current_user.name }}</span>
-                    <a href="{{ url_for('logout') }}" class="btn btn-outline"
-                        style="padding: 0.3rem 0.8rem; font-size: var(--text-sm);">Logout</a>
-                </li>
-                {% else %}
-                <li><a href="{{ url_for('login_page') }}" class="btn btn-primary"
-                        style="padding: 0.4rem 1rem;">Login</a></li>
-                {% endif %}
-            </ul>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main>
-        {% block content %}{% endblock %}
-    </main>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h4>About Us</h4>
-                    <p>Your trusted source for premium car spare parts. Quality guaranteed.</p>
-                </div>
-
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul class="footer-links">
-                        <li><a href="{{ url_for('products') }}">Shop All Parts</a></li>
-                        <li><a href="{{ url_for('cart') }}">Shopping Cart</a></li>
-                        <li><a href="{{ url_for('admin') }}">Admin Panel</a></li>
-                        <li><a href="{{ url_for('site_insights') }}">Site Insights</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-section">
-                    <h4>Customer Service</h4>
-                    <ul class="footer-links">
-                        <li><a href="#">Contact Us</a></li>
-                        <li><a href="#">Shipping Info</a></li>
-                        <li><a href="#">Returns Policy</a></li>
-                        <li><a href="#">Warranty</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-section">
-                    <h4>Connect With Us</h4>
-                    <p>📧 support@autopartspro.com</p>
-                    <p>📱 +1 (800) 123-4567</p>
-                    <p>📍 123 Auto Street, Car City</p>
-                </div>
+    <!-- Top Pit-Wall Telemetry Strip -->
+    <div class="ap-topbar">
+        <div class="container ap-topbar-inner">
+            <div class="ap-topbar-status">
+                <span class="ap-pulse-dot" aria-hidden="true"></span>
+                <span>SYS.ONLINE // OEM+ FITMENT VERIFIED</span>
+                <span class="ap-topbar-sep ap-topbar-hide-sm">//</span>
+                <span class="ap-topbar-hide-sm">FREE EXPRESS DISPATCH ON ORDERS $100+</span>
+                <span class="ap-topbar-sep ap-topbar-hide-sm">//</span>
+                <span class="ap-topbar-hide-sm">30-DAY TRACK &amp; STREET WARRANTY</span>
             </div>
-
-            <div class="footer-bottom">
-                <p>&copy; 2026 AutoParts Pro. All rights reserved. | Built with ❤️ for automotive enthusiasts</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Product Detail Modal -->
-    <div class="pd-overlay" id="product-modal" style="display:none;">
-        <div class="pd-modal">
-            <button class="pd-close" onclick="closeProductModal()" title="Close">&times;</button>
-            <div class="pd-body" id="pd-body">
-                <div class="pd-loading">Loading...</div>
+            <div class="ap-topbar-links">
+                <a href="{{ url_for('portfolio_home') }}" title="Return to Wilson Manuel Portfolio Hub">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+                    <span>Portfolio Hub</span>
+                </a>
             </div>
         </div>
     </div>
 
-    <style>
-        .pd-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(6px);
-            z-index: 10003; display: flex; align-items: center; justify-content: center;
-            animation: fadeIn 0.2s ease;
-        }
-        .pd-modal {
-            background: var(--bg-secondary); border: 1px solid var(--glass-border);
-            border-radius: 18px; max-width: 720px; width: 92%; max-height: 88vh;
-            overflow-y: auto; box-shadow: 0 32px 80px rgba(0,0,0,0.5);
-            animation: modalPop 0.35s cubic-bezier(0.16,1,0.3,1);
-            position: relative; padding: 0;
-        }
-        .pd-close {
-            position: absolute; top: 14px; right: 16px; z-index: 10;
-            background: var(--bg-tertiary); border: 1px solid var(--glass-border);
-            color: var(--text-primary); width: 36px; height: 36px; border-radius: 50%;
-            font-size: 1.3rem; cursor: pointer; display: grid; place-items: center;
-            transition: background 0.2s, transform 0.2s;
-        }
-        .pd-close:hover { background: var(--danger); color: #fff; transform: scale(1.1); }
-        .pd-body { padding: 0; }
-        .pd-loading {
-            padding: 80px 0; text-align: center; color: var(--text-muted);
-            font-size: var(--text-lg);
-        }
-        .pd-img-wrap {
-            background: var(--bg-tertiary); display: flex; align-items: center;
-            justify-content: center; height: 280px; border-radius: 18px 18px 0 0;
-            overflow: hidden;
-        }
-        .pd-img-wrap img {
-            max-height: 100%; max-width: 100%; object-fit: contain; padding: 24px;
-        }
-        .pd-content { padding: 28px 32px; }
-        .pd-badges { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-        .pd-name {
-            font-family: var(--font-primary); font-size: var(--text-2xl);
-            font-weight: 800; margin: 0 0 6px; letter-spacing: -0.02em;
-        }
-        .pd-price {
-            font-family: var(--font-primary); font-size: var(--text-xl); font-weight: 700;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text; margin-bottom: 16px; display: inline-block;
-        }
-        .pd-desc {
-            color: var(--text-secondary); font-size: var(--text-sm);
-            line-height: 1.7; margin-bottom: 20px;
-        }
-        .pd-specs {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-            margin-bottom: 20px;
-        }
-        .pd-spec {
-            padding: 10px 14px; background: var(--bg-tertiary);
-            border-radius: var(--radius-md); border: 1px solid var(--glass-border);
-        }
-        .pd-spec-label {
-            font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em;
-            color: var(--text-muted); font-weight: 700; margin-bottom: 2px;
-        }
-        .pd-spec-value {
-            font-size: var(--text-sm); font-weight: 600; color: var(--text-primary);
-        }
-        .pd-compat {
-            padding: 14px 16px; background: var(--bg-tertiary);
-            border-radius: var(--radius-md); margin-bottom: 20px;
-            border-left: 3px solid var(--primary);
-        }
-        .pd-compat-title {
-            font-size: var(--text-sm); font-weight: 700; margin-bottom: 4px;
-        }
-        .pd-compat-text { font-size: var(--text-sm); color: var(--text-secondary); margin: 0; }
-        .pd-actions { display: flex; gap: 12px; align-items: center; }
-        .pd-qty {
-            display: flex; align-items: center; gap: 0;
-            border: 1px solid var(--glass-border); border-radius: var(--radius-md);
-            overflow: hidden;
-        }
-        .pd-qty button {
-            background: var(--bg-tertiary); border: none; color: var(--text-primary);
-            width: 36px; height: 36px; font-size: 1.1rem; cursor: pointer;
-            transition: background 0.15s;
-        }
-        .pd-qty button:hover { background: var(--primary); color: #fff; }
-        .pd-qty span {
-            width: 40px; text-align: center; font-weight: 700; font-size: var(--text-sm);
-            background: var(--bg-secondary); color: var(--text-primary);
-        }
-        .pd-perks {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-            margin-top: 20px;
-        }
-        .pd-perk {
-            text-align: center; padding: 10px; background: var(--bg-tertiary);
-            border-radius: var(--radius-md); font-size: 0.7rem;
-            color: var(--text-muted); font-weight: 600;
-        }
-        .pd-perk-icon { font-size: 1.3rem; margin-bottom: 4px; }
-        @media (max-width: 600px) {
-            .pd-specs { grid-template-columns: 1fr; }
-            .pd-content { padding: 20px 18px; }
-            .pd-img-wrap { height: 200px; }
-            .pd-perks { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
-        }
-    </style>
+    <!-- Sticky Pit-Wall Navigation -->
+    <nav class="navbar" aria-label="Store Navigation">
+        <div class="container navbar-inner">
+            <a href="{{ url_for('store_home') }}" class="navbar-brand">
+                <div class="ap-brand-mark" aria-hidden="true">
+                    <!-- Custom Slotted Brake Rotor / Tachometer SVG -->
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="9"/>
+                        <circle cx="12" cy="12" r="3.2"/>
+                        <path d="M12 3v3M21 12h-3M12 21v-3M3 12h3M18.36 5.64l-2.12 2.12M5.64 18.36l2.12-2.12"/>
+                    </svg>
+                </div>
+                <div class="ap-brand-copy">
+                    <span class="ap-brand-title">AutoParts <span>Pro</span></span>
+                    <span class="ap-brand-sub">Apex // OEM+ Division</span>
+                </div>
+            </a>
 
-    <!-- JavaScript -->
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    {% block extra_js %}{% endblock %}
+            <ul class="navbar-nav">
+                <li>
+                    <a href="{{ url_for('store_home') }}" class="nav-link {% if request.endpoint == 'store_home' %}is-active{% endif %}">
+                        <span class="nav-idx">01</span> Storefront
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('products') }}" class="nav-link {% if request.endpoint in ('products', 'product_detail') %}is-active{% endif %}">
+                        <span class="nav-idx">02</span> Catalog
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('cart') }}" class="nav-link {% if request.endpoint in ('cart', 'checkout') %}is-active{% endif %}">
+                        <span class="nav-idx">03</span> Pit Cart
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('admin') }}" class="nav-link {% if request.endpoint == 'admin' %}is-active{% endif %}">
+                        <span class="nav-idx">04</span> Inventory
+                    </a>
+                </li>
+            </ul>
 
-    <!-- Theme Toggle Script -->
-    <script>
-        const themeToggle = document.getElementById('theme-toggle');
-        const html = document.documentElement;
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
-                const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-                html.setAttribute('data-theme', next);
-                localStorage.setItem('hub-theme', next);
-            });
-        }
-    </script>
+            <div class="ap-nav-actions">
+                <!-- My Garage Vehicle Fitment Trigger -->
+                <button type="button" class="ap-garage-pill" id="ap-garage-trigger" onclick="openGarageModal()" title="Select your vehicle for instant fitment verification">
+                    <span class="ap-garage-dot" aria-hidden="true"></span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/>
+                        <circle cx="6.5" cy="16.5" r="2.5"/>
+                        <circle cx="16.5" cy="16.5" r="2.5"/>
+                    </svg>
+                    <span class="ap-garage-lbl-prefix">Garage:</span>
+                    <span id="ap-nav-garage-label">Select Ride</span>
+                </button>
 
-    <!-- Product Modal Script -->
-    <script>
-        let modalQty = 1;
-        let modalStock = 0;
-        let modalProductId = null;
+                <!-- Dark / Light Theme Switcher -->
+                <button type="button" class="ap-icon-btn" id="theme-toggle" title="Switch Dark / Light Telemetry Mode" aria-label="Toggle theme">
+                    <svg class="theme-icon-dark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                    </svg>
+                    <svg class="theme-icon-light" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="4"/>
+                        <path d="M12 2v2M12 20v2m-7.07-14.93 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+                    </svg>
+                </button>
 
-        function escModalHtml(str) {
-            const d = document.createElement('div');
-            d.textContent = str == null ? '' : String(str);
-            return d.innerHTML;
-        }
+                <!-- Slide-Out Cart Drawer Trigger -->
+                <a href="{{ url_for('cart') }}" class="ap-icon-btn ap-cart-trigger" id="ap-cart-drawer-btn" title="Open Live Pit-Box Cart">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="8" cy="21" r="1"/>
+                        <circle cx="19" cy="21" r="1"/>
+                        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                    </svg>
+                    <span class="cart-badge" id="cart-count" {% if cart_count == 0 %}style="display: none;"{% endif %}>{{ cart_count }}</span>
+                </a>
 
-        function openProductModal(productId) {
-            const modal = document.getElementById('product-modal');
-            const body = document.getElementById('pd-body');
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-            body.innerHTML = '<div class="pd-loading">Loading...</div>';
-            modalQty = 1;
-            modalProductId = productId;
+                {% if current_user %}
+                <div class="ap-user-chip ap-topbar-hide-sm">
+                    <span style="color: var(--accent);">●</span>
+                    <span>{{ current_user.name.split(' ')[0] }}</span>
+                    <a href="{{ url_for('logout') }}" style="color: var(--text-muted); font-size: 0.72rem; margin-left: 4px; text-transform: uppercase;" title="Sign Out">Exit</a>
+                </div>
+                {% else %}
+                <a href="{{ url_for('login_page') }}" class="btn btn-primary btn-sm ap-topbar-hide-sm">Sign In</a>
+                {% endif %}
 
-            fetch('/car-spareparts/api/product/' + productId)
-                .then(r => r.json())
-                .then(p => {
-                    modalStock = p.stock || 0;
-                    const inStock = modalStock > 0;
-                    const imgUrl = (p.image_url && p.image_url.startsWith('/static/')) ? escModalHtml(p.image_url) : '/static/images/products/air-filter.webp';
-                    body.innerHTML = `
-                        <div class="pd-img-wrap">
-                            <img src="${imgUrl}" alt="${escModalHtml(p.name)}" decoding="async">
-                        </div>
-                        <div class="pd-content">
-                            <div class="pd-badges">
-                                ${inStock
-                                    ? `<span class="badge badge-success">In Stock (${Number(modalStock)})</span>`
-                                    : `<span class="badge badge-danger">Out of Stock</span>`}
-                                ${p.featured ? '<span class="badge badge-warning">⭐ Featured</span>' : ''}
-                                <span class="badge" style="background:var(--bg-tertiary);border:1px solid var(--glass-border);color:var(--text-secondary);">${escModalHtml(p.category_icon || '')} ${escModalHtml(p.category_name || '')}</span>
-                            </div>
-                            <h2 class="pd-name">${escModalHtml(p.name)}</h2>
-                            <div class="pd-price">$${parseFloat(p.price || 0).toFixed(2)}</div>
-                            <p class="pd-desc">${escModalHtml(p.description || 'No description available.')}</p>
-
-                            <div class="pd-specs">
-                                <div class="pd-spec">
-                                    <div class="pd-spec-label">Brand</div>
-                                    <div class="pd-spec-value">${escModalHtml(p.brand || '—')}</div>
-                                </div>
-                                <div class="pd-spec">
-                                    <div class="pd-spec-label">Part Number</div>
-                                    <div class="pd-spec-value">${escModalHtml(p.part_number || '—')}</div>
-                                </div>
-                                <div class="pd-spec">
-                                    <div class="pd-spec-label">Category</div>
-                                    <div class="pd-spec-value">${escModalHtml(p.category_name || '—')}</div>
-                                </div>
-                                <div class="pd-spec">
-                                    <div class="pd-spec-label">Stock</div>
-                                    <div class="pd-spec-value">${Number(modalStock)} units</div>
-                                </div>
-                                ${p.specifications ? `
-                                <div class="pd-spec" style="grid-column: 1 / -1;">
-                                    <div class="pd-spec-label">Specifications</div>
-                                    <div class="pd-spec-value">${escModalHtml(p.specifications)}</div>
-                                </div>` : ''}
-                            </div>
-
-                            ${p.compatible_cars ? `
-                            <div class="pd-compat">
-                                <div class="pd-compat-title">🚗 Compatible Vehicles</div>
-                                <p class="pd-compat-text">${escModalHtml(p.compatible_cars)}</p>
-                            </div>` : ''}
-
-                            <div class="pd-actions">
-                                <div class="pd-qty">
-                                    <button onclick="modalChangeQty(-1)">−</button>
-                                    <span id="modal-qty">1</span>
-                                    <button onclick="modalChangeQty(1)">+</button>
-                                </div>
-                                ${inStock
-                                    ? `<button class="btn btn-primary" style="flex:1;" onclick="modalAddToCart()">🛒 Add to Cart</button>`
-                                    : `<button class="btn btn-primary" style="flex:1;opacity:0.5;" disabled>Out of Stock</button>`}
-                            </div>
-
-                            <div class="pd-perks">
-                                <div class="pd-perk"><div class="pd-perk-icon">🚚</div>Free Shipping</div>
-                                <div class="pd-perk"><div class="pd-perk-icon">✅</div>Genuine Parts</div>
-                                <div class="pd-perk"><div class="pd-perk-icon">🔄</div>Easy Returns</div>
-                            </div>
-                        </div>
-                    `;
-                })
-                .catch(() => {
-                    body.innerHTML = '<div class="pd-loading">Failed to load product details.</div>';
-                });
-        }
-
-        function closeProductModal() {
-            const modal = document.getElementById('product-modal');
-            modal.style.animation = 'fadeOut 0.2s ease forwards';
-            setTimeout(() => {
-                modal.style.display = 'none';
-                modal.style.animation = '';
-                document.body.style.overflow = '';
-            }, 200);
-        }
-
-        document.getElementById('product-modal').addEventListener('click', function(e) {
-            if (e.target === this) closeProductModal();
-        });
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeProductModal();
-        });
-
-        function modalChangeQty(delta) {
-            modalQty = Math.max(1, Math.min(modalStock, modalQty + delta));
-            const el = document.getElementById('modal-qty');
-            if (el) el.textContent = modalQty;
-        }
-
-        function modalAddToCart() {
-            if (!modalProductId) return;
-            addToCart(modalProductId, modalQty);
-            closeProductModal();
-        }
-    </script>
-    <!-- AI Assistant Floating Chat -->
-    <button class="ai-chat-btn" id="ai-chat-btn" title="Chat with AI Assistant">💬</button>
-
-    <div class="ai-chat-modal" id="ai-chat-modal">
-        <div class="ai-chat-header">
-            <div class="ai-chat-title">
-                <span style="font-size: 1.2rem;">🤖</span>
-                <span>AI Assistant</span>
+                <!-- Mobile Menu Button -->
+                <button type="button" class="ap-mobile-toggle" id="ap-mobile-btn" aria-label="Toggle navigation menu" onclick="toggleMobileMenu()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                        <line x1="4" y1="7" x2="20" y2="7"/>
+                        <line x1="4" y1="12" x2="20" y2="12"/>
+                        <line x1="4" y1="17" x2="20" y2="17"/>
+                    </svg>
+                </button>
             </div>
-            <button class="ai-chat-close" id="ai-chat-close">&times;</button>
         </div>
+
+        <!-- Mobile Collapsible Navigation -->
+        <div class="ap-mobile-drawer" id="ap-mobile-drawer">
+            <div style="display: grid; gap: 0.4rem; margin-bottom: 0.85rem;">
+                <a href="{{ url_for('store_home') }}" class="nav-link {% if request.endpoint == 'store_home' %}is-active{% endif %}"><span class="nav-idx">01</span> Storefront</a>
+                <a href="{{ url_for('products') }}" class="nav-link {% if request.endpoint in ('products', 'product_detail') %}is-active{% endif %}"><span class="nav-idx">02</span> Parts Catalog</a>
+                <a href="{{ url_for('cart') }}" class="nav-link {% if request.endpoint in ('cart', 'checkout') %}is-active{% endif %}"><span class="nav-idx">03</span> Full Cart</a>
+                <a href="{{ url_for('admin') }}" class="nav-link {% if request.endpoint == 'admin' %}is-active{% endif %}"><span class="nav-idx">04</span> Inventory Console</a>
+                <a href="{{ url_for('portfolio_home') }}" class="nav-link"><span class="nav-idx">↩</span> Back to Portfolio Hub</a>
+            </div>
+            <div style="display: flex; gap: 0.6rem; padding-top: 0.75rem; border-top: 1px solid var(--glass-border);">
+                {% if current_user %}
+                <span class="badge badge-success" style="flex: 1; justify-content: center; padding: 0.5rem;">Signed in: {{ current_user.name }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">Logout</a>
+                {% else %}
+                <a href="{{ url_for('login_page') }}" class="btn btn-primary btn-sm" style="width: 100%;">Driver Sign In / Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Page Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Pit-Wall Technical Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.9rem;">
+                        <div class="ap-brand-mark" style="width: 32px; height: 32px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </div>
+                        <span class="ap-brand-title" style="font-size: 1.08rem;">AutoParts <span>Pro</span></span>
+                    </div>
+                    <p style="font-size: 0.88rem; line-height: 1.6; margin-bottom: 1rem;">
+                        OEM-verified replacement hardware and motorsport-grade upgrades. Built with live chassis fitment matching and Gemini AI diagnostics.
+                    </p>
+                    <div style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
+                        <span class="badge badge-neutral">ISO-9001 SPEC</span>
+                        <span class="badge badge-neutral">DIRECT FIT</span>
+                        <span class="badge badge-success">LIVE DEMO</span>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h4>01 // Store Systems</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('products') }}">All Performance Parts</a></li>
+                        <li><a href="{{ url_for('products', category=1) }}">Engine &amp; Ignition</a></li>
+                        <li><a href="{{ url_for('products', category=2) }}">Braking Hardware</a></li>
+                        <li><a href="{{ url_for('products', category=4) }}">Suspension &amp; Chassis</a></li>
+                        <li><a href="{{ url_for('products', category=6) }}">Optics &amp; LED Lighting</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>02 // Driver Tools</h4>
+                    <ul class="footer-links">
+                        <li><a href="#" onclick="openGarageModal(); return false;">My Garage Fitment Selector</a></li>
+                        <li><a href="#" onclick="openCartDrawer(); return false;">Live Pit-Box Cart Drawer</a></li>
+                        <li><a href="#" onclick="openMechanicChat(); return false;">AI Mechanic Diagnostics</a></li>
+                        <li><a href="{{ url_for('admin') }}">Sandbox Inventory Console</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>03 // Pit Dispatch</h4>
+                    <p style="font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 0.45rem; color: var(--text-primary);">support@autopartspro.dev</p>
+                    <p style="font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 0.45rem;">+1 (800) 555-APEX</p>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.9rem;">Pit Lane Sector 04 · Jakarta / Global Dispatch</p>
+                    <a href="{{ url_for('portfolio_home') }}" class="btn btn-outline btn-sm" style="width: 100%;">&larr; Portfolio Ecosystem</a>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <span>&copy; 2026 AUTOPARTS PRO // APEX TELEMETRY EDITION</span>
+                <span>PART OF WILSON MANUEL PORTFOLIO ECOSYSTEM</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- =====================================================================
+         SLIDE-OUT LIVE PIT-BOX CART DRAWER
+         ===================================================================== -->
+    <div class="ap-drawer-backdrop" id="ap-cart-backdrop" onclick="closeCartDrawer()"></div>
+    <aside class="ap-cart-drawer" id="ap-cart-drawer" aria-label="Shopping Cart Drawer">
+        <div class="ap-drawer-head">
+            <div>
+                <div class="mono" style="font-size: 0.66rem; letter-spacing: 0.12em; color: var(--primary); text-transform: uppercase;">PIT-BOX MANIFEST</div>
+                <h3 style="font-size: 1.15rem; text-transform: uppercase; margin: 0;">Active Cart <span class="mono" id="ap-drawer-count" style="font-size: 0.85rem; color: var(--text-muted);">(0)</span></h3>
+            </div>
+            <button type="button" class="ap-icon-btn" onclick="closeCartDrawer()" aria-label="Close cart drawer">&times;</button>
+        </div>
+
+        <div class="ap-drawer-body">
+            <div class="ap-ship-meter" id="ap-drawer-ship-meter">
+                <div class="flex-between" style="font-size: 0.78rem;">
+                    <span id="ap-drawer-ship-text" style="color: var(--text-secondary);">Add $100.00 for Free Track-Day Priority</span>
+                    <span class="mono" id="ap-drawer-ship-pct" style="font-size: 0.72rem; color: var(--accent);">0%</span>
+                </div>
+                <div class="ap-ship-bar">
+                    <div class="ap-ship-fill" id="ap-drawer-ship-fill" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div id="ap-drawer-items">
+                <div style="padding: 2.5rem 0; text-align: center; color: var(--text-muted); font-family: var(--font-mono); font-size: 0.82rem;">
+                    SYNCING PIT-BOX...
+                </div>
+            </div>
+        </div>
+
+        <div class="ap-drawer-foot" id="ap-drawer-foot">
+            <div style="margin-bottom: 0.9rem;">
+                <div class="flex-between" style="font-size: 0.84rem; margin-bottom: 0.35rem;">
+                    <span style="color: var(--text-muted);">Subtotal</span>
+                    <span class="mono" id="ap-drawer-subtotal">$0.00</span>
+                </div>
+                <div class="flex-between" style="font-size: 0.84rem; margin-bottom: 0.35rem;">
+                    <span style="color: var(--text-muted);">Tax (10%)</span>
+                    <span class="mono" id="ap-drawer-tax">$0.00</span>
+                </div>
+                <div class="flex-between" style="padding-top: 0.55rem; border-top: 1px solid var(--glass-border); font-weight: 700;">
+                    <span style="font-family: var(--font-display); text-transform: uppercase;">Total Estimate</span>
+                    <span class="mono" id="ap-drawer-total" style="font-size: 1.2rem; color: var(--primary);">$0.00</span>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 0.5rem;">
+                <a href="{{ url_for('checkout') }}" class="btn btn-primary" id="ap-drawer-checkout-btn" style="width: 100%;">
+                    Proceed to Dispatch &rarr;
+                </a>
+                <a href="{{ url_for('cart') }}" class="btn btn-outline btn-sm" style="width: 100%;">
+                    Open Full Cart Page
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- =====================================================================
+         "MY GARAGE" VEHICLE FITMENT MODAL
+         ===================================================================== -->
+    <div class="ap-garage-overlay" id="ap-garage-modal" onclick="if(event.target===this) closeGarageModal()">
+        <div class="ap-garage-dialog">
+            <div class="flex-between" style="padding-bottom: 0.9rem; border-bottom: 1px solid var(--glass-border);">
+                <div>
+                    <div class="ap-console-tag">CHASSIS TELEMETRY // FITMENT ENGINE</div>
+                    <h3 style="font-size: 1.35rem; text-transform: uppercase; margin-top: 2px;">Select Your Garage Vehicle</h3>
+                </div>
+                <button type="button" class="ap-icon-btn" onclick="closeGarageModal()" aria-label="Close garage selector">&times;</button>
+            </div>
+
+            <p style="font-size: 0.88rem; margin-top: 0.85rem;">
+                Park your vehicle in <strong>My Garage</strong> to highlight direct-fit &amp; universal components across every catalog card and advise the AI Mechanic.
+            </p>
+
+            <div class="ap-garage-grid" id="ap-garage-modal-list">
+                {% for v in garage_vehicles %}
+                <button type="button" class="ap-garage-option" data-vehicle-id="{{ v.id }}" onclick="selectGarageFromModal('{{ v.id }}')">
+                    <div class="flex-between" style="margin-bottom: 2px;">
+                        <strong style="font-family: var(--font-display); font-size: 0.98rem; text-transform: uppercase;">{{ v.name }}</strong>
+                        <span class="mono" style="font-size: 0.68rem; color: var(--text-muted);">{{ v.year }}</span>
+                    </div>
+                    <div class="mono" style="font-size: 0.72rem; color: var(--text-secondary);">{{ v.trim }}</div>
+                </button>
+                {% endfor %}
+            </div>
+
+            <div class="flex-between" style="padding-top: 0.9rem; border-top: 1px solid var(--glass-border); flex-wrap: wrap;">
+                <button type="button" class="btn btn-outline btn-sm" onclick="clearGarageVehicle()">Clear Garage</button>
+                <button type="button" class="btn btn-primary btn-sm" id="ap-garage-shop-btn" onclick="shopForGarageVehicle()">
+                    Filter Catalog For Selected Ride &rarr;
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         QUICK-VIEW TECHNICAL DATASHEET MODAL
+         ===================================================================== -->
+    <div class="pd-overlay" id="product-modal" onclick="if(event.target===this) closeProductModal()">
+        <div class="pd-modal">
+            <button class="pd-close" onclick="closeProductModal()" title="Close">&times;</button>
+            <div id="pd-body">
+                <div style="padding: 4rem 0; text-align: center; font-family: var(--font-mono); color: var(--text-muted);">LOADING COMPONENT TELEMETRY...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         UPGRADED AI PIT-CREW MECHANIC ASSISTANT
+         ===================================================================== -->
+    <button class="ai-chat-btn" id="ai-chat-btn" title="Open AI Pit-Crew Mechanic">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+        </svg>
+        <span>AI Mechanic</span>
+    </button>
+
+    <div class="ai-chat-modal" id="ai-chat-modal" aria-label="AI Mechanic Diagnostic Assistant">
+        <div class="ai-chat-header">
+            <div>
+                <div style="display: flex; align-items: center; gap: 0.45rem;">
+                    <span class="ap-pulse-dot"></span>
+                    <strong style="font-family: var(--font-display); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.04em;">Apex AI // Pit Mechanic</strong>
+                </div>
+                <div class="mono" id="ai-garage-context" style="font-size: 0.66rem; color: var(--text-muted); margin-top: 2px;">
+                    NO GARAGE VEHICLE SET · ALL CHASSIS
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.35rem;">
+                <button type="button" class="ap-icon-btn" id="ai-chat-clear" style="height: 30px; min-width: 30px; padding: 0 6px; font-size: 0.68rem;" title="Reset Diagnostic Session">CLR</button>
+                <button type="button" class="ap-icon-btn" id="ai-chat-close" style="height: 30px; min-width: 30px; padding: 0;" title="Close">&times;</button>
+            </div>
+        </div>
+
+        <!-- Diagnostic Quick-Prompt Chips -->
+        <div class="ai-quick-chips">
+            <button type="button" class="ai-chip" onclick="askMechanicPrompt('My brakes are squeaking under light braking — what parts do you recommend?')">Brakes squeaking</button>
+            <button type="button" class="ai-chip" onclick="askMechanicPrompt('Which parts in stock fit my vehicle for a routine service tune-up?')">Tune-up kit</button>
+            <button type="button" class="ai-chip" onclick="askMechanicPrompt('I want brighter night visibility — compare your LED vs Halogen headlight bulbs.')">Headlight upgrade</button>
+            <button type="button" class="ai-chip" onclick="askMechanicPrompt('Slow engine crank in the morning — battery or alternator?')">Slow crank check</button>
+        </div>
+
         <div class="ai-chat-messages" id="ai-messages">
             <div class="ai-msg ai-msg-other">
-                <div class="ai-msg-bubble">Hello! I'm your AI Shopping Assistant. How can I help you find the right spare parts today?</div>
+                <div class="ai-msg-bubble">
+                    <strong>Pit-Crew Telemetry Online.</strong> Tell me your vehicle or describe a symptom (squealing brakes, rough idle, dim headlights), and I'll match exact OEM+ parts from live stock.
+                </div>
             </div>
         </div>
+
         <div class="ai-chat-input-area">
-            <input type="text" id="ai-input" class="ai-input" placeholder="Ask about our products..." autocomplete="off">
-            <button class="ai-send-btn" id="ai-send-btn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="22" y1="2" x2="11" y2="13" />
-                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            <input type="text" id="ai-input" class="ai-input" placeholder="Describe symptom, car model, or SKU..." autocomplete="off">
+            <button class="ai-send-btn" id="ai-send-btn" aria-label="Send message">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
                 </svg>
             </button>
         </div>
     </div>
 
-    <style>
-        /* Floating Chat Button */
-        .ai-chat-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .ai-chat-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 12px 32px rgba(0,0,0,0.5);
-        }
-
-        /* Chat Modal (Glassmorphism) */
-        .ai-chat-modal {
-            position: fixed;
-            bottom: 100px;
-            right: 30px;
-            width: 380px;
-            height: 500px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--glass-border);
-            border-radius: 18px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            z-index: 9998;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            backdrop-filter: blur(12px);
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(20px) scale(0.95);
-            transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .ai-chat-modal.is-open {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateY(0) scale(1);
-        }
-        @media (max-width: 480px) {
-            .ai-chat-modal {
-                width: calc(100% - 40px);
-                right: 20px;
-                bottom: 90px;
-                height: 400px;
-            }
-        }
-
-        /* Chat Header */
-        .ai-chat-header {
-            padding: 16px 20px;
-            background: rgba(255, 255, 255, 0.03);
-            border-bottom: 1px solid var(--glass-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .ai-chat-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-            font-family: var(--font-primary);
-            color: var(--text-primary);
-        }
-        .ai-chat-close {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 24px;
-            cursor: pointer;
-            transition: color 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            line-height: 1;
-        }
-        .ai-chat-close:hover {
-            color: var(--danger);
-        }
-
-        /* Chat Messages */
-        .ai-chat-messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        .ai-msg {
-            display: flex;
-            flex-direction: column;
-            max-width: 85%;
-        }
-        .ai-msg-mine {
-            align-self: flex-end;
-            align-items: flex-end;
-        }
-        .ai-msg-other {
-            align-self: flex-start;
-            align-items: flex-start;
-        }
-        .ai-msg-bubble {
-            padding: 12px 16px;
-            border-radius: 16px;
-            font-size: var(--text-sm);
-            line-height: 1.5;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .ai-msg-mine .ai-msg-bubble {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: #fff;
-            border-bottom-right-radius: 4px;
-        }
-        .ai-msg-other .ai-msg-bubble {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--glass-border);
-            border-bottom-left-radius: 4px;
-        }
-        .ai-typing {
-            font-style: italic;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            margin-top: -8px;
-            margin-bottom: 8px;
-        }
-
-        /* Chat Input */
-        .ai-chat-input-area {
-            padding: 16px;
-            background: var(--bg-tertiary);
-            border-top: 1px solid var(--glass-border);
-            display: flex;
-            gap: 10px;
-        }
-        .ai-input {
-            flex: 1;
-            padding: 12px 16px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--glass-border);
-            border-radius: 99px;
-            color: var(--text-primary);
-            font-family: inherit;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .ai-input:focus {
-            border-color: var(--primary);
-        }
-        .ai-send-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s, transform 0.2s;
-        }
-        .ai-send-btn:hover {
-            background: var(--secondary);
-            transform: scale(1.05);
-        }
-        .ai-send-btn:disabled {
-            background: var(--bg-secondary);
-            color: var(--text-muted);
-            cursor: not-allowed;
-            transform: none;
-        }
-    </style>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const btn = document.getElementById('ai-chat-btn');
-            const modal = document.getElementById('ai-chat-modal');
-            const closeBtn = document.getElementById('ai-chat-close');
-            const msgContainer = document.getElementById('ai-messages');
-            const input = document.getElementById('ai-input');
-            const sendBtn = document.getElementById('ai-send-btn');
-            
-            let chatHistory = '';
-
-            // Toggle modal
-            btn.addEventListener('click', () => {
-                modal.classList.toggle('is-open');
-                if(modal.classList.contains('is-open')) {
-                    input.focus();
-                }
-            });
-            closeBtn.addEventListener('click', () => {
-                modal.classList.remove('is-open');
-            });
-
-            // Close on escape
-            document.addEventListener('keydown', (e) => {
-                if(e.key === 'Escape' && modal.classList.contains('is-open')) {
-                    modal.classList.remove('is-open');
-                }
-            });
-
-            function escapeHTML(str) {
-                const d = document.createElement('div');
-                d.textContent = str;
-                return d.innerHTML;
-            }
-
-            function formatMessage(text) {
-                let html = escapeHTML(text);
-                // Parse **bold** to <strong>bold</strong>
-                html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                // Parse *italic* to <em>italic</em>
-                html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-                // Parse newlines to <br>
-                html = html.replace(/\n/g, '<br>');
-                return html;
-            }
-
-            function addMessage(text, isMine) {
-                const div = document.createElement('div');
-                div.className = 'ai-msg ' + (isMine ? 'ai-msg-mine' : 'ai-msg-other');
-                div.innerHTML = `<div class="ai-msg-bubble">${formatMessage(text)}</div>`;
-                msgContainer.appendChild(div);
-                msgContainer.scrollTop = msgContainer.scrollHeight;
-            }
-
-            function addTypingIndicator() {
-                const div = document.createElement('div');
-                div.className = 'ai-typing';
-                div.id = 'ai-typing';
-                div.textContent = 'AI is typing...';
-                msgContainer.appendChild(div);
-                msgContainer.scrollTop = msgContainer.scrollHeight;
-            }
-
-            function removeTypingIndicator() {
-                const el = document.getElementById('ai-typing');
-                if(el) el.remove();
-            }
-
-            async function handleSend() {
-                const text = input.value.trim();
-                if(!text) return;
-
-                input.value = '';
-                input.disabled = true;
-                sendBtn.disabled = true;
-
-                addMessage(text, true);
-                chatHistory += `User: ${text}\n`;
-                
-                addTypingIndicator();
-
-                try {
-                    const res = await fetch('/car-spareparts/api/ask', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message: text, history: chatHistory })
-                    });
-                    const data = await res.json();
-                    
-                    removeTypingIndicator();
-                    
-                    if(data.success) {
-                        addMessage(data.response, false);
-                        chatHistory += `AI: ${data.response}\n`;
-                    } else {
-                        addMessage(data.message || 'Sorry, I encountered an error.', false);
-                    }
-                } catch (e) {
-                    removeTypingIndicator();
-                    addMessage('Network error. Please try again.', false);
-                } finally {
-                    input.disabled = false;
-                    sendBtn.disabled = false;
-                    input.focus();
-                }
-            }
-
-            sendBtn.addEventListener('click', handleSend);
-            input.addEventListener('keydown', (e) => {
-                if(e.key === 'Enter') handleSend();
-            });
-        });
-    </script>
+    <!-- Core Store JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 
 </html>

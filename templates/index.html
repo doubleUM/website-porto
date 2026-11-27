@@ -1,73 +1,213 @@
 {% extends 'base.html' %}
 
+{% block title %}AutoParts Pro // Motorsport Telemetry &amp; OEM+ Storefront{% endblock %}
+
 {% block content %}
-<!-- Hero Section -->
-<section class="hero">
-    <div class="container">
-        <div class="hero-content-box">
-            <h1 class="hero-title">High-Performance Parts</h1>
-            <p class="hero-subtitle">Premium automotive components engineered for maximum reliability and power. Fast shipping, expert support.</p>
-            <div class="flex-center gap-3">
-                <a href="{{ url_for('products') }}" class="btn btn-primary btn-lg">Shop Now</a>
-                <a href="{{ url_for('products') }}" class="btn btn-outline btn-lg">Browse Catalog</a>
+<!-- =========================================================================
+     ASYMMETRIC PIT-WALL HERO + LIVE GARAGE FITMENT CONSOLE
+     ========================================================================= -->
+<section class="ap-hero">
+    <div class="container ap-hero-grid">
+        <!-- Left: Telemetry Pitch -->
+        <div>
+            <div class="ap-hero-badge">
+                <span class="ap-pulse-dot"></span>
+                <span>LIVE INVENTORY // {{ total_skus }} OEM &amp; TRACK-GRADE SKUS</span>
+            </div>
+
+            <h1 class="ap-hero-title">
+                Engineered For <em>Peak Output.</em>
+            </h1>
+
+            <p class="ap-hero-lead">
+                Precision replacement hardware and track-proven upgrades from Brembo, NGK, Bosch, Eibach, and Osram. Verify exact chassis fitment in seconds or run a live AI diagnostic.
+            </p>
+
+            <div class="ap-hero-cta">
+                <a href="{{ url_for('products') }}" class="btn btn-primary btn-lg">
+                    Explore Parts Catalog
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </a>
+                <button type="button" class="btn btn-secondary btn-lg" onclick="openMechanicChat()">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                    Ask AI Mechanic
+                </button>
+            </div>
+
+            <div class="ap-hero-telemetry">
+                <div class="ap-stat-cell">
+                    <span class="ap-stat-val">99.8<span>%</span></span>
+                    <span class="ap-stat-lbl">Chassis Fitment Accuracy</span>
+                </div>
+                <div class="ap-stat-cell">
+                    <span class="ap-stat-val">&lt;24<span>HR</span></span>
+                    <span class="ap-stat-lbl">Pit-Lane Dispatch</span>
+                </div>
+                <div class="ap-stat-cell">
+                    <span class="ap-stat-val">100<span>%</span></span>
+                    <span class="ap-stat-lbl">Authentic OEM+ Marques</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Interactive "My Garage" ECU Fitment Console -->
+        <div class="ap-fitment-console">
+            <div class="ap-console-header">
+                <div>
+                    <div class="ap-console-tag">ECU MODULE // MY GARAGE</div>
+                    <h2 class="ap-console-title">Vehicle Fitment Selector</h2>
+                </div>
+                <span class="badge badge-success" id="hero-garage-status-pill">READY</span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label class="form-label" for="hero-garage-select">Select Make, Model &amp; Chassis</label>
+                <select id="hero-garage-select" class="form-control">
+                    <option value="" data-title="All Vehicles / Select Your Ride" data-meta="STANDBY">— All Vehicles / Select Your Ride —</option>
+                    {% for v in garage_vehicles %}
+                    <option value="{{ v.id }}" data-title="{{ v.name }}" data-meta="{{ v.trim }} · {{ v.year }}">{{ v.name }} ({{ v.trim }} · {{ v.year }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mono" style="font-size: 0.66rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem;">
+                Quick Chassis Presets:
+            </div>
+            <div class="ap-quick-chassis" id="hero-chassis-chips">
+                <button type="button" class="ap-chassis-chip" data-vid="honda-civic">Civic FL5</button>
+                <button type="button" class="ap-chassis-chip" data-vid="bmw-3-series">BMW G20</button>
+                <button type="button" class="ap-chassis-chip" data-vid="ford-mustang">Mustang GT</button>
+                <button type="button" class="ap-chassis-chip" data-vid="toyota-tacoma">Tacoma 4x4</button>
+                <button type="button" class="ap-chassis-chip" data-vid="toyota-camry">Camry XV70</button>
+            </div>
+
+            <div class="ap-console-readout">
+                <div class="ap-readout-status" id="hero-fitment-readout">
+                    Select a vehicle above to verify exact &amp; universal parts across <strong>{{ total_skus }}</strong> catalog SKUs.
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 0.6rem;">
+                <button type="button" class="btn btn-primary" style="flex: 1;" id="hero-shop-fitment-btn" onclick="shopForGarageVehicle()">
+                    Shop Compatible Parts &rarr;
+                </button>
+                <button type="button" class="btn btn-outline btn-sm" id="hero-clear-garage-btn" style="display: none;" onclick="setGarageVehicle('')">
+                    Reset
+                </button>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Floating Trust Indicators -->
-<div class="container trust-bar">
-    <div class="trust-bar-inner">
-        <div class="trust-item">
-            <span class="trust-icon">🚚</span>
+<!-- =========================================================================
+     OEM MOTORSPORT BRAND MARQUEE
+     ========================================================================= -->
+<div class="ap-marquee-bar" aria-label="Partner Automotive Brands">
+    <div class="ap-marquee-track">
+        <span class="ap-marquee-item">Brembo Braking</span>
+        <span class="ap-marquee-item">NGK Spark Plugs</span>
+        <span class="ap-marquee-item">Bosch Motorsport</span>
+        <span class="ap-marquee-item">K&amp;N Engineering</span>
+        <span class="ap-marquee-item">Eibach Suspension</span>
+        <span class="ap-marquee-item">Osram Optics</span>
+        <span class="ap-marquee-item">Optima AGM Power</span>
+        <span class="ap-marquee-item">Castrol Racing</span>
+        <span class="ap-marquee-item">Monroe Shocks</span>
+        <span class="ap-marquee-item">Mann-Filter</span>
+        <span class="ap-marquee-item">Hella Lighting</span>
+        <!-- Seamless Loop Duplicate -->
+        <span class="ap-marquee-item" aria-hidden="true">Brembo Braking</span>
+        <span class="ap-marquee-item" aria-hidden="true">NGK Spark Plugs</span>
+        <span class="ap-marquee-item" aria-hidden="true">Bosch Motorsport</span>
+        <span class="ap-marquee-item" aria-hidden="true">K&amp;N Engineering</span>
+        <span class="ap-marquee-item" aria-hidden="true">Eibach Suspension</span>
+        <span class="ap-marquee-item" aria-hidden="true">Osram Optics</span>
+        <span class="ap-marquee-item" aria-hidden="true">Optima AGM Power</span>
+        <span class="ap-marquee-item" aria-hidden="true">Castrol Racing</span>
+        <span class="ap-marquee-item" aria-hidden="true">Monroe Shocks</span>
+        <span class="ap-marquee-item" aria-hidden="true">Mann-Filter</span>
+        <span class="ap-marquee-item" aria-hidden="true">Hella Lighting</span>
+    </div>
+</div>
+
+<!-- =========================================================================
+     PRECISION GUARANTEES STRIP
+     ========================================================================= -->
+<div class="ap-guarantees">
+    <div class="container ap-guarantees-grid">
+        <div class="ap-guarantee-card">
+            <div class="ap-guarantee-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            </div>
             <div>
-                <h4 style="margin-bottom: 2px;">Free Shipping</h4>
-                <p style="margin: 0; font-size: var(--text-sm); color: var(--text-secondary);">On orders over $100</p>
+                <h4>Priority Dispatch</h4>
+                <p>Free express shipping on $100+ orders</p>
             </div>
         </div>
-        <div class="trust-item">
-            <span class="trust-icon" style="font-weight: 900;">✔</span>
+        <div class="ap-guarantee-card">
+            <div class="ap-guarantee-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
             <div>
-                <h4 style="margin-bottom: 2px;">Quality Guarantee</h4>
-                <p style="margin: 0; font-size: var(--text-sm); color: var(--text-secondary);">100% authentic parts</p>
+                <h4>OEM+ Authenticated</h4>
+                <p>Serialized manufacturer-direct hardware</p>
             </div>
         </div>
-        <div class="trust-item">
-            <span class="trust-icon">🔧</span>
+        <div class="ap-guarantee-card">
+            <div class="ap-guarantee-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/></svg>
+            </div>
             <div>
-                <h4 style="margin-bottom: 2px;">Expert Support</h4>
-                <p style="margin: 0; font-size: var(--text-sm); color: var(--text-secondary);">Technical assistance</p>
+                <h4>Live Fitment Check</h4>
+                <p>Instant chassis &amp; socket verification</p>
             </div>
         </div>
-        <div class="trust-item">
-            <span class="trust-icon" style="font-weight: 900; font-size: 2.2rem; transform: translateY(-2px);">⟳</span>
+        <div class="ap-guarantee-card">
+            <div class="ap-guarantee-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            </div>
             <div>
-                <h4 style="margin-bottom: 2px;">Easy Returns</h4>
-                <p style="margin: 0; font-size: var(--text-sm); color: var(--text-secondary);">30-day return policy</p>
+                <h4>30-Day Pit Return</h4>
+                <p>Zero-restock hassle-free exchanges</p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Featured Categories (Bento Grid) -->
-<section class="section-categories">
+<!-- =========================================================================
+     SHOP BY VEHICLE SYSTEM (BENTO MATRIX)
+     ========================================================================= -->
+<section id="systems">
     <div class="container">
-        <h2 class="section-title">Shop by Category</h2>
+        <div class="ap-section-head">
+            <div>
+                <div class="ap-kicker">01 // ARCHITECTURE</div>
+                <h2 class="ap-section-title">Shop By Vehicle System</h2>
+                <p class="ap-section-sub">Engineered assemblies organized by mechanical subsystem.</p>
+            </div>
+            <a href="{{ url_for('products') }}" class="btn btn-outline btn-sm">View Full Schematic &rarr;</a>
+        </div>
+
         <div class="bento-grid">
             {% for category in categories %}
                 {% set bg_img = 'category_electrical.webp' %}
-                {% if category.name == 'Engine Parts' %} {% set bg_img = 'category_engine.webp' %}
-                {% elif category.name == 'Brake Systems' %} {% set bg_img = 'category_brakes.webp' %}
-                {% elif category.name == 'Suspension' %} {% set bg_img = 'category_suspension.webp' %}
-                {% elif category.name == 'Filters' %} {% set bg_img = 'category_filters.webp' %}
-                {% elif category.name == 'Lighting' %} {% set bg_img = 'category_lighting.webp' %}
+                {% if category.name == 'Engine Parts' %}{% set bg_img = 'category_engine.webp' %}
+                {% elif category.name == 'Brake Systems' %}{% set bg_img = 'category_brakes.webp' %}
+                {% elif category.name == 'Suspension' %}{% set bg_img = 'category_suspension.webp' %}
+                {% elif category.name == 'Filters' %}{% set bg_img = 'category_filters.webp' %}
+                {% elif category.name == 'Lighting' %}{% set bg_img = 'category_lighting.webp' %}
                 {% endif %}
-                <a href="{{ url_for('products', category=category.id) }}" 
-                   class="bento-item {% if loop.index0 == 0 %}bento-span-2 bento-span-row-2{% elif loop.index0 == 3 %}bento-span-2{% endif %}"
-                   style="background-image: linear-gradient(to top, rgba(10,14,39,0.95) 0%, rgba(10,14,39,0.2) 100%), url('/static/images/{{ bg_img }}'); background-size: cover; background-position: center;">
+                <a href="{{ url_for('products', category=category.id) }}"
+                   class="bento-item {% if loop.index0 == 0 %}bento-span-2 bento-span-row-2{% elif loop.index0 == 3 %}bento-span-2{% endif %}">
+                    <div class="bento-bg" style="background-image: url('/static/images/{{ bg_img }}');"></div>
+                    <div class="bento-top">
+                        <span class="bento-sys-code">SYS-0{{ loop.index }}</span>
+                        <span class="bento-count">{{ category.product_count or 0 }} SKUS</span>
+                    </div>
                     <div class="bento-content">
                         <h3 class="bento-title">{{ category.name }}</h3>
                         <p class="bento-desc">{{ category.description }}</p>
+                        <span class="bento-cta">Explore System &rarr;</span>
                     </div>
                 </a>
             {% endfor %}
@@ -75,33 +215,196 @@
     </div>
 </section>
 
-<!-- Featured Products -->
-<section class="section-featured">
+<!-- =========================================================================
+     FEATURED PERFORMANCE HARDWARE
+     ========================================================================= -->
+<section style="padding-top: 0;">
     <div class="container">
-        <h2 class="section-title">Featured Products</h2>
-        <div class="grid grid-3">
-            {% for product in featured_products %}
-            <div class="card">
-                <div style="height: 200px; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: var(--space-md); border-radius: var(--radius-md);">
-                    <img src="{{ product.image_url or '/static/images/products/air-filter.webp' }}"
-                        alt="{{ product.name }}" class="card-img" style="object-fit: contain; padding: 10px;" loading="lazy" decoding="async" width="400" height="400">
-                </div>
-                <span class="badge badge-success" style="position:absolute; top:var(--space-md); right:var(--space-md); z-index:10;">In Stock</span>
-                <h3 class="card-title">{{ product.name }}</h3>
-                <p class="card-text">{{ product.description[:80] }}...</p>
-
-                <div class="flex-between" style="margin-top: auto; border-top: 1px solid var(--glass-border); padding-top: var(--space-md);">
-                    <span class="card-price">${{ "%.2f"|format(product.price) }}</span>
-                    <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="{{ product.id }}">
-                        Add to Cart
-                    </button>
-                </div>
+        <div class="ap-section-head">
+            <div>
+                <div class="ap-kicker">02 // TRACK &amp; STREET SPEC</div>
+                <h2 class="ap-section-title">Featured Hardware</h2>
+                <p class="ap-section-sub">High-demand OEM+ components calibrated for reliability and stopping power.</p>
             </div>
-            {% endfor %}
+            <a href="{{ url_for('products', sort='featured') }}" class="btn btn-primary btn-sm">Browse All {{ total_skus }} Parts &rarr;</a>
         </div>
-        <div class="text-center" style="margin-top: var(--space-xl);">
-            <a href="{{ url_for('products') }}" class="btn btn-secondary btn-lg">View All Products</a>
+
+        <div class="ap-product-grid">
+            {% for product in featured_products %}
+            <article class="ap-card" data-fitment-cars="{{ product.compatible_cars or '' }}">
+                <div class="ap-card-topbar">
+                    <span class="ap-card-brand">{{ product.brand }}</span>
+                    <span class="ap-card-sku">SKU // {{ product.part_number or ('AP-0' ~ product.id) }}</span>
+                </div>
+
+                <div class="ap-card-stage">
+                    <div class="ap-stage-badges">
+                        {% if product.stock > 0 %}
+                        <span class="badge badge-success">IN STOCK · {{ product.stock }}</span>
+                        {% else %}
+                        <span class="badge badge-danger">DEPLETED</span>
+                        {% endif %}
+                        <span class="ap-fit-badge"></span>
+                    </div>
+
+                    <button type="button" class="ap-quickview-btn" onclick="openProductModal({{ product.id }})" title="Quick Technical Spec">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+
+                    <a href="{{ url_for('product_detail', product_id=product.id) }}" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">
+                        <img src="{{ product.image_url or '/static/images/products/air-filter.webp' }}"
+                             alt="{{ product.name }}" loading="lazy" decoding="async" width="360" height="360">
+                    </a>
+                </div>
+
+                <div class="ap-card-body">
+                    <div class="ap-card-cat">{{ product.category.name if product.category else 'Component' }}</div>
+                    <h3 class="ap-card-title">
+                        <a href="{{ url_for('product_detail', product_id=product.id) }}">{{ product.name }}</a>
+                    </h3>
+                    <p class="ap-card-desc">{{ product.description }}</p>
+
+                    {% if product.compatible_cars %}
+                    <div class="ap-card-compat" title="{{ product.compatible_cars }}">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:var(--primary);"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                        <span>{{ product.compatible_cars }}</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="ap-card-footer">
+                        <div class="ap-price">${{ "%.2f"|format(product.price) }}</div>
+                        <div class="ap-card-actions">
+                            <button type="button" class="btn btn-outline btn-sm" onclick="openProductModal({{ product.id }})">Specs</button>
+                            {% if product.stock > 0 %}
+                            <button type="button" class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="{{ product.id }}">+ Add</button>
+                            {% else %}
+                            <button type="button" class="btn btn-outline btn-sm" disabled>Sold Out</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
         </div>
     </div>
 </section>
+
+<!-- =========================================================================
+     INTERACTIVE PIT-CREW AI DIAGNOSTIC DISPATCH
+     ========================================================================= -->
+<section style="padding-top: 0;">
+    <div class="container">
+        <div class="ap-diag-panel">
+            <div>
+                <div class="ap-kicker">03 // AI TELEMETRY DIAGNOSTICS</div>
+                <h2 class="ap-section-title" style="margin-bottom: 0.75rem;">Not Sure Which Component Failed?</h2>
+                <p style="font-size: 0.96rem; line-height: 1.65; margin-bottom: 1.25rem;">
+                    Select a common mechanical symptom or open the <strong>Apex AI Pit Mechanic</strong>. It cross-references your Garage vehicle against live inventory SKUs, specs, and pricing.
+                </p>
+                <button type="button" class="btn btn-primary" onclick="openMechanicChat()">
+                    Launch Interactive Diagnostic &rarr;
+                </button>
+            </div>
+
+            <div class="ap-symptom-grid">
+                <button type="button" class="ap-symptom-btn" onclick="askMechanicPrompt('My front brakes squeak and leave heavy brake dust. Which brake pads or rotors in stock should I get?')">
+                    <span class="ap-symptom-code">SYMPTOM // 01 · BRAKING</span>
+                    <span class="ap-symptom-label">Brake Squeal or Pedal Vibration</span>
+                    <span class="ap-symptom-hint">Compare ceramic pads, slotted rotors &amp; DOT 4 fluid</span>
+                </button>
+
+                <button type="button" class="ap-symptom-btn" onclick="askMechanicPrompt('My engine has a rough idle and sluggish acceleration. Which spark plugs and filters do you recommend?')">
+                    <span class="ap-symptom-code">SYMPTOM // 02 · POWERTRAIN</span>
+                    <span class="ap-symptom-label">Rough Idle or Sluggish Throttle</span>
+                    <span class="ap-symptom-hint">Check NGK iridium plugs, K&amp;N air &amp; fuel filters</span>
+                </button>
+
+                <button type="button" class="ap-symptom-btn" onclick="askMechanicPrompt('My car struggles to crank in the morning and headlights flicker. Should I check battery or alternator?')">
+                    <span class="ap-symptom-code">SYMPTOM // 03 · ELECTRICAL</span>
+                    <span class="ap-symptom-label">Slow Morning Crank / Voltage Drop</span>
+                    <span class="ap-symptom-hint">Evaluate 750 CCA AGM battery vs 150A alternator</span>
+                </button>
+
+                <button type="button" class="ap-symptom-btn" onclick="askMechanicPrompt('My ride feels bouncy over highway bumps. Which suspension components do you carry?')">
+                    <span class="ap-symptom-code">SYMPTOM // 04 · CHASSIS</span>
+                    <span class="ap-symptom-label">Bouncy Ride or Nose-Dive</span>
+                    <span class="ap-symptom-hint">Inspect gas-charged shocks &amp; heavy-duty springs</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function () {
+        const catalogCompat = {{ (catalog_compat or []) | tojson }};
+        const selectEl = document.getElementById('hero-garage-select');
+        const readoutEl = document.getElementById('hero-fitment-readout');
+        const statusPill = document.getElementById('hero-garage-status-pill');
+        const clearBtn = document.getElementById('hero-clear-garage-btn');
+        const chips = document.querySelectorAll('#hero-chassis-chips .ap-chassis-chip');
+
+        function syncHeroConsole() {
+            const vehicle = getSelectedGarageVehicle();
+            if (selectEl) selectEl.value = vehicle ? vehicle.id : '';
+
+            chips.forEach(chip => {
+                chip.classList.toggle('is-selected', Boolean(vehicle && chip.dataset.vid === vehicle.id));
+            });
+
+            if (!vehicle) {
+                if (statusPill) {
+                    statusPill.className = 'badge badge-neutral';
+                    statusPill.textContent = 'STANDBY';
+                }
+                if (clearBtn) clearBtn.style.display = 'none';
+                if (readoutEl) {
+                    readoutEl.innerHTML = `Select a vehicle above to verify exact &amp; universal parts across <strong>${catalogCompat.length}</strong> catalog SKUs.`;
+                }
+                return;
+            }
+
+            let exactCount = 0;
+            let universalCount = 0;
+            catalogCompat.forEach(item => {
+                const res = evaluateFitment(item.compatible_cars, vehicle);
+                if (res.status === 'exact') exactCount++;
+                else if (res.status === 'universal') universalCount++;
+            });
+            const totalFit = exactCount + universalCount;
+
+            if (statusPill) {
+                statusPill.className = 'badge badge-success';
+                statusPill.textContent = 'LOCKED IN';
+            }
+            if (clearBtn) clearBtn.style.display = 'inline-flex';
+            if (readoutEl) {
+                readoutEl.innerHTML = `
+                    <strong>✓ ${totalFit} Compatible SKUs Ready</strong> for ${escHtml(vehicle.name)}
+                    <span style="display:block;font-size:0.7rem;color:var(--text-muted);margin-top:2px;">
+                        ${exactCount} Direct Chassis Spec &middot; ${universalCount} Universal / Platform Fit
+                    </span>
+                `;
+            }
+        }
+
+        if (selectEl) {
+            selectEl.addEventListener('change', function () {
+                setGarageVehicle(this.value);
+            });
+        }
+
+        chips.forEach(chip => {
+            chip.addEventListener('click', function () {
+                setGarageVehicle(this.dataset.vid);
+            });
+        });
+
+        window.addEventListener('ap:garage-changed', syncHeroConsole);
+        document.addEventListener('DOMContentLoaded', syncHeroConsole);
+        syncHeroConsole();
+    })();
+</script>
 {% endblock %}

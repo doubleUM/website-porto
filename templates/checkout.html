@@ -1,157 +1,246 @@
 {% extends 'base.html' %}
 
+{% block title %}Dispatch &amp; Checkout // AutoParts Pro{% endblock %}
+
 {% block content %}
-<section style="padding-top: var(--space-xl);">
+<div class="ap-page-header">
     <div class="container">
-        <h1 class="hero-title" style="font-size: var(--text-4xl); margin-bottom: var(--space-xl);">Checkout</h1>
+        <nav class="ap-breadcrumb" aria-label="Breadcrumb">
+            <a href="{{ url_for('store_home') }}">Storefront</a>
+            <span>/</span>
+            <a href="{{ url_for('cart') }}">Pit-Box Cart</a>
+            <span>/</span>
+            <span style="color: var(--text-primary);">Dispatch</span>
+        </nav>
 
+        <h1 style="font-size: clamp(1.85rem, 3.5vw, 2.5rem); text-transform: uppercase; margin-bottom: 0.2rem;">
+            Dispatch &amp; Authorization
+        </h1>
+
+        <div class="ap-steps">
+            <span class="ap-step is-done">✓ 01 // Pit-Box Cart</span>
+            <span class="mono" style="color: var(--text-muted);">&rarr;</span>
+            <span class="ap-step is-active" id="step-dispatch">02 // Dispatch &amp; Payment</span>
+            <span class="mono" style="color: var(--text-muted);">&rarr;</span>
+            <span class="ap-step" id="step-receipt">03 // Order Telemetry</span>
+        </div>
+    </div>
+</div>
+
+<section style="padding-top: 2rem;">
+    <div class="container" id="checkout-stage">
+        {% if cart_items %}
         <div class="checkout-layout">
-            <!-- Checkout Form -->
-            <div class="card fade-in" style="animation-delay: 0.1s; animation-fill-mode: backwards;">
-                <h3 style="margin-bottom: var(--space-lg);">Shipping Information</h3>
-
+            <!-- Left: Recipient & Payment Authorization -->
+            <div class="card fade-in">
                 <form id="checkout-form">
-                    <div class="form-group">
-                        <label class="form-label">Full Name *</label>
-                        <input type="text" class="form-control" name="name" required placeholder="John Doe">
+                    <div class="flex-between" style="padding-bottom: 0.85rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--glass-border); flex-wrap: wrap;">
+                        <div>
+                            <div class="mono" style="font-size: 0.68rem; color: var(--primary); letter-spacing: 0.12em;">SECTION 01</div>
+                            <h3 style="font-size: 1.25rem; text-transform: uppercase; margin: 0;">Recipient &amp; Pit Destination</h3>
+                        </div>
+                        <span class="badge badge-info">DEMO CHECKOUT · NO REAL CHARGE</span>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Email Address *</label>
-                        <input type="email" class="form-control" name="email" required placeholder="john@example.com">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Phone Number *</label>
-                        <input type="tel" class="form-control" name="phone" required placeholder="+1 (800) 123-4567">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Shipping Address *</label>
-                        <textarea class="form-control" name="address" required
-                            placeholder="123 Main St, Apt 4B&#10;New York, NY 10001"></textarea>
-                    </div>
-
-                    <h3 style="margin: var(--space-xl) 0 var(--space-lg);">Payment Information</h3>
-
-                    <div class="form-group">
-                        <label class="form-label">Card Number *</label>
-                        <input type="text" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19">
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
-                        <div class="form-group">
-                            <label class="form-label">Expiry Date *</label>
-                            <input type="text" class="form-control" placeholder="MM/YY" maxlength="5">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label class="form-label">Recipient Full Name *</label>
+                            <input type="text" class="form-control" name="name" required
+                                   value="{{ current_user.name if current_user else '' }}"
+                                   placeholder="Alex Mercer">
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">CVV *</label>
-                            <input type="text" class="form-control" placeholder="123" maxlength="3">
+                            <label class="form-label">Telemetry Email *</label>
+                            <input type="email" class="form-control" name="email" required
+                                   value="{{ current_user.email if current_user else '' }}"
+                                   placeholder="driver@apexgarage.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Contact Phone *</label>
+                            <input type="tel" class="form-control" name="phone" required placeholder="+1 (800) 555-0199">
+                        </div>
+
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label class="form-label">Shipping / Workshop Address *</label>
+                            <textarea class="form-control" name="address" required
+                                      placeholder="Bay 4, 740 Motorsport Pkwy&#10;Austin, TX 78701"></textarea>
                         </div>
                     </div>
 
+                    <div style="padding-bottom: 0.85rem; margin: 1.5rem 0 1.25rem; border-bottom: 1px solid var(--glass-border);">
+                        <div class="mono" style="font-size: 0.68rem; color: var(--primary); letter-spacing: 0.12em;">SECTION 02</div>
+                        <h3 style="font-size: 1.25rem; text-transform: uppercase; margin: 0;">Simulated Card Authorization</h3>
+                    </div>
+
                     <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: var(--space-sm); cursor: pointer;">
+                        <label class="form-label">Card Number (Test Mode) *</label>
+                        <input type="text" class="form-control mono" id="cc-num" required placeholder="4242 4242 4242 4242" maxlength="19">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Expiry (MM/YY) *</label>
+                            <input type="text" class="form-control mono" id="cc-exp" required placeholder="08/29" maxlength="5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Security Code (CVV) *</label>
+                            <input type="text" class="form-control mono" required placeholder="888" maxlength="4">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 0.35rem;">
+                        <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; font-size: 0.88rem; color: var(--text-secondary);">
                             <input type="checkbox" required>
-                            <span>I agree to the terms and conditions</span>
+                            <span>I confirm chassis fitment details and accept the demo dispatch terms.</span>
                         </label>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
-                        🔒 Place Order
+                    <button type="submit" class="btn btn-primary btn-lg" id="place-order-btn" style="width: 100%; margin-top: 0.5rem;">
+                        Authorize &amp; Dispatch Order &rarr;
                     </button>
                 </form>
             </div>
 
-            <!-- Order Summary -->
-            <div>
-                <div class="cart-summary fade-in" style="animation-delay: 0.2s; animation-fill-mode: backwards;">
-                    <h3 style="margin-bottom: var(--space-lg);">Order Summary</h3>
-
-                    <div style="max-height: 300px; overflow-y: auto; margin-bottom: var(--space-lg);">
-                        {% for item in cart_items %}
-                        <div
-                            style="display: flex; gap: var(--space-md); align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--glass-border);">
-                            <div style="background: var(--bg-tertiary); max-width: 50px; min-width: 50px; height: 50px; border-radius: var(--radius-sm); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                                <img src="{{ item.product.image_url or '/static/images/products/air-filter.webp' }}" alt="{{ item.product.name }}" style="max-height: 80%; max-width: 80%; object-fit: contain;" loading="lazy" decoding="async">
-                            </div>
-                            <div style="flex: 1;">
-                                <p style="font-weight: 600; margin-bottom: 0;">{{ item.product.name }}</p>
-                                <p style="color: var(--text-muted); font-size: var(--text-sm); margin: 0;">Qty: {{ item.quantity }}</p>
-                            </div>
-                            <div style="text-align: right;">
-                                <p style="font-weight: 600; margin: 0;">${{ "%.2f"|format(item.product.price * item.quantity) }}</p>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-
-                    <div class="summary-row">
-                        <span>Subtotal:</span>
-                        <span>${{ "%.2f"|format(total) }}</span>
-                    </div>
-
-                    <div class="summary-row">
-                        <span>Shipping:</span>
-                        <span style="color: var(--success);">FREE</span>
-                    </div>
-
-                    <div class="summary-row">
-                        <span>Tax (10%):</span>
-                        <span>${{ "%.2f"|format(total * 0.1) }}</span>
-                    </div>
-
-                    <div class="summary-row"
-                        style="border-top: 2px solid var(--primary); padding-top: var(--space-md); margin-top: var(--space-md);">
-                        <span style="font-size: var(--text-xl); font-weight: 700;">Total:</span>
-                        <span class="summary-total">${{ "%.2f"|format(total * 1.1) }}</span>
-                    </div>
-
-                    <div style="margin-top: var(--space-lg); text-align: center;">
-                        <div style="font-size: var(--text-2xl); margin-bottom: var(--space-sm);">🔒</div>
-                        <p style="font-size: var(--text-sm); color: var(--text-muted);">Your payment information is
-                            secure and encrypted</p>
-                    </div>
-
-                    <a href="{{ url_for('cart') }}" class="btn btn-outline"
-                        style="width: 100%; margin-top: var(--space-md);">
-                        ← Back to Cart
-                    </a>
+            <!-- Right: Order Manifest Summary -->
+            <div class="cart-summary fade-in">
+                <div class="mono" style="font-size: 0.68rem; letter-spacing: 0.12em; color: var(--primary); text-transform: uppercase; margin-bottom: 0.25rem;">
+                    LOCKED MANIFEST
                 </div>
+                <h3 style="font-size: 1.35rem; text-transform: uppercase; margin-bottom: 1rem;">Components ({{ cart_items|length }})</h3>
+
+                <div style="max-height: 290px; overflow-y: auto; margin-bottom: 1rem; padding-right: 4px;">
+                    {% for item in cart_items %}
+                    <div style="display: flex; gap: 0.75rem; align-items: center; padding: 0.65rem 0; border-bottom: 1px solid var(--glass-border);">
+                        <div style="background: var(--bg-tertiary); width: 52px; height: 52px; border-radius: var(--radius-xs); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; padding: 5px; flex-shrink: 0;">
+                            <img src="{{ item.product.image_url or '/static/images/products/air-filter.webp' }}"
+                                 alt="{{ item.product.name }}"
+                                 style="max-height: 100%; max-width: 100%; object-fit: contain;" loading="lazy" decoding="async">
+                        </div>
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-weight: 700; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ item.product.name }}</div>
+                            <div class="mono" style="font-size: 0.72rem; color: var(--text-muted);">QTY {{ item.quantity }} &middot; {{ item.product.brand }}</div>
+                        </div>
+                        <div class="mono" style="font-weight: 700; font-size: 0.9rem;">
+                            ${{ "%.2f"|format(item.product.price * item.quantity) }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="summary-row">
+                    <span style="color: var(--text-secondary);">Subtotal</span>
+                    <span class="mono">${{ "%.2f"|format(total) }}</span>
+                </div>
+                <div class="summary-row">
+                    <span style="color: var(--text-secondary);">Pit Dispatch</span>
+                    <span class="mono" style="color: var(--accent); font-weight: 700;">FREE</span>
+                </div>
+                <div class="summary-row">
+                    <span style="color: var(--text-secondary);">Tax (10%)</span>
+                    <span class="mono">${{ "%.2f"|format(total * 0.1) }}</span>
+                </div>
+                <div class="summary-row" style="border-bottom: none; border-top: 2px solid var(--primary); padding-top: 0.9rem; margin-top: 0.35rem;">
+                    <span style="font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; text-transform: uppercase;">Total</span>
+                    <span class="summary-total">${{ "%.2f"|format(total * 1.1) }}</span>
+                </div>
+
+                <a href="{{ url_for('cart') }}" class="btn btn-outline btn-sm" style="width: 100%; margin-top: 1.15rem;">
+                    &larr; Modify Cart Manifest
+                </a>
             </div>
         </div>
+        {% else %}
+        <div class="card text-center" style="padding: 4rem 2rem; max-width: 580px; margin: 0 auto;">
+            <div class="mono" style="font-size: 0.75rem; color: var(--primary); margin-bottom: 0.5rem;">[ NO ITEMS TO DISPATCH ]</div>
+            <h2 style="text-transform: uppercase; margin-bottom: 0.5rem;">Your Cart Is Empty</h2>
+            <p style="margin-bottom: 1.5rem;">Stage components in your Pit Cart before proceeding to checkout.</p>
+            <a href="{{ url_for('products') }}" class="btn btn-primary">Browse Parts Catalog &rarr;</a>
+        </div>
+        {% endif %}
     </div>
 </section>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-    document.getElementById('checkout-form').addEventListener('submit', function (e) {
-        e.preventDefault();
+    const ccNum = document.getElementById('cc-num');
+    if (ccNum) {
+        ccNum.addEventListener('input', function () {
+            const digits = this.value.replace(/\D/g, '').slice(0, 16);
+            this.value = digits.replace(/(\d{4})(?=\d)/g, '$1 ');
+        });
+    }
 
-        const formData = {
-            name: this.name.value,
-            email: this.email.value,
-            phone: this.phone.value,
-            address: this.address.value
-        };
+    const ccExp = document.getElementById('cc-exp');
+    if (ccExp) {
+        ccExp.addEventListener('input', function () {
+            const digits = this.value.replace(/\D/g, '').slice(0, 4);
+            this.value = digits.length > 2 ? digits.slice(0, 2) + '/' + digits.slice(2) : digits;
+        });
+    }
 
-        fetch('/car-spareparts/api/order', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData)
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification('Order placed successfully! Order ID: #' + data.order_id, 'success');
-                    setTimeout(() => { window.location.href = '{{ url_for("store_home") }}'; }, 2000);
-                }
+    const checkoutForm = document.getElementById('checkout-form');
+    if (checkoutForm) {
+        checkoutForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('place-order-btn');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = 'TRANSMITTING DISPATCH ORDER...';
+            }
+
+            const formData = {
+                name: this.name.value,
+                email: this.email.value,
+                phone: this.phone.value,
+                address: this.address.value
+            };
+
+            fetch('/car-spareparts/api/order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
             })
-            .catch(error => {
-                showNotification('Error placing order. Please try again.', 'error');
-            });
-    });
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        updateCartCount(0);
+                        const stepDisp = document.getElementById('step-dispatch');
+                        const stepRec = document.getElementById('step-receipt');
+                        if (stepDisp) stepDisp.className = 'ap-step is-done';
+                        if (stepRec) stepRec.className = 'ap-step is-active';
+
+                        document.getElementById('checkout-stage').innerHTML = `
+                            <div class="card text-center fade-in" style="max-width:640px;margin:0 auto;padding:3.5rem 2rem;border-color:var(--accent);">
+                                <div class="badge badge-success" style="margin:0 auto 1rem;">DISPATCH CONFIRMED // ORDER #${Number(data.order_id)}</div>
+                                <h2 style="font-size:2rem;text-transform:uppercase;margin-bottom:0.65rem;">Order Transmitted To Pit Lane</h2>
+                                <p style="max-width:46ch;margin:0 auto 1.75rem;">
+                                    Thank you, <strong>${escHtml(formData.name)}</strong>. Your components manifest has been logged under telemetry ID <strong class="mono">#${Number(data.order_id)}</strong>.
+                                </p>
+                                <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+                                    <a href="{{ url_for('store_home') }}" class="btn btn-primary">Return To Storefront</a>
+                                    <a href="{{ url_for('products') }}" class="btn btn-outline">Continue Browsing</a>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        showNotification(data.message || 'Unable to place order.', 'error');
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.textContent = 'Authorize & Dispatch Order →';
+                        }
+                    }
+                })
+                .catch(() => {
+                    showNotification('Error placing order. Please try again.', 'error');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.textContent = 'Authorize & Dispatch Order →';
+                    }
+                });
+        });
+    }
 </script>
 {% endblock %}

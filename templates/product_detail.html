@@ -1,161 +1,208 @@
 {% extends 'base.html' %}
 
-{% block content %}
-<section style="padding-top: var(--space-xl);">
-    <div class="container">
-        <!-- Breadcrumb -->
-        <div style="margin-bottom: var(--space-lg);">
-            <a href="{{ url_for('store_home') }}" style="color: var(--text-muted);">Home</a>
-            <span style="color: var(--text-muted);"> / </span>
-            <a href="{{ url_for('products', category=product.category_id) }}" style="color: var(--text-muted);">{{
-                product.category.name }}</a>
-            <span style="color: var(--text-muted);"> / </span>
-            <span>{{ product.name }}</span>
-        </div>
+{% block title %}{{ product.name }} ({{ product.part_number or 'OEM' }}) // AutoParts Pro{% endblock %}
 
-        <!-- Product Detail -->
+{% block content %}
+<div class="ap-page-header">
+    <div class="container">
+        <nav class="ap-breadcrumb" aria-label="Breadcrumb">
+            <a href="{{ url_for('store_home') }}">Storefront</a>
+            <span>/</span>
+            <a href="{{ url_for('products', category=product.category_id) }}">{{ product.category.name }}</a>
+            <span>/</span>
+            <span style="color: var(--text-primary);">{{ product.part_number or product.name }}</span>
+        </nav>
+    </div>
+</div>
+
+<section style="padding-top: 2.25rem;">
+    <div class="container">
         <div class="product-detail">
-            <!-- Product Image -->
+            <!-- Left: Studio CAD Component Stage -->
             <div>
-                <div
-                    style="background: var(--bg-tertiary); border-radius: var(--radius-lg); height: 500px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-lg); overflow: hidden;">
+                <div class="ap-pdp-stage">
+                    <div style="position: absolute; top: 1.1rem; left: 1.25rem; z-index: 2; display: flex; gap: 0.45rem; flex-wrap: wrap;">
+                        <span class="badge badge-neutral">{{ product.brand }}</span>
+                        {% if product.featured %}
+                        <span class="badge badge-warning">TRACK FEATURED</span>
+                        {% endif %}
+                    </div>
+                    <div class="mono" style="position: absolute; bottom: 1rem; right: 1.25rem; font-size: 0.68rem; color: var(--text-muted);">
+                        SCALE // STUDIO SPEC &middot; {{ product.part_number or ('AP-0' ~ product.id) }}
+                    </div>
                     <img src="{{ product.image_url or '/static/images/products/air-filter.webp' }}"
-                        alt="{{ product.name }}"
-                        style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 30px;" decoding="async">
+                         alt="{{ product.name }}" decoding="async">
+                </div>
+
+                <!-- Engineering Assurances Strip -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-top: 0.9rem;">
+                    <div style="padding: 0.85rem; background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); text-align: center;">
+                        <div class="mono" style="font-size: 0.7rem; color: var(--primary); font-weight: 700;">DISPATCH</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">Same-Day Pit Prep</div>
+                    </div>
+                    <div style="padding: 0.85rem; background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); text-align: center;">
+                        <div class="mono" style="font-size: 0.7rem; color: var(--accent); font-weight: 700;">AUTHENTICITY</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">100% Genuine {{ product.brand }}</div>
+                    </div>
+                    <div style="padding: 0.85rem; background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); text-align: center;">
+                        <div class="mono" style="font-size: 0.7rem; color: var(--secondary); font-weight: 700;">WARRANTY</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">30-Day Fitment Cover</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Product Info -->
-            <div class="product-info">
-                <h1>{{ product.name }}</h1>
-
-                <div style="display: flex; gap: var(--space-sm); margin-bottom: var(--space-md);">
+            <!-- Right: Technical Component Datasheet -->
+            <div>
+                <div style="display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
                     {% if product.stock > 0 %}
-                    <span class="badge badge-success">✅ In Stock ({{ product.stock }} units)</span>
+                    <span class="badge badge-success">● IN STOCK ({{ product.stock }} UNITS)</span>
                     {% else %}
-                    <span class="badge badge-danger">❌ Out of Stock</span>
+                    <span class="badge badge-danger">● OUT OF STOCK</span>
                     {% endif %}
-                    {% if product.featured %}
-                    <span class="badge badge-warning">⭐ Featured</span>
-                    {% endif %}
+                    <button type="button" class="badge badge-neutral" style="cursor: pointer;" onclick="copySku('{{ product.part_number or ('AP-0' ~ product.id) }}')" title="Click to copy Part Number">
+                        SKU // {{ product.part_number or ('AP-0' ~ product.id) }} ⧉
+                    </button>
                 </div>
 
-                <div class="card-price" style="font-size: var(--text-4xl); margin-bottom: var(--space-lg);">
+                <h1 style="font-size: clamp(1.9rem, 3.5vw, 2.75rem); text-transform: uppercase; margin-bottom: 0.5rem;">
+                    {{ product.name }}
+                </h1>
+
+                <div class="mono" style="font-size: 2rem; font-weight: 700; color: var(--primary); margin-bottom: 1.15rem;">
                     ${{ "%.2f"|format(product.price) }}
                 </div>
 
-                <p style="font-size: var(--text-lg); margin-bottom: var(--space-lg);">{{ product.description }}</p>
+                <p style="font-size: 1rem; line-height: 1.65; margin-bottom: 1.35rem;">
+                    {{ product.description }}
+                </p>
 
-                <!-- Product Specifications -->
-                <div class="product-specs">
-                    <h3 style="margin-bottom: var(--space-md);">Specifications</h3>
-
-                    <div class="spec-item">
-                        <span class="spec-label">Brand:</span>
-                        <span class="spec-value">{{ product.brand }}</span>
+                <!-- Live Garage Chassis Fitment Verifier -->
+                <div style="padding: 1rem 1.15rem; background: var(--bg-card); border: 1px solid var(--border-strong); border-left: 3px solid var(--primary); border-radius: var(--radius-sm); margin-bottom: 1.35rem;" id="pdp-fitment-panel">
+                    <div class="flex-between" style="flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span class="mono" style="font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--primary);">
+                            LIVE CHASSIS FITMENT CHECK
+                        </span>
+                        <select id="pdp-garage-select" class="form-control ap-select-compact">
+                            <option value="" data-title="Select vehicle to verify..." data-meta="CHASSIS">Select vehicle to verify...</option>
+                            {% for v in garage_vehicles %}
+                            <option value="{{ v.id }}" data-title="{{ v.name }}" data-meta="{{ v.trim.split('·')[-1].strip() }}">{{ v.name }} ({{ v.trim.split('·')[-1].strip() }})</option>
+                            {% endfor %}
+                        </select>
                     </div>
-
-                    <div class="spec-item">
-                        <span class="spec-label">Part Number:</span>
-                        <span class="spec-value">{{ product.part_number }}</span>
+                    <div id="pdp-fitment-result" style="font-size: 0.88rem; color: var(--text-secondary);">
+                        Compatible Applications: <strong style="color: var(--text-primary);">{{ product.compatible_cars or 'Universal Fitment' }}</strong>
                     </div>
+                </div>
 
-                    <div class="spec-item">
-                        <span class="spec-label">Category:</span>
-                        <span class="spec-value">{{ product.category.name }}</span>
+                <!-- Technical Specification Matrix -->
+                <div class="ap-spec-matrix">
+                    <div class="ap-spec-box">
+                        <div class="ap-spec-lbl">Manufacturer</div>
+                        <div class="ap-spec-val">{{ product.brand }}</div>
                     </div>
-
+                    <div class="ap-spec-box">
+                        <div class="ap-spec-lbl">Part Number</div>
+                        <div class="ap-spec-val">{{ product.part_number or 'OEM-STD' }}</div>
+                    </div>
+                    <div class="ap-spec-box">
+                        <div class="ap-spec-lbl">Subsystem</div>
+                        <div class="ap-spec-val">{{ product.category.name }}</div>
+                    </div>
+                    <div class="ap-spec-box">
+                        <div class="ap-spec-lbl">Warehouse Allocation</div>
+                        <div class="ap-spec-val">{{ product.stock }} Units Available</div>
+                    </div>
                     {% if product.specifications %}
-                    <div class="spec-item">
-                        <span class="spec-label">Details:</span>
-                        <span class="spec-value">{{ product.specifications }}</span>
+                    <div class="ap-spec-box is-wide">
+                        <div class="ap-spec-lbl">Engineering &amp; Dimensional Specs</div>
+                        <div class="ap-spec-val">{{ product.specifications }}</div>
+                    </div>
+                    {% endif %}
+                    {% if product.compatible_cars %}
+                    <div class="ap-spec-box is-wide">
+                        <div class="ap-spec-lbl">Verified Chassis &amp; Socket Compatibility</div>
+                        <div class="ap-spec-val">{{ product.compatible_cars }}</div>
                     </div>
                     {% endif %}
                 </div>
 
-                <!-- Compatible Cars -->
-                {% if product.compatible_cars %}
-                <div
-                    style="margin-top: var(--space-md); padding: var(--space-md); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                    <h4 style="margin-bottom: var(--space-sm);">🚗 Compatible Vehicles</h4>
-                    <p style="margin: 0;">{{ product.compatible_cars }}</p>
-                </div>
-                {% endif %}
+                <!-- Primary Purchase & AI Mechanic Controls -->
+                <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-top: 1.5rem;">
+                    <div class="quantity-control">
+                        <button type="button" class="quantity-btn" onclick="decreaseQuantity()">−</button>
+                        <span class="quantity-value" id="quantity">1</span>
+                        <button type="button" class="quantity-btn" onclick="increaseQuantity()">+</button>
+                    </div>
 
-                <!-- Add to Cart -->
-                <div style="margin-top: var(--space-lg);">
-                    <div style="display: flex; gap: var(--space-md); align-items: center;">
-                        <div class="quantity-control">
-                            <button class="quantity-btn" onclick="decreaseQuantity()">-</button>
-                            <span class="quantity-value" id="quantity">1</span>
-                            <button class="quantity-btn" onclick="increaseQuantity()">+</button>
-                        </div>
+                    {% if product.stock > 0 %}
+                    <button type="button" class="btn btn-primary btn-lg" style="flex: 1; min-width: 200px;" onclick="addToCartDetail()">
+                        + Add To Pit Cart
+                    </button>
+                    {% else %}
+                    <button type="button" class="btn btn-primary btn-lg" style="flex: 1;" disabled>
+                        Currently Out of Stock
+                    </button>
+                    {% endif %}
 
-                        {% if product.stock > 0 %}
-                        <button class="btn btn-primary btn-lg" style="flex: 1;" onclick="addToCartDetail()">
-                            🛒 Add to Cart
-                        </button>
-                        {% else %}
-                        <button class="btn btn-primary btn-lg" style="flex: 1; opacity: 0.5;" disabled>
-                            Out of Stock
-                        </button>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Additional Info -->
-                <div
-                    style="margin-top: var(--space-lg); display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md);">
-                    <div
-                        style="text-align: center; padding: var(--space-md); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                        <div style="font-size: var(--text-3xl); margin-bottom: var(--space-xs);">🚚</div>
-                        <p style="font-size: var(--text-sm); margin: 0;">Free Shipping</p>
-                    </div>
-                    <div
-                        style="text-align: center; padding: var(--space-md); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                        <div style="font-size: var(--text-3xl); margin-bottom: var(--space-xs);">✅</div>
-                        <p style="font-size: var(--text-sm); margin: 0;">Genuine Parts</p>
-                    </div>
-                    <div
-                        style="text-align: center; padding: var(--space-md); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                        <div style="font-size: var(--text-3xl); margin-bottom: var(--space-xs);">🔄</div>
-                        <p style="font-size: var(--text-sm); margin: 0;">Easy Returns</p>
-                    </div>
+                    <button type="button" class="btn btn-outline btn-lg" id="pdp-ask-mechanic-btn" title="Ask AI Mechanic about installation &amp; fitment">
+                        Ask AI Mechanic
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Related Products -->
+        <!-- Related Subsystem Components -->
         {% if related_products %}
-        <section style="margin-top: var(--space-2xl);">
-            <h2 class="section-title">Related Products</h2>
-            <div class="grid grid-4">
-                {% for rel_product in related_products %}
-                <div class="card">
-                    <div
-                        style="background: var(--bg-tertiary); height: 150px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-md); overflow: hidden;">
-                        <img src="{{ rel_product.image_url or '/static/images/products/air-filter.webp' }}"
-                            alt="{{ rel_product.name }}"
-                            style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 10px;" loading="lazy" decoding="async">
-                    </div>
-                    <h4 class="card-title">{{ rel_product.name }}</h4>
-                    <div class="flex-between" style="margin-top: auto;">
-                        <span class="card-price" style="font-size: var(--text-xl);">${{ "%.2f"|format(rel_product.price)
-                            }}</span>
-                        <a href="{{ url_for('product_detail', product_id=rel_product.id) }}"
-                            class="btn btn-outline btn-sm">View</a>
-                    </div>
+        <div style="margin-top: 4rem;">
+            <div class="ap-section-head">
+                <div>
+                    <div class="ap-kicker">SUBSYSTEM COMPANIONS</div>
+                    <h2 class="ap-section-title">Related {{ product.category.name }}</h2>
                 </div>
+                <a href="{{ url_for('products', category=product.category_id) }}" class="btn btn-outline btn-sm">View All {{ product.category.name }} &rarr;</a>
+            </div>
+
+            <div class="ap-product-grid-4">
+                {% for rel_product in related_products %}
+                <article class="ap-card" data-fitment-cars="{{ rel_product.compatible_cars or '' }}">
+                    <div class="ap-card-topbar">
+                        <span class="ap-card-brand">{{ rel_product.brand }}</span>
+                        <span class="ap-card-sku">{{ rel_product.part_number or ('AP-0' ~ rel_product.id) }}</span>
+                    </div>
+                    <div class="ap-card-stage" style="height: 175px;">
+                        <div class="ap-stage-badges">
+                            <span class="ap-fit-badge"></span>
+                        </div>
+                        <a href="{{ url_for('product_detail', product_id=rel_product.id) }}" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">
+                            <img src="{{ rel_product.image_url or '/static/images/products/air-filter.webp' }}"
+                                 alt="{{ rel_product.name }}" loading="lazy" decoding="async">
+                        </a>
+                    </div>
+                    <div class="ap-card-body">
+                        <h4 class="ap-card-title" style="font-size: 1rem;">
+                            <a href="{{ url_for('product_detail', product_id=rel_product.id) }}">{{ rel_product.name }}</a>
+                        </h4>
+                        <div class="ap-card-footer">
+                            <span class="ap-price" style="font-size: 1.08rem;">${{ "%.2f"|format(rel_product.price) }}</span>
+                            <a href="{{ url_for('product_detail', product_id=rel_product.id) }}" class="btn btn-outline btn-sm">Inspect</a>
+                        </div>
+                    </div>
+                </article>
                 {% endfor %}
             </div>
-        </section>
+        </div>
         {% endif %}
     </div>
 </section>
+{% endblock %}
 
+{% block extra_js %}
 <script>
     let quantity = 1;
-    const maxQuantity = {{ product.stock }};
+    const maxQuantity = {{ product.stock or 0 }};
+    const pdpCompatStr = {{ (product.compatible_cars or '') | tojson }};
+    const pdpName = {{ product.name | tojson }};
+    const pdpSku = {{ (product.part_number or '') | tojson }};
 
     function increaseQuantity() {
         if (quantity < maxQuantity) {
@@ -172,23 +219,61 @@
     }
 
     function addToCartDetail() {
-        fetch('/car-spareparts/api/cart/add', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                product_id: {{ product.id }},
-            quantity: quantity
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                updateCartCount(data.cart_count);
-                showNotification('Added to cart successfully!', 'success');
-            }
-        });
+        addToCart({{ product.id }}, quantity, true);
     }
+
+    function copySku(sku) {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(sku);
+            showNotification('Copied SKU ' + sku + ' to clipboard.', 'info', 2400);
+        }
+    }
+
+    (function () {
+        const selectEl = document.getElementById('pdp-garage-select');
+        const resultEl = document.getElementById('pdp-fitment-result');
+        const panelEl = document.getElementById('pdp-fitment-panel');
+        const askBtn = document.getElementById('pdp-ask-mechanic-btn');
+
+        function updatePdpFitment() {
+            const vehicle = getSelectedGarageVehicle();
+            if (selectEl) selectEl.value = vehicle ? vehicle.id : '';
+            if (!vehicle) {
+                if (panelEl) panelEl.style.borderLeftColor = 'var(--primary)';
+                if (resultEl) {
+                    resultEl.innerHTML = `Compatible Applications: <strong style="color:var(--text-primary);">${escHtml(pdpCompatStr || 'Universal Fitment')}</strong>`;
+                }
+                return;
+            }
+
+            const fit = evaluateFitment(pdpCompatStr, vehicle);
+            if (fit.status === 'exact') {
+                if (panelEl) panelEl.style.borderLeftColor = 'var(--accent)';
+                resultEl.innerHTML = `<strong style="color:var(--accent);">✓ DIRECT CHASSIS FIT FOR ${escHtml(vehicle.name.toUpperCase())}</strong> &mdash; Listed in OEM fitment table (${escHtml(pdpCompatStr)}).`;
+            } else if (fit.status === 'universal') {
+                if (panelEl) panelEl.style.borderLeftColor = 'var(--secondary)';
+                resultEl.innerHTML = `<strong style="color:var(--secondary);">◎ UNIVERSAL / PLATFORM FIT FOR ${escHtml(vehicle.name.toUpperCase())}</strong> &mdash; Matches platform spec (${escHtml(pdpCompatStr)}).`;
+            } else {
+                if (panelEl) panelEl.style.borderLeftColor = 'var(--danger)';
+                resultEl.innerHTML = `<strong style="color:var(--danger);">⚠ VERIFY FITMENT</strong> &mdash; Specified for <em>${escHtml(pdpCompatStr || 'other models')}</em>. <a href="/car-spareparts/products?vehicle=${encodeURIComponent(vehicle.id)}" style="color:var(--primary);text-decoration:underline;font-weight:600;">Browse ${escHtml(vehicle.name)} parts &rarr;</a>`;
+            }
+        }
+
+        if (selectEl) {
+            selectEl.addEventListener('change', function () {
+                setGarageVehicle(this.value);
+            });
+        }
+
+        if (askBtn) {
+            askBtn.addEventListener('click', () => {
+                askMechanicPrompt(`Tell me about ${pdpName} (${pdpSku || 'OEM'}): installation tips, symptoms it fixes, and vehicle compatibility.`);
+            });
+        }
+
+        window.addEventListener('ap:garage-changed', updatePdpFitment);
+        document.addEventListener('DOMContentLoaded', updatePdpFitment);
+        updatePdpFitment();
+    })();
 </script>
 {% endblock %}
